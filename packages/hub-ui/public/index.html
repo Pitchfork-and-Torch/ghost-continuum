@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Ghost Continuum Command Nexus v3.0 OMEGA ASCENDANT — holographic intrusion map, forensic time machine, deception genome, multi-plane fabric, Home Shield." />
+  <meta name="theme-color" content="#02060f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>COMMAND NEXUS · Ghost Continuum v3.0 OMEGA ASCENDANT</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/ui.css" />
+  <!-- Three.js r160 via CDN — justified for WebGL holographic map; canvas 2D fallback if blocked -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <!-- X conversion tracking base code -->
+  <script>
+  !function(e,t,n,s,u,a){e.twq||(s=e.twq=function(){s.exe?s.exe.apply(s,arguments):s.queue.push(arguments);
+  },s.version='1.1',s.queue=[],u=t.createElement(n),u.async=!0,u.src='https://static.ads-twitter.com/uwt.js',
+  a=t.getElementsByTagName(n)[0],a.parentNode.insertBefore(u,a))}(window,document,'script');
+  twq('config','rdkqt');
+  </script>
+  <!-- End X conversion tracking base code -->
+</head>
+<body class="omega-body morph-research">
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="bloom-bg" aria-hidden="true"></div>
+
+  <a class="skip-link" href="#holoStage">Skip to holographic map</a>
+
+  <div id="trustBanner" class="trust-banner" role="note">
+    <span id="trustBannerText">Your data stays on this PC. Nothing is uploaded unless you export it yourself.</span>
+    <button type="button" id="trustBannerClose" class="trust-close" aria-label="Dismiss">×</button>
+  </div>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <header class="nx-top" role="banner">
+    <div class="nx-brand">
+      <img src="/logo.png" alt="" class="nx-logo" width="36" height="36" />
+      <div class="nx-title-block">
+        <h1 class="nx-title">COMMAND NEXUS</h1>
+        <div class="nx-meta">
+          <span class="nx-version" id="nxVersion">v3.0.0</span>
+          <span class="nx-live-dot" aria-hidden="true"></span>
+          <span class="nx-live">LIVE</span>
+          <span class="nx-clock" id="nxClock">—</span>
+          <button type="button" id="btnWizard" class="nx-linkish" title="Home Shield wizard">HOME SHIELD <span id="wizardBadge" class="wiz-dot"></span></button>
+          <button type="button" id="btnHomeSettings" class="nx-linkish" title="Home settings">HOME</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nx-top-stats">
+      <div class="nx-chip threat-chip">
+        <span class="chip-val" id="intrusionPaths">0</span>
+        <span class="chip-lbl">ACTIVE INTRUSION PATHS</span>
+      </div>
+      <div class="nx-chip contain-chip">
+        <span class="chip-val" id="containmentPct">—%</span>
+        <span class="chip-lbl">CONTAINMENT</span>
+      </div>
+    </div>
+
+    <div class="nx-query-wrap">
+      <div class="nx-query-box">
+        <input
+          id="nlQuery"
+          type="text"
+          placeholder="show me last 24h scanners"
+          autocomplete="off"
+          aria-label="Natural language query"
+        />
+        <button type="button" id="btnVoice" class="voice-btn" title="Ghost Voice" aria-label="Toggle voice input">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
+            <path d="M12 18v3"/>
+          </svg>
+        </button>
+      </div>
+      <div class="nx-voice-tag" id="voiceTag">GHOST VOICE ENABLED</div>
+      <div class="nx-query-hints" id="nlHints">
+        <button type="button" class="hint" data-q="show me last 24h scanners">…scanners</button>
+        <button type="button" class="hint" data-q="anomalous ports">…anomalous ports</button>
+        <button type="button" class="hint" data-q="failed auth chains">…failed auth chains</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ MAIN COCKPIT ═══ -->
+  <div class="nx-cockpit">
+    <!-- LEFT: Threat Efficacy Gauge + Chad Genome -->
+    <aside class="nx-left" aria-label="Threat efficacy">
+      <div class="glass-panel gauge-panel">
+        <div class="panel-label" id="lblEfficacy">THREAT EFFICACY</div>
+        <div class="gauge-wrap" id="threatGauge">
+          <svg class="gauge-svg" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00e5ff"/>
+                <stop offset="50%" stop-color="#b388ff"/>
+                <stop offset="100%" stop-color="#e040fb"/>
+              </linearGradient>
+              <filter id="gaugeGlow">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <circle class="gauge-track" cx="100" cy="100" r="78" />
+            <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="78"
+              stroke="url(#gaugeGrad)" filter="url(#gaugeGlow)"
+              stroke-dasharray="490" stroke-dashoffset="490" />
+            <circle class="gauge-inner" cx="100" cy="100" r="58" />
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-pct" id="gaugePct">—</div>
+            <div class="gauge-sub" id="gaugeSub">CONTAINMENT</div>
+          </div>
+        </div>
+        <div class="gauge-metrics">
+          <div class="gm"><span class="gm-k">AVG RESPONSE</span><span class="gm-v" id="avgResponse">—</span></div>
+          <div class="gm"><span class="gm-k">DECEPTION</span><span class="gm-v" id="deceptionRate">—</span></div>
+          <div class="gm"><span class="gm-k">FALSE +</span><span class="gm-v" id="falsePos">0%</span></div>
+        </div>
+        <canvas id="efficacySpark" class="sparkline" width="220" height="36" aria-label="Efficacy history"></canvas>
+      </div>
+
+      <!-- Operator sentinel — portrait + reactive matrix rain (below gauge) -->
+      <div class="glass-panel operator-panel" id="operatorPanel" data-nexus-mood="clear">
+        <div class="panel-label">OPERATOR · SENTINEL.sys</div>
+        <div class="operator-frame">
+          <img id="operatorImg" src="/assets/operator.jpg" alt="Operator" class="operator-img" width="400" height="400" />
+          <canvas id="operatorRain" class="operator-rain" aria-hidden="true"></canvas>
+          <div class="operator-scanlines" aria-hidden="true"></div>
+          <div class="operator-glitch" aria-hidden="true"></div>
+          <div class="operator-hud">
+            <span class="operator-tag" id="operatorTag">LINK NOMINAL</span>
+            <span class="operator-mood" id="operatorMood">CLEAR</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-panel chad-panel">
+        <div class="panel-label" id="lblChad">CHAD GENOME · HALL OF FAME</div>
+        <div id="chadBoard" class="chad-board">
+          <div class="meta-dim">Loading evolved personas…</div>
+        </div>
+        <button type="button" id="btnEvolve" class="nx-btn accent">EVOLVE POOL</button>
+      </div>
+
+      <div class="glass-panel planes-mini">
+        <div class="panel-label">
+          <span id="lblPlanes">SENSOR PLANES</span>
+          <span class="plane-hint" title="Toggle each plane on/off">LAYERS</span>
+          <a class="plane-hint" href="https://trenchcoat.jonbailey.xyz/" target="_blank" rel="noopener"
+             title="Trench Coat landing + docs" style="color:#00ff9f;text-decoration:none;margin-left:0.5rem">TRENCH</a>
+          <a class="plane-hint" href="http://127.0.0.1:8742/" target="_blank" rel="noopener"
+             title="Local Trench Coat control API" style="color:#00ff9f;text-decoration:none;margin-left:0.35rem">API</a>
+        </div>
+        <div id="planeShells" class="plane-shells" role="group" aria-label="Sensor plane toggles"></div>
+        <div class="legal-mini plane-footer">Enable only what you need · opt-in planes stay off until armed · Trench Coat = privacy cloak</div>
+      </div>
+
+      <div class="glass-panel home-panel">
+        <div class="panel-label">HOUSEHOLD · DEVICES</div>
+        <div id="deviceList" class="device-list"><div class="meta-dim">Loading…</div></div>
+        <div class="device-add">
+          <input id="devIp" type="text" placeholder="IP" class="home-input" />
+          <input id="devName" type="text" placeholder="Name" class="home-input" />
+          <select id="devKind" class="home-input">
+            <option value="phone">phone</option>
+            <option value="pc">pc</option>
+            <option value="tv">tv</option>
+            <option value="nas">nas</option>
+            <option value="camera">camera</option>
+            <option value="device">other</option>
+          </select>
+          <button type="button" id="btnAddDevice" class="nx-btn sm">TRUST</button>
+        </div>
+      </div>
+
+      <div class="glass-panel home-panel">
+        <div class="panel-label">PROGRESS · HYGIENE</div>
+        <div id="badgeBoard" class="badge-board"><div class="meta-dim">Loading badges…</div></div>
+        <div class="ops-grid" style="margin-top:8px">
+          <button type="button" id="btnHomeReport" class="nx-btn sm">WEEKLY REPORT</button>
+          <button type="button" id="btnHomeBackup" class="nx-btn sm">BACKUP</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Holographic Map -->
+    <main class="nx-center" id="holoStage">
+      <div class="holo-frame glass-panel">
+        <div class="holo-toolbar">
+          <span class="holo-tag"><span class="pulse-dot"></span> HOLOGRAPHIC INTRUSION MAP</span>
+          <div class="holo-actions">
+            <button type="button" id="btnLive" class="nx-btn sm accent" title="Real map — purge demo fabric">LIVE</button>
+            <button type="button" id="btnDemo" class="nx-btn sm" title="Cinematic demo campaign (not real threats)">DEMO</button>
+            <button type="button" id="btnRespond" class="nx-btn sm respond-btn" title="Defensive response to real threats">RESPOND</button>
+            <button type="button" id="btnPauseOrbit" class="nx-btn sm" title="Pause / resume auto-rotation" aria-pressed="false">⏸ PAUSE</button>
+            <button type="button" id="btnFocusThreat" class="nx-btn sm">FOCUS THREAT</button>
+            <button type="button" id="btnResetCam" class="nx-btn sm">RESET CAM</button>
+            <button type="button" id="btnToggleShells" class="nx-btn sm" aria-pressed="true">PLANES</button>
+            <button type="button" id="btnPhylo" class="nx-btn sm">PHYLOGENY</button>
+          </div>
+        </div>
+        <div class="holo-stage-wrap">
+          <div id="holoMap" class="holo-canvas" role="img" aria-label="3D holographic network intrusion map"></div>
+          <!-- Glass node inspector -->
+          <aside id="nodeInspector" class="node-inspector" hidden aria-label="Node details">
+            <div class="node-inspector-head">
+              <div>
+                <div class="ni-kicker">NODE DOSSIER</div>
+                <h2 id="niTitle" class="ni-title">—</h2>
+              </div>
+              <button type="button" id="niClose" class="ni-close" aria-label="Close panel">×</button>
+            </div>
+            <div class="node-inspector-body" id="niBody"></div>
+            <div class="node-inspector-edit">
+              <div class="panel-label">CUSTOMIZE</div>
+              <label class="wiz-field">Display name
+                <input type="text" id="niRename" class="home-input" maxlength="48" placeholder="Rename this node" />
+              </label>
+              <label class="wiz-field">Shape
+                <select id="niShape" class="home-input"></select>
+              </label>
+              <label class="wiz-field">Notes
+                <textarea id="niNotes" class="home-input ni-notes" rows="2" maxlength="240" placeholder="Operator notes (local only)"></textarea>
+              </label>
+              <div class="ops-grid">
+                <button type="button" id="niSave" class="nx-btn sm primary">SAVE</button>
+                <button type="button" id="niReset" class="nx-btn sm">RESET META</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+        <div id="holoPopover" class="holo-popover" hidden></div>
+        <div id="holoTooltip" class="holo-tooltip" hidden></div>
+        <div id="planeTip" class="plane-tip glass-tip" hidden role="tooltip"></div>
+        <div class="holo-corner tl"></div>
+        <div class="holo-corner tr"></div>
+        <div class="holo-corner bl"></div>
+        <div class="holo-corner br"></div>
+      </div>
+    </main>
+
+    <!-- RIGHT: Morph Modes -->
+    <aside class="nx-right" aria-label="Sentinel morph modes">
+      <div class="glass-panel morph-panel">
+        <div class="panel-label" id="lblMorph">SENTINEL MORPH MODE</div>
+        <div class="morph-stack" id="morphStack" role="radiogroup" aria-label="Morph mode">
+          <button type="button" class="morph-btn" data-morph="stealth" role="radio" aria-checked="false">
+            <span class="morph-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 3c-1.5 2-4 3.5-4 7 0 2.5 1.5 4 3 5l1 6h2l1-6c1.5-1 3-2.5 3-5 0-3.5-2.5-5-4-7zm-1 14.5c-.5.3-1 .8-1 1.5 0 1.1.9 2 2 2s2-.9 2-2c0-.7-.5-1.2-1-1.5"/></svg>
+            </span>
+            <span class="morph-name">STEALTH</span>
+          </button>
+          <button type="button" class="morph-btn active" data-morph="research" role="radio" aria-checked="true">
+            <span class="morph-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            </span>
+            <span class="morph-name">RESEARCH</span>
+          </button>
+          <button type="button" class="morph-btn" data-morph="aggressive" role="radio" aria-checked="false">
+            <span class="morph-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2L4 20h16L12 2z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 10v4M12 16v1" stroke="currentColor" stroke-width="2"/></svg>
+            </span>
+            <span class="morph-name">AGGRESSIVE</span>
+            <span class="morph-warn" aria-hidden="true">⚠</span>
+          </button>
+          <button type="button" class="morph-btn" data-morph="forensic" role="radio" aria-checked="false">
+            <span class="morph-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="2"/></svg>
+            </span>
+            <span class="morph-name">FORENSIC</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-panel nl-result-panel">
+        <div class="panel-label">GHOST INTELLIGENCE</div>
+        <div id="nlResult" class="nl-result">
+          Natural language runs locally over your event stream. Nothing leaves this machine.
+        </div>
+        <button type="button" id="btnNlQuery" class="nx-btn primary full">QUERY</button>
+      </div>
+
+      <div class="glass-panel threat-panel" id="threatPanel">
+        <div class="panel-label">
+          THREAT RESPONSE
+          <span class="threat-badge" id="threatBadge" data-verdict="CLEAR">CLEAR</span>
+        </div>
+        <div id="threatSummary" class="threat-summary meta-dim">Scanning live fabric for real (non-demo) high-score events…</div>
+        <div class="threat-actions">
+          <button type="button" id="btnThreatAssess" class="nx-btn sm">ASSESS</button>
+          <button type="button" id="btnThreatContain" class="nx-btn sm">CONTAIN</button>
+          <button type="button" id="btnThreatFull" class="nx-btn sm primary">FULL RESPOND</button>
+        </div>
+        <div class="legal-mini">Defensive playbook only · morph · rotate · evolve · seal · no offensive actions</div>
+      </div>
+
+      <div class="glass-panel ops-panel">
+        <div class="panel-label">OPS</div>
+        <div class="ops-grid">
+          <button type="button" id="btnSnapshot" class="nx-btn sm">SEAL INCIDENT</button>
+          <button type="button" id="btnRotate" class="nx-btn sm">ROTATE LAN</button>
+          <button type="button" id="btnMaximize" class="nx-btn sm">MAX EFFICACY</button>
+          <button type="button" id="btnWhatIf" class="nx-btn sm">WHAT-IF</button>
+        </div>
+        <div class="legal-mini">Authorized use only · Defensive · Loopback hub · Exploit roles blocked</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ═══ FORENSIC TIME MACHINE ═══ -->
+  <section class="nx-timeline glass-panel" aria-label="Forensic Time Machine">
+    <div class="tm-head">
+      <span class="tm-title">FORENSIC TIME MACHINE</span>
+      <span class="tm-range" id="tmRange">· 24H</span>
+      <div class="tm-actions">
+        <button type="button" id="tmBranch" class="nx-btn sm">BRANCH SIM</button>
+        <button type="button" id="tmExport" class="nx-btn sm">EXPORT REPLAY</button>
+        <button type="button" id="tmWhatIf" class="nx-btn sm">WHAT-IF AGGRESSIVE</button>
+      </div>
+    </div>
+    <div class="tm-track-wrap">
+      <div class="tm-markers" id="tmMarkers"></div>
+      <input type="range" id="tmScrub" class="tm-scrub" min="0" max="1000" value="1000" aria-label="Scrub timeline" />
+      <div class="tm-labels" id="tmLabels"></div>
+    </div>
+    <div class="tm-controls">
+      <button type="button" id="tmBack" class="tm-ctrl" title="Step back">⏮</button>
+      <button type="button" id="tmPlay" class="tm-ctrl" title="Play / pause">▶</button>
+      <button type="button" id="tmFwd" class="tm-ctrl" title="Step forward">⏭</button>
+      <span class="tm-hint">SCRUB TO RECONSTRUCT</span>
+      <span class="tm-ts" id="tmTs">LIVE</span>
+    </div>
+  </section>
+
+  <!-- ═══ STATUS BAR ═══ -->
+  <footer class="nx-status" role="contentinfo">
+    <div class="st-left">
+      <span id="stSentinels">0 SENTINELS ONLINE</span>
+      <span class="st-sep">·</span>
+      <span id="stMorphing">0 MORPHING</span>
+      <span class="st-sep">·</span>
+      <span class="st-ok" id="stFp">ZERO FALSE POSITIVES</span>
+    </div>
+    <div class="st-legend">
+      <span class="leg cyan"></span> PROTECTED
+      <span class="leg violet"></span> THREAT PATH
+      <span class="leg red"></span> LIVE BREACH
+      <span class="leg green"></span> EVOLVED SENTINEL
+    </div>
+    <div class="st-right">
+      <span id="stMorph">RESEARCH</span>
+      <span class="st-sep">·</span>
+      <span id="stSse">SSE —</span>
+      <span class="st-sep">·</span>
+      <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum" target="_blank" rel="noopener" class="st-link">GITHUB</a>
+      <span class="st-sep">·</span>
+      
+    </div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="modalNode" class="nx-modal">
+    <div class="modal-head">
+      <h2 id="modalNodeTitle">Node</h2>
+      <button type="button" class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="modalNodeBody"></div>
+  </dialog>
+
+  <dialog id="modalThreat" class="nx-modal modal-threat">
+    <div class="modal-head">
+      <h2 id="modalThreatTitle">Threat response</h2>
+      <button type="button" class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="modalThreatBody"></div>
+    <div class="modal-foot" id="modalThreatFoot"></div>
+  </dialog>
+
+  <dialog id="modalWizard" class="nx-modal modal-wide">
+    <div class="modal-head">
+      <h2 id="modalWizardTitle">Home Shield setup</h2>
+      <button type="button" class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="modalWizardBody"></div>
+  </dialog>
+
+  <dialog id="modalShield" class="nx-modal">
+    <div class="modal-head">
+      <h2>You are protected</h2>
+      <button type="button" class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="modalShieldBody"></div>
+  </dialog>
+
+  <dialog id="modalReport" class="nx-modal modal-wide">
+    <div class="modal-head">
+      <h2>Home immune report</h2>
+      <button type="button" class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="modalReportBody"></div>
+  </dialog>
+
+  <!-- Home settings drawer -->
+  <aside id="panelHomeSettings" class="home-drawer" aria-label="Home settings">
+    <div class="home-drawer-inner glass-panel">
+      <div class="panel-label">HOME SETTINGS</div>
+      <label class="wiz-field">Household <input id="setHousehold" class="home-input" type="text" /></label>
+      <label class="wiz-field">Language
+        <select id="setLanguage" class="home-input">
+          <option value="home">Home (plain English)</option>
+          <option value="expert">Expert</option>
+        </select>
+      </label>
+      <label class="check-row"><input type="checkbox" id="setKidMode" /> Kid mode (blocks auto-aggressive)</label>
+      <label class="check-row"><input type="checkbox" id="setQuietHours" /> Quiet hours (night morph)</label>
+      <div class="quiet-row">
+        <input id="setQuietStart" type="time" class="home-input" value="22:00" />
+        <span>→</span>
+        <input id="setQuietEnd" type="time" class="home-input" value="07:00" />
+      </div>
+      <label class="check-row"><input type="checkbox" id="setHighContrast" /> High contrast</label>
+      <label class="check-row"><input type="checkbox" id="setReducedMotion" /> Reduced motion</label>
+      <label class="check-row"><input type="checkbox" id="setTrustBanner" checked /> Trust banner</label>
+      <button type="button" id="btnSaveHomeSettings" class="nx-btn primary full">SAVE HOME SETTINGS</button>
+
+      <div class="panel-label" style="margin-top:14px">ALERTS (OPTIONAL)</div>
+      <div id="notifyStatus" class="meta-dim" style="margin-bottom:8px">—</div>
+      <label class="check-row"><input type="checkbox" id="setNotifyEnabled" /> Enable outbound alerts</label>
+      <label class="wiz-field">Discord webhook <input id="setDiscord" class="home-input" type="password" autocomplete="off" placeholder="https://discord.com/api/webhooks/…" /></label>
+      <label class="wiz-field">Telegram bot token <input id="setTelegramToken" class="home-input" type="password" autocomplete="off" /></label>
+      <label class="wiz-field">Telegram chat id <input id="setTelegramChat" class="home-input" type="text" /></label>
+      <label class="wiz-field">Generic webhook <input id="setGenericHook" class="home-input" type="url" placeholder="https://…" /></label>
+      <label class="wiz-field">Home Assistant state URL <input id="setHaUrl" class="home-input" type="url" placeholder="http://ha.local:8123/api/states/binary_sensor.ghost_threat" /></label>
+      <label class="wiz-field">HA long-lived token <input id="setHaToken" class="home-input" type="password" autocomplete="off" /></label>
+      <div class="ops-grid">
+        <button type="button" id="btnNotifySave" class="nx-btn sm">SAVE ALERTS</button>
+        <button type="button" id="btnNotifyTest" class="nx-btn sm">TEST ALERT</button>
+      </div>
+      <div class="legal-mini" style="margin-top:10px">HA poll helper: GET /api/home/ha-state · Restore: POST /api/home/restore with backup id</div>
+      <button type="button" class="nx-btn sm full" style="margin-top:8px" onclick="document.getElementById('panelHomeSettings').classList.remove('open')">CLOSE</button>
+    </div>
+  </aside>
+
+  <script type="module" src="/assets/app.js"></script>
+</body>
+</html>

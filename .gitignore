@@ -1,0 +1,55 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# Local runtime (never commit operator data)
+.dm-sentinel-local/
+.ghost-continuum-local/
+deploy/jonbailey/site-public/
+
+# Build / deploy artifacts
+dist/
+build/
+target/
+*.tgz
+.wrangler/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+Thumbs.db
+*.pid
+
+# Runtime data if created inside repo
+incident-snapshots/
+*.jsonl
+
+# Operator / production secrets (never commit)
+deploy/jonbailey/jonbailey-production.json
+deploy/jonbailey/**/*-secrets*
+*.pem
+*.key
+
+# Local marketing render caches / large video worktrees
+scripts/video-build/
+assets/video/
+docs/archives/
+
+# Personal operator portrait (local only — never push face photos)
+packages/hub-ui/public/assets/operator.jpg
+packages/hub-ui/public/assets/operator.jpeg
+packages/hub-ui/public/assets/operator.png
+packages/hub-ui/public/assets/jonnyb.***/.wrangler/
+**/wrangler-account.json
+_stack_out.txt
+_hub_err.txt
+_hub_out.txt
+_stack_err.txt

@@ -1,0 +1,27 @@
+# Ghost Continuum Edge — jonbailey.xyz
+# Deploy: npm run deploy:edge:jonbailey
+# UPSTREAM = origin hostname WITHOUT the Worker route (e.g. Pages *.pages.dev)
+
+name = "jonbailey-sentinel-edge"
+main = "../../../packages/edge/worker.js"
+compatibility_date = "2026-07-01"
+
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+# Attach routes in Cloudflare dashboard or uncomment when zone is on this account:
+# routes = [
+#   { pattern = "jonbailey.xyz/*", zone_name = "jonbailey.xyz" },
+#   { pattern = "www.jonbailey.xyz/*", zone_name = "jonbailey.xyz" },
+# ]
+
+[vars]
+SITE_SEED = "jonbailey.xyz"
+# Replace with your Pages dev hostname or direct origin (NOT jonbailey.xyz — avoids loop)
+UPSTREAM = "jonbailey.pages.dev"
+DEPLOY_PAGE = "https://ghost.jonbailey.xyz/"
+
+[[kv_namespaces]]
+binding = "DM_KV"
+id = "b41b0a4be563416cb73c5090b7705185"

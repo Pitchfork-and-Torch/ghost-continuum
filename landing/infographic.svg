@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Ghost Continuum v3.0 OMEGA ASCENDANT architecture</title>
+  <desc id="desc">Eight sensor planes feeding Command Nexus with Merkle-sealed forensics and Home Shield</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#02060f"/>
+      <stop offset="50%" stop-color="#0a1220"/>
+      <stop offset="100%" stop-color="#071018"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#7c4dff"/>
+      <stop offset="100%" stop-color="#e040fb"/>
+    </linearGradient>
+    <linearGradient id="plane" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(0,229,255,0.22)"/>
+      <stop offset="100%" stop-color="rgba(12,24,40,0.9)"/>
+    </linearGradient>
+    <linearGradient id="okg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#69f0ae"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="rgba(0,229,255,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="720" fill="url(#bg)"/>
+  <rect width="1200" height="720" fill="url(#grid)"/>
+  <circle cx="200" cy="120" r="180" fill="rgba(0,229,255,0.05)"/>
+  <circle cx="1000" cy="560" r="220" fill="rgba(224,64,251,0.05)"/>
+  <circle cx="600" cy="340" r="140" fill="rgba(124,77,255,0.04)"/>
+
+  <!-- Title -->
+  <text x="60" y="48" fill="#00e5ff" font-family="ui-monospace,Consolas,monospace" font-size="14" letter-spacing="6">GHOST CONTINUUM</text>
+  <text x="60" y="82" fill="#e8f4ff" font-family="system-ui,Segoe UI,sans-serif" font-size="32" font-weight="700">Living Digital Immune System</text>
+  <text x="60" y="112" fill="#b388ff" font-family="ui-monospace,Consolas,monospace" font-size="14" letter-spacing="3">v3.0 OMEGA ASCENDANT</text>
+  <text x="60" y="138" fill="#8aa6c4" font-family="system-ui,Segoe UI,sans-serif" font-size="15">Evolve · Morph · Contain · Seal — defensive only · local-first · zero core deps</text>
+
+  <!-- Center nexus -->
+  <g filter="url(#glow)">
+    <rect x="455" y="250" width="290" height="175" rx="16" fill="rgba(8,18,32,0.95)" stroke="url(#neon)" stroke-width="2"/>
+    <text x="600" y="295" text-anchor="middle" fill="#00e5ff" font-family="ui-monospace,Consolas,monospace" font-size="13" letter-spacing="3">COMMAND NEXUS</text>
+    <text x="600" y="328" text-anchor="middle" fill="#e8f4ff" font-family="system-ui,Segoe UI,sans-serif" font-size="20" font-weight="600">Holographic cockpit</text>
+    <text x="600" y="355" text-anchor="middle" fill="#8aa6c4" font-family="system-ui,Segoe UI,sans-serif" font-size="12">map · morphs · time machine · voice</text>
+    <text x="600" y="385" text-anchor="middle" fill="#69f0ae" font-family="ui-monospace,Consolas,monospace" font-size="11" letter-spacing="2">HOME SHIELD READY</text>
+  </g>
+
+  <!-- Eight planes -->
+  <g font-family="ui-monospace,Consolas,monospace" font-size="12">
+    <!-- Ghost LAN -->
+    <rect x="60" y="175" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(0,229,255,0.45)"/>
+    <text x="80" y="202" fill="#00e5ff">01 GHOST LAN</text>
+    <text x="80" y="222" fill="#8aa6c4" font-size="11">polymorphic honeypots</text>
+    <path d="M260 209 C360 209 400 300 455 320" fill="none" stroke="rgba(0,229,255,0.35)" stroke-width="1.5"/>
+
+    <!-- Edge -->
+    <rect x="60" y="270" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(124,77,255,0.5)"/>
+    <text x="80" y="297" fill="#b388ff">02 EDGE TRIPWIRE</text>
+    <text x="80" y="317" fill="#8aa6c4" font-size="11">Cloudflare sensors</text>
+    <path d="M260 304 C380 304 420 330 455 330" fill="none" stroke="rgba(124,77,255,0.4)" stroke-width="1.5"/>
+
+    <!-- Audit -->
+    <rect x="60" y="365" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(0,229,255,0.35)"/>
+    <text x="80" y="392" fill="#00e5ff">03 AUDIT PLANE</text>
+    <text x="80" y="412" fill="#8aa6c4" font-size="11">integrity watch</text>
+    <path d="M260 399 C360 399 420 370 455 350" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="1.5"/>
+
+    <!-- Narrative -->
+    <rect x="60" y="460" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(224,64,251,0.4)"/>
+    <text x="80" y="487" fill="#e040fb">04 NARRATIVE</text>
+    <text x="80" y="507" fill="#8aa6c4" font-size="11">persona weave</text>
+    <path d="M260 494 C360 494 420 400 455 370" fill="none" stroke="rgba(224,64,251,0.3)" stroke-width="1.5"/>
+
+    <!-- Phantom -->
+    <rect x="940" y="175" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(224,64,251,0.45)"/>
+    <text x="960" y="202" fill="#e040fb">05 PHANTOM MESH</text>
+    <text x="960" y="222" fill="#8aa6c4" font-size="11">decoy fabric</text>
+    <path d="M940 209 C840 209 800 300 745 320" fill="none" stroke="rgba(224,64,251,0.35)" stroke-width="1.5"/>
+
+    <!-- Deep veil -->
+    <rect x="940" y="270" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(0,229,255,0.35)"/>
+    <text x="960" y="297" fill="#00e5ff">06 DEEP VEIL</text>
+    <text x="960" y="317" fill="#8aa6c4" font-size="11">signal cloak</text>
+    <path d="M940 304 C820 304 780 330 745 330" fill="none" stroke="rgba(0,229,255,0.3)" stroke-width="1.5"/>
+
+    <!-- Mirage -->
+    <rect x="940" y="365" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(224,64,251,0.4)"/>
+    <text x="960" y="392" fill="#e040fb">07 MIRAGE CORE</text>
+    <text x="960" y="412" fill="#8aa6c4" font-size="11">NSGA-II genome</text>
+    <path d="M940 399 C840 399 780 370 745 350" fill="none" stroke="rgba(224,64,251,0.35)" stroke-width="1.5"/>
+
+    <!-- Trench Coat -->
+    <rect x="940" y="460" width="200" height="68" rx="10" fill="url(#plane)" stroke="rgba(105,240,174,0.45)"/>
+    <text x="960" y="487" fill="#69f0ae">08 TRENCH COAT</text>
+    <text x="960" y="507" fill="#8aa6c4" font-size="11">privacy cloak plane</text>
+    <path d="M940 494 C840 494 780 400 745 370" fill="none" stroke="rgba(105,240,174,0.35)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Genome + Trust strip -->
+  <rect x="280" y="470" width="640" height="56" rx="10" fill="rgba(8,18,32,0.9)" stroke="rgba(224,64,251,0.35)"/>
+  <text x="600" y="494" text-anchor="middle" fill="#e040fb" font-family="ui-monospace,Consolas,monospace" font-size="12" letter-spacing="2">DECEPTION GENOME · NSGA-II · RUNTIME MORPH · CHAD LEADERBOARD</text>
+  <text x="600" y="514" text-anchor="middle" fill="#8aa6c4" font-family="system-ui,Segoe UI,sans-serif" font-size="12">fitness from engagements · declarative fragments · no eval</text>
+  <path d="M600 470 L600 425" fill="none" stroke="rgba(224,64,251,0.4)" stroke-width="1.5"/>
+
+  <!-- Merkle bar -->
+  <rect x="60" y="560" width="1080" height="48" rx="8" fill="rgba(8,18,32,0.9)" stroke="rgba(0,229,255,0.25)"/>
+  <text x="80" y="590" fill="#00e5ff" font-family="ui-monospace,Consolas,monospace" font-size="13">MERKLE LEDGER</text>
+  <text x="240" y="590" fill="#8aa6c4" font-family="system-ui,Segoe UI,sans-serif" font-size="13">sealed incidents · STIX/TAXII 2.1 · courtroom-grade chain</text>
+  <text x="1120" y="590" text-anchor="end" fill="#69f0ae" font-family="ui-monospace,Consolas,monospace" font-size="12">DEFENSIVE ONLY</text>
+
+  <!-- Footer ethos -->
+  <rect x="60" y="630" width="1080" height="52" rx="8" fill="rgba(0,229,255,0.04)" stroke="rgba(0,229,255,0.15)"/>
+  <text x="80" y="662" fill="#8aa6c4" font-family="system-ui,Segoe UI,sans-serif" font-size="13">Authorized networks only · local-first · zero core npm deps · MIT · open source</text>
+  <text x="1120" y="662" text-anchor="end" fill="#00e5ff" font-family="ui-monospace,Consolas,monospace" font-size="12">ghost.jonbailey.xyz</text>
+</svg>

@@ -1,0 +1,67 @@
+# Ghost Continuum
+> Open-source Living Digital Immune System — v3.0 OMEGA ASCENDANT. Holographic Command Nexus, NSGA-II genomes, multi-plane polymorphic deception, Home Shield, Merkle forensics. Defensive only. Local-first. Zero core npm deps.
+
+Ghost Continuum (https://ghost.jonbailey.xyz) is a local-first defensive security platform by Pitchfork-and-Torch. Deception traps breed via genetic algorithms, personas morph at runtime, and engagements are sealed in a Merkle ledger. Sensor planes orchestrate Ghost LAN honeypots, Cloudflare edge tripwires, audit, narrative weave, phantom mesh, deep veil, mirage core, and Trench Coat privacy. Node.js 18+, zero npm dependencies in the core stack.
+
+Last reviewed: 2026-07-23
+Social preview (OG/Twitter 1200x630): https://ghost.jonbailey.xyz/share-card.jpg
+
+## Citation-ready one-liner
+Ghost Continuum is an open-source polymorphic honeypot and defensive deception engine: traps evolve via NSGA-II, personas morph at runtime, and evidence is Merkle-sealed — for authorized targets on your own network only. Version 3.0 OMEGA ASCENDANT adds an immersive public Command interface and Home Shield path.
+
+## Quick answers (AEO)
+- **What is Ghost Continuum?** Living Digital Immune System — polymorphic honeypots and edge tripwires that evolve, morph, contain, and seal evidence.
+- **Is it offensive?** No. Defensive only. Authorized targets on your own network.
+- **How do I install?** `git clone https://github.com/Pitchfork-and-Torch/ghost-continuum.git && cd ghost-continuum && npm run setup && npm start`
+- **Latest version?** 3.0.0 OMEGA ASCENDANT — https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest
+- **Where is it live?** Landing https://ghost.jonbailey.xyz · Command Nexus preview https://ghost.jonbailey.xyz/hub/
+- **GitHub:** https://github.com/Pitchfork-and-Torch/ghost-continuum
+- **What is Command Nexus?** Holographic operator dashboard with 3D intrusion map, sensor planes, LIVE/DEMO modes, Home Shield, forensic replay.
+- **What is Home Shield?** Family-friendly and home-lab defense controls: wizard, kid mode, quiet hours, alerts, PWA, weekly report.
+- **What does the dashboard look like?** https://ghost.jonbailey.xyz/hub/command-nexus.png
+- **Related cloak layer?** Trench Coat multi-hop privacy cloak: https://trenchcoat.jonbailey.xyz/
+- **Related radio OS?** GrokLink OS: https://github.com/Pitchfork-and-Torch/GrokLink-OS · https://groklink.jonbailey.xyz/
+- **Related fashion concept?** AXIOM (Optimus wardrobe): https://axiom.jonbailey.xyz/
+
+## Core capabilities
+- Deception Genome — classic GA + NSGA-II, fitness scoring, runtime morph (no eval)
+- Ghost LAN — polymorphic LAN honeypots (NAS, router, camera personas)
+- Edge plane — Cloudflare Worker tripwires, sentinel script, KV honeypot rotation
+- Command Nexus — holographic 3D intrusion map, forensic time machine, Ghost Voice, NL queries
+- Trust fabric — Merkle ledger, STIX/TAXII 2.1, sealed incident bundles
+- Extended planes — Phantom Mesh, Deep Veil, Mirage Core, Trench Coat
+- Home Shield — wizard profiles, kid mode, quiet hours, device trust, notifications, PWA
+- Public site v3 — interactive planes explorer, client-side Nexus lifecycle demo, efficacy gauges
+
+## Install
+```bash
+git clone https://github.com/Pitchfork-and-Torch/ghost-continuum.git
+cd ghost-continuum
+npm run setup
+npm start
+```
+Command Hub: http://127.0.0.1:30000 (after install)
+
+## Production URLs
+- Product landing: https://ghost.jonbailey.xyz/
+- Command Nexus preview: https://ghost.jonbailey.xyz/hub/
+- Dashboard screenshot: https://ghost.jonbailey.xyz/hub/command-nexus.png
+- Social / OG card (1200×630): https://ghost.jonbailey.xyz/share-card.jpg
+- Architecture infographic: https://ghost.jonbailey.xyz/infographic.svg
+- LLM summary: https://ghost.jonbailey.xyz/llms.txt
+- Sitemap: https://ghost.jonbailey.xyz/sitemap.xml
+- Edge telemetry (jonbailey.xyz): https://jonbailey.xyz/.__dm/status
+
+## Related network
+- AXIOM: https://axiom.jonbailey.xyz/ · https://axiom.jonbailey.xyz/llms.txt
+- GrokLink OS: https://github.com/Pitchfork-and-Torch/GrokLink-OS · https://groklink.jonbailey.xyz/
+- Trench Coat: https://trenchcoat.jonbailey.xyz/
+- Fl1pp3r69: https://fl1pp3r69.jonbailey.xyz/
+- Socialism Destroyer: https://destroyer.jonbailey.xyz/
+- Jon Bailey (musician): https://jonbailey.xyz/
+- SafeDeposit: https://safedepositbox.org/
+
+## License
+MIT — Pitchfork-and-Torch
+
+# refreshed: 2026-07-23 · v3.0.0 OMEGA ASCENDANT

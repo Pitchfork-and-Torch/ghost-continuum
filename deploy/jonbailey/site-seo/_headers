@@ -1,0 +1,80 @@
+/*
+  ! Access-Control-Allow-Origin
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://fonts.googleapis.com https://static.ads-twitter.com https://analytics.twitter.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: https://t.co https://analytics.twitter.com; connect-src 'self' https://cdn.jsdelivr.net https://static.ads-twitter.com https://ads-api.twitter.com https://analytics.twitter.com https://t.co https://cloudflareinsights.com; worker-src 'self' blob:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+
+# HTML: shorter CDN TTL so X/social crawlers pick up meta changes faster
+/
+  Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=600
+  CDN-Cache-Control: max-age=300
+
+/hub/
+  Cache-Control: public, max-age=60, s-maxage=300, stale-while-revalidate=600
+  CDN-Cache-Control: max-age=300
+
+/css/*
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: text/css; charset=utf-8
+
+/js/*
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: application/javascript; charset=utf-8
+
+/llms.txt
+  Cache-Control: public, max-age=3600, s-maxage=86400
+  Content-Type: text/plain; charset=utf-8
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600, s-maxage=86400
+  Content-Type: application/xml; charset=utf-8
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+  CDN-Cache-Control: max-age=31536000
+
+/og-card.png
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: image/png
+  CDN-Cache-Control: max-age=604800
+
+/og-card.jpg
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: image/jpeg
+  CDN-Cache-Control: max-age=604800
+
+/og-card-v3.png
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: image/png
+  CDN-Cache-Control: max-age=604800
+
+/og-card-v3.jpg
+  Cache-Control: public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400
+  Content-Type: image/jpeg
+  CDN-Cache-Control: max-age=604800
+
+/share-card.png
+  Cache-Control: public, max-age=3600, s-maxage=86400
+  Content-Type: image/png
+  CDN-Cache-Control: max-age=86400
+
+/share-card.jpg
+  Cache-Control: public, max-age=3600, s-maxage=86400
+  Content-Type: image/jpeg
+  CDN-Cache-Control: max-age=86400
+
+/hub/command-nexus.png
+  Cache-Control: public, max-age=31536000, immutable
+  CDN-Cache-Control: max-age=31536000
+
+/hub/*.js
+  Cache-Control: public, max-age=300, s-maxage=3600
+  Content-Type: application/javascript; charset=utf-8

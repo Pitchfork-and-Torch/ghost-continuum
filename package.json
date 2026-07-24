@@ -1,0 +1,58 @@
+{
+  "name": "ghost-continuum",
+  "version": "3.0.0",
+  "description": "Living Digital Immune System — v3.0 OMEGA ASCENDANT holographic Command Nexus, NSGA-II genomes, multi-plane fabric (incl. Trench Coat privacy), Home Shield, Merkle forensics. Zero core deps.",
+  "type": "module",
+  "bin": {
+    "ghost-continuum": "./bin/ghost-continuum.js"
+  },
+  "scripts": {
+    "setup": "node bin/setup.js",
+    "start": "node bin/start-stack.js",
+    "hub": "node bin/ghost-continuum.js start",
+    "doctor": "node bin/ghost-continuum.js doctor",
+    "init": "node bin/init.js",
+    "arm": "powershell -ExecutionPolicy Bypass -File bin/arm-all.ps1",
+    "arm:planes": "node bin/arm-planes.js",
+    "arm:unix": "sh bin/arm-all.sh",
+    "ghost-lan": "node packages/ghost-lan/bin/ghost-lan.js start",
+    "edge:local": "node bin/edge-local.js",
+    "cell": "node bin/cell-start.js",
+    "install:win": "powershell -ExecutionPolicy Bypass -File bin/install.ps1",
+    "install:autostart": "powershell -ExecutionPolicy Bypass -File bin/install-autostart.ps1",
+    "install:unix": "sh bin/install.sh",
+    "tray": "powershell -ExecutionPolicy Bypass -File apps/desktop/tray.ps1",
+    "watch": "node apps/desktop/watch.js",
+    "test": "node test/verify.js && node test/genome.js && node test/continuum.js && node test/metrics.js && node test/phases.js && node test/integration.js && node test/stack.js && node test/edge-worker.js && node test/plane-toggles.js && node test/trench-cloak.js && node test/omega-v2.js && node test/threat-response.js && node test/home-suite.js",
+    "demo:campaign": "node -e \"import('./packages/hub-api/src/demo-campaign.js').then(m=>console.log(JSON.stringify(m.injectDemoCampaign({persist:false}),null,2)))\"",
+    "deploy:edge:jonbailey": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-edge.ps1",
+    "deploy:hub:pages": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-pages.ps1",
+    "deploy:site": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-site.ps1",
+    "deploy:seo": "powershell -ExecutionPolicy Bypass -File scripts/post-deploy-seo.ps1",
+    "deploy:site:full": "powershell -ExecutionPolicy Bypass -Command \"& './deploy/jonbailey/scripts/deploy-site.ps1'; if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) { exit $LASTEXITCODE }; & './scripts/post-deploy-seo.ps1'\"",
+    "deploy:hub:gateway": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-gateway.ps1",
+    "ghost-cli": "node bin/ghost-cli.js wake",
+    "test:unit": "node test/verify.js",
+    "test:integration": "node test/integration.js",
+    "test:stack": "node test/stack.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "deception",
+    "honeypot",
+    "security",
+    "ghost-continuum",
+    "defensive"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pitchfork-and-Torch/ghost-continuum.git"
+  },
+  "devDependencies": {
+    "wrangler": "^4.108.0"
+  }
+}
+

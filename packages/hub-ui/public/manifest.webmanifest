@@ -1,0 +1,19 @@
+{
+  "name": "Ghost Continuum Command Nexus",
+  "short_name": "Ghost Nexus",
+  "description": "Local-first Living Digital Immune System — v3.0 OMEGA ASCENDANT Command Nexus",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#02060f",
+  "theme_color": "#00e5ff",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["security", "utilities"]
+}

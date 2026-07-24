@@ -1,0 +1,7 @@
+{
+  "name": "@ghost-continuum/planes",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Living fabric plane registry — Ghost LAN, Edge, Mesh, Veil, Mirage",
+  "main": "src/registry.js"
+}

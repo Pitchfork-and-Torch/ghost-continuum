@@ -1,0 +1,16 @@
+# Ghost Continuum Hub API gateway — ghost.jonbailey.xyz/api/*
+# Pair with Cloudflare Pages (hub UI) + Tunnel to local Node hub.
+
+name = "jonbailey-ghost-hub-api"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# routes = [
+#   { pattern = "ghost.jonbailey.xyz/api/*", zone_name = "jonbailey.xyz" },
+#   { pattern = "ghost.jonbailey.xyz/taxii2/*", zone_name = "jonbailey.xyz" },
+# ]
+
+[vars]
+ALLOWED_ORIGIN = "https://ghost.jonbailey.xyz"
+# Set via wrangler secret: HUB_ORIGIN = https://<tunnel-id>.cfargotunnel.com
+# Set via wrangler secret: HUB_TOKEN = <same as GC_HUB_TOKEN on local hub>

@@ -1,0 +1,54 @@
+{
+  "hubPort": 30000,
+  "ghostLanPort": 29999,
+  "edgeLocalPort": 30001,
+  "cellPort": 3333,
+  "cellRoot": "",
+  "primaryDomain": "",
+  "useLocalEdge": true,
+  "edgeStatusUrl": "",
+  "edgeStatusKey": "",
+  "tripwireUrl": "",
+  "cloudflareWorkerName": "",
+  "hubToken": "",
+  "demoMode": false,
+  "useBuiltinValidator": true,
+  "paths": { "ghostLan": "packages/ghost-lan" },
+  "allowedDomains": ["localhost", "127.0.0.1", "ghost-continuum-local"],
+  "allowedPrivateCidrs": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"],
+  "defensiveOperators": ["recon", "scanner", "analyst"],
+  "blockExploitOperators": true,
+  "continuum": {
+    "morph": "research",
+    "evolution": {
+      "enabled": true,
+      "cycleEvery": 25,
+      "populationSize": 10,
+      "algorithm": "nsga2",
+      "comment": "nsga2 (v2 multi-objective) or classic (v1 single-objective GA)"
+    },
+    "trust": { "ledger": true },
+    "narrative": { "enabled": false, "worldId": "default" },
+    "planes": {
+      "phantomMesh": false,
+      "deepVeil": false,
+      "mirageCore": false,
+      "trenchCloak": false,
+      "trenchEntryHost": "127.0.0.1",
+      "trenchEntryPort": 1080,
+      "trenchApiPort": 8742,
+      "trenchAutoStart": false,
+      "trenchRouteTools": true,
+      "trenchPollMs": 20000,
+      "phantomMeshPeers": [],
+      "mirageImage": "alpine:3.19"
+    },
+    "triggers": { "mirageFitnessThreshold": 40 },
+    "plugins": []
+  },
+  "narrative": {
+    "llmEndpoint": "http://127.0.0.1:11434",
+    "llmModel": "llama3.2",
+    "llmTimeoutMs": 8000
+  }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://ghost.jonbailey.xyz/</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://ghost.jonbailey.xyz/og-card.png</image:loc>
+      <image:title>Ghost Continuum v3.0 OMEGA ASCENDANT</image:title>
+      <image:caption>Living Digital Immune System — defensive only, local-first</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://ghost.jonbailey.xyz/infographic.svg</image:loc>
+      <image:title>Ghost Continuum architecture</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/hub/</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/hub/command-nexus.png</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/infographic.svg</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/og-card.png</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/llms.txt</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://ghost.jonbailey.xyz/robots.txt</loc>
+    <lastmod>2026-07-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

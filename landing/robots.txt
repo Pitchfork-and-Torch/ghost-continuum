@@ -1,0 +1,67 @@
+# Ghost Continuum — https://ghost.jonbailey.xyz
+User-agent: *
+Allow: /
+Allow: /hub/
+Allow: /hub/command-nexus.png
+Allow: /llms.txt
+Allow: /sitemap.xml
+Allow: /infographic.svg
+Allow: /og-card.png
+Allow: /og-card.jpg
+Allow: /css/
+Allow: /js/
+
+# Answer engines / AI crawlers (AEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://ghost.jonbailey.xyz/sitemap.xml
+# Machine-readable summary: https://ghost.jonbailey.xyz/llms.txt
+# Social card: https://ghost.jonbailey.xyz/og-card.png
+
+# IndexNow key: https://ghost.jonbailey.xyz/7577922ed4d3ec3df303933b78cbd0ee.txt

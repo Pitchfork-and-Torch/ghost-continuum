@@ -1,0 +1,7 @@
+{
+  "name": "@ghost-continuum/continuum",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Living Deception Continuum — orchestration nexus and sentinel morphs",
+  "main": "src/index.js"
+}

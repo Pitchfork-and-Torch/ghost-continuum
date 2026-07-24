@@ -1,0 +1,19 @@
+{
+  "primaryDomain": "jonbailey.xyz",
+  "useLocalEdge": false,
+  "edgeStatusUrl": "https://jonbailey.xyz/.__dm/status",
+  "tripwireUrl": "https://jonbailey.xyz/.__dm/tripwire",
+  "cloudflareWorkerName": "jonbailey-sentinel-edge",
+  "hubToken": "GENERATE_WITH_node_-e_console.log(require('crypto').randomBytes(32).toString('hex'))",
+  "allowedDomains": ["jonbailey.xyz", "www.jonbailey.xyz", "ghost.jonbailey.xyz", "localhost", "127.0.0.1"],
+  "continuum": {
+    "morph": "research",
+    "corePlanes": { "ghostLan": true, "edge": true, "audit": true },
+    "planes": {
+      "phantomMesh": true,
+      "deepVeil": true,
+      "mirageCore": true
+    },
+    "narrative": { "enabled": true, "worldId": "production" }
+  }
+}

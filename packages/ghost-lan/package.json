@@ -1,0 +1,22 @@
+{
+  "name": "ghost-lan",
+  "version": "0.2.1",
+  "description": "Polymorphic Ghost LAN — rotating deception layer for home networks",
+  "type": "module",
+  "bin": {
+    "ghost-lan": "./bin/ghost-lan.js"
+  },
+  "scripts": {
+    "start": "node src/sentinel.js",
+    "install:win": "powershell -ExecutionPolicy Bypass -File install/install.ps1",
+    "uninstall:win": "powershell -ExecutionPolicy Bypass -File install/uninstall.ps1",
+    "test": "node test/verify.js && node test/ops-verify.js",
+    "test:integration": "node test/integration.js",
+    "test:all": "node test/verify.js && node test/ops-verify.js && node test/integration.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["honeypot", "deception", "home-security", "polymorphic"],
+  "license": "MIT"
+}
