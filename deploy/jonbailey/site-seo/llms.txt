@@ -1,0 +1,30 @@
+# Ghost Continuum
+> Open-source Living Digital Immune System - v3.5.0 Crystal Membrane. Command Nexus with command palette, time-window NL queries, keyboard cockpit, hover-expand fabric map, Ghost LAN tab, Home Shield, Merkle forensics. Defensive only. Local-first. Zero core npm deps.
+
+Site: https://ghost.jonbailey.xyz/
+Hub preview: https://ghost.jonbailey.xyz/hub/
+Source: https://github.com/Pitchfork-and-Torch/ghost-continuum
+License: MIT
+
+## What it is
+
+Ghost Continuum is an open-source polymorphic honeypot and defensive deception engine: traps evolve via NSGA-II, personas morph at runtime, and evidence is Merkle-sealed - for authorized targets on your own network only. Version 3.5.0 Crystal Membrane upgrades Command Nexus (Ctrl/Cmd+K palette, last-24h queries that actually filter time, keyboard views) and the public landing.
+
+## Quick answers
+
+- **Offensive?** No. Defensive only.
+- **Cloud required?** No. Local-first. Optional Cloudflare edge for sites you already host.
+- **Core dependencies?** Zero npm packages in the engine. Node.js 18+.
+- **Latest version?** 3.5.0 Crystal Membrane - https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest
+- **Install:** git clone, npm run setup, npm start -> http://127.0.0.1:30000
+- **Command Nexus 3.5:** Ctrl/Cmd+K palette, 1-5 views, / query, time-window + IP NL search
+- **Home Shield:** wizard + kid mode + quiet hours for home / lab operators
+
+## Key surfaces
+
+- Public site: architecture planes, lifecycle demo, efficacy gauges, quickstart, FAQ
+- Command Nexus: Crystal Membrane cockpit at local :30000
+- Hub preview: https://ghost.jonbailey.xyz/hub/
+- Design system: docs/DESIGN-SYSTEM-LUMINOUS-MEMBRANE.md
+
+# refreshed: 2026-08-13 · v3.5.0 Crystal Membrane
