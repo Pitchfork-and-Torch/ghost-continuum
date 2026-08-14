@@ -30,6 +30,7 @@
     "deploy:site": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-site.ps1",
     "deploy:site:unix": "bash scripts/deploy-site.sh",
     "deploy:seo": "powershell -ExecutionPolicy Bypass -File scripts/post-deploy-seo.ps1",
+    "deploy:seo:unix": "bash scripts/post-deploy-seo.sh",
     "deploy:site:full": "powershell -ExecutionPolicy Bypass -Command \"& './deploy/jonbailey/scripts/deploy-site.ps1'; if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) { exit $LASTEXITCODE }; & './scripts/post-deploy-seo.ps1'\"",
     "deploy:hub:gateway": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-gateway.ps1",
     "ghost-cli": "node bin/ghost-cli.js wake",
