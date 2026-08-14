@@ -63,6 +63,12 @@ assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer secret' } }, {
 assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer wrong' } }, { hubToken: 'secret' }), false);
 assert.strictEqual(hubTokenOk({ headers: {} }, { hubToken: 'secret' }), false);
 
+const landingHtml = fs.readFileSync(new URL('../landing/index.html', import.meta.url), 'utf8');
+assert.ok(landingHtml.includes('<!DOCTYPE html>'), 'landing/index.html must be a real HTML document');
+assert.ok(landingHtml.includes('</html>'), 'landing/index.html must be a complete HTML document');
+assert.ok(!landingHtml.includes('PLACEHOLDER_WILL_FAIL'), 'landing/index.html must not be a stub');
+assert.ok(landingHtml.length > 8000, 'landing/index.html looks truncated');
+
 const ep = cellEndpoints(3333);
 assert.ok(ep.ping.includes('/api/health'));
 assert.strictEqual(resolveCellRoot({}), '');
