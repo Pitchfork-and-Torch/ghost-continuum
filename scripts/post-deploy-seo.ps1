@@ -40,7 +40,7 @@ try {
     @{ n = "og:image share-card.jpg"; p = 'share-card.jpg' },
     @{ n = "twitter:card large"; p = 'twitter:card" content="summary_large_image"' },
     @{ n = "softwareVersion 3.6.0"; p = '3.6.0' },
-    @{ n = "Crystal Membrane"; p = 'Crystal Membrane' },
+    @{ n = "Crystal Seal"; p = 'Crystal Seal' },
     @{ n = "llms.txt link"; p = 'llms.txt' },
     @{ n = "canonical"; p = 'rel="canonical"' }
   )
