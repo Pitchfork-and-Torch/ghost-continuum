@@ -238,6 +238,7 @@ This deploys Pages then runs `scripts/post-deploy-seo.ps1` (live HEAD checks, me
 - [ ] Tunnel + DNS for `sentinel.<your-domain>`
 - [ ] `hubToken` / `GC_HUB_TOKEN` configured
 - [ ] `hubAllowedHosts` includes the tunnel hostname (e.g. `ghost.jonbailey.xyz`) — hostname only, not a secret
+- [ ] Leave `hubTrustProxy` off (tunnel to loopback does not need `X-Forwarded-For`)
 - [ ] Cloudflare Access policy on Command Hub hostname
 - [ ] Edge status + tripwire verified
 

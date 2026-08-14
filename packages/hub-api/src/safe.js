@@ -172,9 +172,20 @@ export function hubOriginOk(req, config = {}) {
   }
 }
 
-export function clientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (xff) return String(xff).split(',')[0].trim();
+export function hubTrustProxy(config = {}) {
+  if (config.hubTrustProxy === true) return true;
+  const env = String(process.env.GC_HUB_TRUST_PROXY || '').trim().toLowerCase();
+  return env === '1' || env === 'true' || env === 'yes';
+}
+
+export function clientIp(req, config = {}) {
+  if (hubTrustProxy(config)) {
+    const xff = req.headers?.['x-forwarded-for'];
+    if (xff) {
+      const first = String(xff).split(',')[0].trim();
+      if (first) return first;
+    }
+  }
   return req.socket?.remoteAddress || 'unknown';
 }
 
@@ -183,9 +194,9 @@ export function clientIp(req) {
 const rlBuckets = new Map();
 const RL_MAX_BUCKETS = 10_000;
 
-export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() } = {}) {
+export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now(), config } = {}) {
   if (max <= 0) return { ok: true, remaining: Infinity, retryAfterMs: 0 };
-  const ip = clientIp(req);
+  const ip = clientIp(req, config);
   const bucket = rlBuckets.get(ip);
 
   if (!bucket || now - bucket.start >= windowMs) {

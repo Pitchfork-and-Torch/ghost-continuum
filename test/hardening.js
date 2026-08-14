@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { rateLimit, resetRateLimits, clientIp } from '../packages/hub-api/src/safe.js';
+import { rateLimit, resetRateLimits, clientIp, hubTrustProxy } from '../packages/hub-api/src/safe.js';
 import { appendLedgerEntry, verifyLedger, getLedgerRoot, countEntries } from '../packages/trust/src/index.js';
 
 // --- Write-side rate limiter -------------------------------------------------
@@ -22,11 +22,36 @@ console.log('  ✓ rate limit is per-IP');
 assert.ok(rateLimit(req('9.9.9.9'), { windowMs: 1000, max: 5, now: t0 + 1001 }).ok, 'window resets');
 console.log('  ✓ rate limit window resets over time');
 
+assert.strictEqual(hubTrustProxy({}), false);
+assert.strictEqual(hubTrustProxy({ hubTrustProxy: true }), true);
 assert.strictEqual(
-  clientIp({ headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' }, socket: {} }),
-  '203.0.113.5',
-  'clientIp honours x-forwarded-for',
+  clientIp({ headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' }, socket: { remoteAddress: '127.0.0.1' } }),
+  '127.0.0.1',
+  'clientIp ignores x-forwarded-for by default',
 );
+assert.strictEqual(
+  clientIp(
+    { headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' }, socket: { remoteAddress: '127.0.0.1' } },
+    { hubTrustProxy: true },
+  ),
+  '203.0.113.5',
+  'clientIp honours x-forwarded-for when hubTrustProxy is set',
+);
+
+resetRateLimits();
+const spoof = (n) => ({
+  headers: { 'x-forwarded-for': `203.0.113.${n}` },
+  socket: { remoteAddress: '127.0.0.1' },
+});
+for (let i = 0; i < 5; i++) {
+  assert.ok(rateLimit(spoof(i), { windowMs: 1000, max: 5, now: t0 }).ok);
+}
+assert.ok(
+  !rateLimit(spoof(99), { windowMs: 1000, max: 5, now: t0 }).ok,
+  'spoofed X-Forwarded-For does not bypass the limiter',
+);
+console.log('  ✓ clientIp ignores XFF unless hubTrustProxy');
+
 assert.ok(rateLimit(req('9.9.9.9'), { max: 0 }).ok, 'max<=0 disables limiting');
 console.log('  ✓ clientIp + disable path');
 

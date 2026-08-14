@@ -12,6 +12,7 @@
   "cloudflareWorkerName": "",
   "hubToken": "",
   "hubAllowedHosts": [],
+  "hubTrustProxy": false,
   "demoMode": false,
   "useBuiltinValidator": true,
   "paths": { "ghostLan": "packages/ghost-lan" },

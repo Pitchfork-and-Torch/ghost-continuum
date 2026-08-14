@@ -71,10 +71,12 @@ async function cmdDoctor() {
   checks.push(['edge mode', Boolean(config.edgeMode)]);
   checks.push(['builtin validator', config.useBuiltinValidator !== false]);
 
-  const { extraHubHosts } = await import('../packages/hub-api/src/safe.js');
+  const { extraHubHosts, hubTrustProxy } = await import('../packages/hub-api/src/safe.js');
   const extraHosts = extraHubHosts(config);
   const hubTokenSet = Boolean(config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN);
+  const trustProxy = hubTrustProxy(config);
   checks.push(['hub host lock (loopback)', true]);
+  if (!trustProxy) checks.push(['rate-limit ignores X-Forwarded-For', true]);
   if (extraHosts.length) {
     checks.push(['hubAllowedHosts declared', extraHosts.length > 0]);
     checks.push(['hub token set for extra hosts', hubTokenSet]);
@@ -94,6 +96,9 @@ async function cmdDoctor() {
     console.log(`  ${ok ? '✓' : '✗'} ${name}`);
   }
 
+  if (trustProxy) {
+    console.log('\n  Tip: hubTrustProxy is on — X-Forwarded-For is trusted for write rate limits');
+  }
   if (extraHosts.length && !hubTokenSet) {
     console.log('\n  Tip: extra hubAllowedHosts require hubToken — set GC_HUB_TOKEN or the hub will 401 /api on that host');
   }

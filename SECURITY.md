@@ -31,6 +31,7 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
 - Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
 - Loopback HTML may set an HttpOnly `SameSite=Strict` cookie — the bearer is never injected into JavaScript
+- Write rate limits ignore `X-Forwarded-For` unless `hubTrustProxy` / `GC_HUB_TRUST_PROXY` is set
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
 
@@ -60,6 +61,22 @@ location.reload();
 ```
 
 The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the extra-host token check when it is missing.
+
+## Hub rate-limit identity
+
+The write-side limiter keys on client IP. On a loopback hub, `X-Forwarded-For` is attacker-controlled, so a flood can rotate that header and skip the 120/10s cap.
+
+Default: ignore `X-Forwarded-For`; use the socket address.
+
+Only set this if a real reverse proxy you control is the only path to the hub:
+
+```json
+{
+  "hubTrustProxy": true
+}
+```
+
+Or `GC_HUB_TRUST_PROXY=1`. Cloudflare Tunnel to `127.0.0.1:30000` does not need this — one shared loopback bucket is the safer default.
 
 ## Deployment rules
 
