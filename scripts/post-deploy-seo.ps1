@@ -2,6 +2,8 @@
 # Run after every major public site deploy: npm run deploy:site; then this script.
 $ErrorActionPreference = "Continue"
 $Base = "https://ghost.jonbailey.xyz"
+$ExpectVersion = if ($env:SEO_EXPECT_VERSION) { $env:SEO_EXPECT_VERSION } else { "3.6.0" }
+$ContentAlias = if ($env:SEO_CONTENT_ALIAS) { $env:SEO_CONTENT_ALIAS } else { "https://ghost-continuum.pages.dev" }
 $Key = "7577922ed4d3ec3df303933b78cbd0ee"
 $Urls = @(
   "$Base/",
@@ -35,7 +37,6 @@ foreach ($u in $Urls) {
 
 Write-Host "`n=== HTML meta / AEO spot-check ===" -ForegroundColor Cyan
 try {
-  $ContentAlias = if ($env:SEO_CONTENT_ALIAS) { $env:SEO_CONTENT_ALIAS } else { "https://ghost-continuum.pages.dev" }
   $html = ""
   try {
     $html = (Invoke-WebRequest -Uri "$Base/" -UseBasicParsing -TimeoutSec 30).Content
@@ -54,7 +55,7 @@ try {
   $checks = @(
     @{ n = "og:image share-card.jpg"; p = 'share-card.jpg' },
     @{ n = "twitter:card large"; p = 'twitter:card" content="summary_large_image"' },
-    @{ n = "softwareVersion 3.6.0"; p = '3.6.0' },
+    @{ n = "softwareVersion $ExpectVersion"; p = $ExpectVersion },
     @{ n = "Crystal Seal"; p = 'Crystal Seal' },
     @{ n = "llms.txt link"; p = 'llms.txt' },
     @{ n = "canonical"; p = 'rel="canonical"' }
@@ -87,6 +88,30 @@ foreach ($ua in @("Mozilla/5.0", "Twitterbot/1.0", "facebookexternalhit/1.1")) {
     Write-Host "  FAIL $ua : $($_.Exception.Message)" -ForegroundColor Red
     $fail++
   }
+}
+
+Write-Host "`n=== Live js/main.js dataset.version ===" -ForegroundColor Cyan
+try {
+  $js = ""
+  try {
+    $js = (Invoke-WebRequest -Uri "$Base/js/main.js" -UseBasicParsing -TimeoutSec 30).Content
+  } catch {
+    $js = ""
+  }
+  if ($js -notmatch 'dataset\.version') {
+    $js = (Invoke-WebRequest -Uri "$ContentAlias/js/main.js" -UseBasicParsing -TimeoutSec 30).Content
+    Write-Host ("  (apex js missed; verified via {0}/js/main.js)" -f $ContentAlias)
+  }
+  $expect = "dataset.version = '$ExpectVersion'"
+  if ($js.Contains($expect)) {
+    Write-Host ("  OK  dataset.version {0}" -f $ExpectVersion) -ForegroundColor Green
+  } else {
+    Write-Host ("  MISS  dataset.version {0}" -f $ExpectVersion) -ForegroundColor Yellow
+    $fail++
+  }
+} catch {
+  Write-Host "  FAIL js fetch: $($_.Exception.Message)" -ForegroundColor Red
+  $fail++
 }
 
 Write-Host "`n=== IndexNow submit ===" -ForegroundColor Cyan

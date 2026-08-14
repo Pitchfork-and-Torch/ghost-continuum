@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO live dataset.version
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` checks live `js/main.js` `dataset.version` (apex, then Pages alias). Matches the Unix script. Landing untouched.
+
 ## [Unreleased] - PowerShell SEO Pages fallback
 
 ### Public site ops
