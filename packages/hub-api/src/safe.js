@@ -55,15 +55,48 @@ export function sanitizeId(id) {
   return SAFE_ID.test(raw) ? raw : null;
 }
 
+export const HUB_TOKEN_COOKIE = 'gc-hub-token';
+
+export function configuredHubToken(config = {}) {
+  return config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN || '';
+}
+
+function timingSafeStringEqual(a, b) {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
+}
+
+export function readCookie(req, name) {
+  const raw = String(req.headers?.cookie || '');
+  if (!raw) return '';
+  for (const part of raw.split(';')) {
+    const idx = part.indexOf('=');
+    if (idx === -1) continue;
+    const key = part.slice(0, idx).trim();
+    if (key !== name) continue;
+    const value = part.slice(idx + 1).trim();
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+  return '';
+}
+
+export function hubTokenCookieHeader(token) {
+  return `${HUB_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; SameSite=Strict; HttpOnly`;
+}
+
 export function hubTokenOk(req, config) {
-  const token = config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN || '';
+  const token = configuredHubToken(config);
   if (!token) return true;
   const auth = req.headers.authorization || '';
-  const expected = `Bearer ${token}`;
-  const a = Buffer.from(auth);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(a, b);
+  if (timingSafeStringEqual(auth, `Bearer ${token}`)) return true;
+  const cookie = readCookie(req, HUB_TOKEN_COOKIE);
+  return cookie.length > 0 && timingSafeStringEqual(cookie, token);
 }
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
@@ -95,6 +128,21 @@ export function allowedHubHosts(config = {}) {
 
 export function extraHubHosts(config = {}) {
   return [...allowedHubHosts(config)].filter((h) => !LOOPBACK_HOSTS.has(h));
+}
+
+export function hubHostIsLoopback(req) {
+  return LOOPBACK_HOSTS.has(parseHostHeader(req.headers?.host));
+}
+
+/**
+ * Read-path lock for /api/*.
+ * Loopback without a configured token stays open (local-first CLI).
+ * Extra (tunneled) hosts always require a configured token, and any
+ * configured token must be presented via Authorization or the HttpOnly cookie.
+ */
+export function hubApiAuthOk(req, config = {}) {
+  if (!configuredHubToken(config) && !hubHostIsLoopback(req)) return false;
+  return hubTokenOk(req, config);
 }
 
 /**

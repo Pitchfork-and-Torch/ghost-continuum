@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] - Hub read-path lock
+
+### Control-plane hygiene
+- Every `/api/*` method (GET included) requires the hub bearer when `hubToken` / `GC_HUB_TOKEN` is set — header or `gc-hub-token` cookie (EventSource cannot send `Authorization`).
+- Extra (tunneled) hosts always require a configured token; `/api/*` returns `401` without it.
+- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie. The bearer is never injected into JavaScript, so a tunneled `GET /` cannot leak write access.
+
 ## [Unreleased] - Hub Host / Origin lock
 
 ### Control-plane hygiene

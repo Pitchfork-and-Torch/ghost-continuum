@@ -56,7 +56,18 @@ import {
  startTrenchCloak,
  status as trenchStatus,
 } from '../../planes/src/trench-cloak.js';
-import { readBody, safeUiPath, sanitizeId, hubTokenOk, hubHostOk, hubOriginOk, rateLimit } from './safe.js';
+import {
+  readBody,
+  safeUiPath,
+  sanitizeId,
+  hubHostOk,
+  hubOriginOk,
+  hubApiAuthOk,
+  hubHostIsLoopback,
+  configuredHubToken,
+  hubTokenCookieHeader,
+  rateLimit,
+} from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -202,7 +213,7 @@ export function startHub(config = loadConfig()) {
       return json(res, 403, { ok: false, error: 'origin not allowed' });
     }
 
-    if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
+    if (url.pathname.startsWith('/api/') && !hubApiAuthOk(req, config)) {
       return json(res, 401, { ok: false, error: 'Hub token required' });
     }
 
@@ -221,13 +232,15 @@ export function startHub(config = loadConfig()) {
 
  if (url.pathname === '/' || url.pathname === '/index.html') {
  const file = path.join(UI_ROOT, 'index.html');
- let html = fs.readFileSync(file, 'utf8');
- const hubToken = config.hubToken || process.env.GC_HUB_TOKEN || '';
- if (hubToken && !html.includes('__GC_HUB_TOKEN')) {
- const boot = `<script>window.__GC_HUB_TOKEN=${JSON.stringify(hubToken)};</script>`;
- html = html.includes('</head>') ? html.replace('</head>', `${boot}</head>`) : `${boot}${html}`;
+ const html = fs.readFileSync(file, 'utf8');
+ const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
+ const hubToken = configuredHubToken(config);
+ // Loopback only: HttpOnly cookie so EventSource/fetch work without
+ // putting the bearer in JavaScript (tunneled HTML must not leak it).
+ if (hubToken && hubHostIsLoopback(req)) {
+ headers['Set-Cookie'] = hubTokenCookieHeader(hubToken);
  }
- res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+ res.writeHead(200, headers);
  return res.end(html);
  }
 

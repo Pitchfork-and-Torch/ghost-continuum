@@ -29,6 +29,8 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Optional hub bearer token compared with constant-time equality when set
 - Hub **Host** allowlist (loopback by default) blocks DNS rebinding
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
+- Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
+- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie — the bearer is never injected into JavaScript
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
 
@@ -50,7 +52,14 @@ If you front the hub with a Cloudflare Tunnel (or similar) on a public hostname,
 }
 ```
 
-Or set `GC_HUB_ALLOWED_HOSTS=ghost.jonbailey.xyz` (comma-separated). Pair extra hosts with `hubToken` / `GC_HUB_TOKEN` and Cloudflare Access. `npm run doctor` warns when extra hosts are declared without a token.
+Or set `GC_HUB_ALLOWED_HOSTS=ghost.jonbailey.xyz` (comma-separated). Extra hosts **require** `hubToken` / `GC_HUB_TOKEN` — `/api/*` returns `401` without it (including GET). Pair with Cloudflare Access. After Access login, set the token once in the browser:
+
+```javascript
+localStorage.setItem('dm-hub-token', 'YOUR_LONG_RANDOM_TOKEN');
+location.reload();
+```
+
+The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the extra-host token check when it is missing.
 
 ## Deployment rules
 

@@ -19,6 +19,12 @@ function hubAuthHeaders(extra = {}) {
  return headers;
 }
 
+function syncHubTokenCookie() {
+ const token = localStorage.getItem('dm-hub-token') || window.__GC_HUB_TOKEN;
+ if (!token) return;
+ document.cookie = `gc-hub-token=${encodeURIComponent(token)}; Path=/; SameSite=Strict`;
+}
+
 async function apiFetch(url, opts = {}) {
  const method = (opts.method || 'GET').toUpperCase();
  const headers = hubAuthHeaders(opts.headers || {});
@@ -358,6 +364,7 @@ export function bindHomeUi(toast) {
 }
 
 export async function bootHome(toast) {
+ syncHubTokenCookie();
  bindHomeUi(toast);
  const j = await refreshHome(toast);
  if (j?.wizardNeeded) {

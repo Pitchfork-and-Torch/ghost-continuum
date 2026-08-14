@@ -29,6 +29,7 @@ DM-Sentinel is a **defensive-only** local deception platform. This model covers 
 | Hub exposed to LAN/WAN | Binds `127.0.0.1` only by default |
 | DNS rebinding against the hub | `Host` allowlist: loopback + optional `hubAllowedHosts` / `GC_HUB_ALLOWED_HOSTS` → `421` |
 | Localhost CSRF from a random website | Mutating `/api/*` requires loopback (or declared) `Origin`; missing `Origin` still allowed for CLI |
+| Tunneled hub read / token leak | Extra hosts require `hubToken`; all `/api/*` methods check bearer or HttpOnly cookie; HTML never injects the token into JavaScript |
 | Unauthorized scope probes | Allowlist + `blockExploitOperators` |
 | Attacker escapes honeypot to host | Minimal listeners, no shell escape paths, container mirage isolated to localhost |
 | Ledger tampering | Merkle append-only chain + verify on export |
@@ -52,7 +53,7 @@ DM-Sentinel is a **defensive-only** local deception platform. This model covers 
 ## Recommendations
 
 1. Keep hub on loopback
-2. Do not add public names to `hubAllowedHosts` unless the hub is tunneled there — and then set `hubToken`
+2. Do not add public names to `hubAllowedHosts` unless the hub is tunneled there — extra hosts **require** `hubToken` (enforced on `/api/*`)
 3. Review `continuum.plugins` paths before enable
 4. Run `npm run doctor` after upgrades
 5. Export incidents via sealed `.tgz` for forensics chain of custody
