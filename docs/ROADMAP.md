@@ -44,6 +44,7 @@
 
 - [x] Printable HTML weekly home report (browser Print → PDF) alongside markdown/JSON  
 - [x] Offline Three.js vendor path (`public/vendor/three.module.js` preferred over CDN)  
+- [x] Standalone HTML sealed forensic replay + local `seal` / `verify` CLI  
 - [ ] Hardened eBPF probes (beyond `/proc/net/tcp` fallback)  
 - [ ] K8s operator (beyond Helm chart)  
 - [ ] Hosted plugin registry  

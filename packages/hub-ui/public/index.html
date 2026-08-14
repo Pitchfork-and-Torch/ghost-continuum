@@ -13,9 +13,9 @@
  <link rel="apple-touch-icon" href="/logo.png" />
  <link rel="manifest" href="/manifest.webmanifest" />
  <link rel="stylesheet" href="/fonts/fontshare/fonts.css" />
- <link rel="stylesheet" href="/assets/ui.css?v=3.5.1" />
- <link rel="stylesheet" href="/assets/ui-nexus-3.3.css?v=3.5.1" />
- <link rel="stylesheet" href="/assets/ui-nexus-3.5.css?v=3.5.1" />
+ <link rel="stylesheet" href="/assets/ui.css?v=3.5.0" />
+ <link rel="stylesheet" href="/assets/ui-nexus-3.3.css?v=3.5.0" />
+ <link rel="stylesheet" href="/assets/ui-nexus-3.5.css?v=3.5.0" />
  <!-- Three.js r160 via CDN - justified for WebGL holographic map; canvas 2D fallback if blocked -->
  <script type="importmap">
  {
@@ -45,7 +45,7 @@
  <div class="nx-title-block">
  <h1 class="nx-title">Command Nexus</h1>
  <div class="nx-meta">
- <span class="nx-version" id="nxVersion">v3.5.1</span>
+ <span class="nx-version" id="nxVersion">v3.6.0</span>
  <span class="nx-live-dot" aria-hidden="true"></span>
  <span class="nx-live">LIVE</span>
  <span class="nx-clock" id="nxClock"> - </span>
@@ -440,6 +440,7 @@
  <span class="mk-label">MERKLE SEAL</span>
  <span class="mk-hash" id="merkleRoot">local ledger - seal incidents to pin chain head</span>
  <span class="mk-ok" id="merkleStatus">INTEGRITY READY</span>
+ <a id="merkleReplay" class="mk-ok" hidden target="_blank" rel="noopener">OPEN REPLAY</a>
  </div>
  <div class="glass-panel bento-tile">
  <div class="panel-label">SEALED OPS</div>
@@ -598,7 +599,7 @@
  </div>
  </div>
 
- <script type="module" src="/assets/app.js?v=3.5.1"></script>
+ <script type="module" src="/assets/app.js?v=3.6.0"></script>
  <!-- ghost-lan-panel loaded from app.js -->
 </body>
 </html>

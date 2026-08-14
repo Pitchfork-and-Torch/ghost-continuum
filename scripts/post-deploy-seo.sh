@@ -7,7 +7,7 @@ set -uo pipefail
 BASE="${SEO_BASE:-https://ghost.jonbailey.xyz}"
 KEY="7577922ed4d3ec3df303933b78cbd0ee"
 UA="Mozilla/5.0 (compatible; ghost-continuum-seo/1.0)"
-EXPECT_VERSION="${SEO_EXPECT_VERSION:-3.5.1}"
+EXPECT_VERSION="${SEO_EXPECT_VERSION:-3.6.0}"
 
 URLS=(
   "$BASE/"

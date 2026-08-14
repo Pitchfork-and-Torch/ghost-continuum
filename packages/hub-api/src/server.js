@@ -9,12 +9,9 @@ import {
  appendEvent,
  readEvents,
  mergeEventStreams,
- sealManifest,
- buildManifest,
- exportIncidentSnapshot,
- writeIncidentBundle,
- createIncidentArchive,
 } from '../../core/src/index.js';
+import { createSealedIncident } from './seal-incident.js';
+import { verifyBundleDirectory } from '../../core/src/seal-bundle.js';
 import { polymorphBytes } from '../../core/src/polymorph/index.js';
 import { verifyPolymorphRoundtrip } from '../../core/src/polymorph/verify.js';
 import { fetchGhostLan, rotateGhostLan } from './adapters/ghost-lan.js';
@@ -59,7 +56,7 @@ import {
  startTrenchCloak,
  status as trenchStatus,
 } from '../../planes/src/trench-cloak.js';
-import { readBody, safeUiPath, sanitizeIncidentLabel, sanitizeId, hubTokenOk, rateLimit } from './safe.js';
+import { readBody, safeUiPath, sanitizeId, hubTokenOk, rateLimit } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -99,6 +96,16 @@ const ASSETS_ROOT = path.join(__dirname, '../../../assets');
 const STATUS_TTL = 2500;
 
 const exportRegistry = new Map();
+const replayRegistry = new Map();
+
+function registerSealedBundle(sealed) {
+ if (sealed?.archivePath) {
+ exportRegistry.set(path.basename(sealed.archivePath, '.tgz'), sealed.archivePath);
+ }
+ if (sealed?.id && sealed?.htmlPath) {
+ replayRegistry.set(sealed.id, sealed.htmlPath);
+ }
+}
 
 function bodyHours(body, fallback) {
  return typeof body?.hours === 'number' ? body.hours : fallback;
@@ -319,56 +326,82 @@ export function startHub(config = loadConfig()) {
  const body = await readBody(req);
  invalidatePrefix('status');
  const status = await buildStatus(config);
- const dir = exportIncidentSnapshot(sanitizeIncidentLabel(body.label));
- const events = readEvents(500);
- writeIncidentBundle(dir, {
- 'status.json': status,
- 'events.jsonl': events.map((e) => JSON.stringify(e)).join('\n'),
+ const sealed = await createSealedIncident({
+ label: body.label || 'snapshot',
+ events: readEvents(500),
+ status,
+ extraFiles: {
  'config-redacted.json': {
  hubPort: config.hubPort,
  primaryDomain: config.primaryDomain,
  demoMode: config.demoMode,
  useBuiltinValidator: config.useBuiltinValidator,
  },
+ },
+ archive: false,
  });
- const snapshotPath = path.join(dir, 'status.json');
- const manifest = sealManifest(buildManifest([{ path: snapshotPath, note: 'hub status snapshot' }]));
- appendEvent({ plane: 'ops', type: 'incident-snapshot', detail: { dir, manifestHash: manifest.manifestHash } });
- return json(res, 200, { ok: true, dir, manifest });
+ registerSealedBundle(sealed);
+ appendEvent({ plane: 'ops', type: 'incident-snapshot', detail: { dir: sealed.dir, manifestHash: sealed.manifestHash } });
+ return json(res, 200, {
+ ok: true,
+ dir: sealed.dir,
+ id: sealed.id,
+ manifest: sealed.manifest,
+ manifestHash: sealed.manifestHash,
+ merkleRoot: sealed.merkleRoot,
+ replayUrl: sealed.replayUrl,
+ });
  }
 
  if (url.pathname === '/api/incident/export' && req.method === 'POST') {
  const body = await readBody(req);
  invalidatePrefix('status');
  const status = await buildStatus(config);
- const dir = exportIncidentSnapshot(sanitizeIncidentLabel(body.label || 'export'));
- const events = readEvents(1000);
- const legalPath = path.join(__dirname, '../../../LEGAL.md');
- writeIncidentBundle(dir, {
- 'status.json': status,
- 'events.jsonl': events.map((e) => JSON.stringify(e)).join('\n'),
- 'MANIFEST.json': sealManifest(
- buildManifest([
- { path: path.join(dir, 'status.json'), note: 'status' },
- { path: path.join(dir, 'events.jsonl'), note: 'events' },
- ]),
- ),
- 'LEGAL.md': fs.existsSync(legalPath) ? fs.readFileSync(legalPath, 'utf8') : '',
- });
  try {
- const archivePath = await createIncidentArchive(dir);
- const id = path.basename(archivePath, '.tgz');
- exportRegistry.set(id, archivePath);
- appendEvent({ plane: 'ops', type: 'incident-export', detail: { id, archivePath } });
+ const sealed = await createSealedIncident({
+ label: body.label || 'export',
+ events: readEvents(1000),
+ status,
+ archive: true,
+ });
+ registerSealedBundle(sealed);
+ appendEvent({
+ plane: 'ops',
+ type: 'incident-export',
+ detail: { id: sealed.id, archivePath: sealed.archivePath, manifestHash: sealed.manifestHash },
+ });
  return json(res, 200, {
  ok: true,
- id,
- downloadUrl: `/api/incident/download/${id}`,
- archivePath,
+ id: sealed.id,
+ downloadUrl: sealed.downloadUrl,
+ replayUrl: sealed.replayUrl,
+ archivePath: sealed.archivePath,
+ dir: sealed.dir,
+ manifestHash: sealed.manifestHash,
+ merkleRoot: sealed.merkleRoot,
+ htmlPath: sealed.htmlPath,
  });
  } catch (e) {
- return json(res, 500, { ok: false, error: e.message, dir });
+ return json(res, 500, { ok: false, error: e.message });
  }
+ }
+
+ if (url.pathname.startsWith('/api/incident/replay/') && req.method === 'GET') {
+ const id = sanitizeId(url.pathname.split('/').pop());
+ const htmlPath = id ? replayRegistry.get(id) : null;
+ if (!htmlPath || !fs.existsSync(htmlPath)) {
+ res.writeHead(404);
+ return res.end('Not found');
+ }
+ res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+ return res.end(fs.readFileSync(htmlPath));
+ }
+
+ if (url.pathname.startsWith('/api/incident/verify/') && req.method === 'GET') {
+ const id = sanitizeId(url.pathname.split('/').pop());
+ const htmlPath = id ? replayRegistry.get(id) : null;
+ if (!htmlPath) return json(res, 404, { ok: false, error: 'Unknown sealed bundle' });
+ return json(res, 200, verifyBundleDirectory(path.dirname(htmlPath)));
  }
 
  if (url.pathname.startsWith('/api/incident/download/') && req.method === 'GET') {
@@ -500,14 +533,14 @@ export function startHub(config = loadConfig()) {
  // Live mode: always build from real events (may be sparse / quiet immune system)
  if (!feed.length) {
  return {
- ok: true,
-      version: '3.5.1',
- live: true,
- demo: false,
- morph: morphId,
- nodes: [
- {
- id: 'immune-core',
+      ok: true,
+      version: '3.6.0',
+      live: true,
+      demo: false,
+      morph: morphId,
+      nodes: [
+        {
+          id: 'immune-core',
  label: 'NEXUS-CORE',
  state: 'guardian',
  color: '#69f0ae',
@@ -709,6 +742,9 @@ export function startHub(config = loadConfig()) {
  if (result.seal?.downloadId && result.seal?.archivePath) {
  exportRegistry.set(result.seal.downloadId, result.seal.archivePath);
  }
+ if (result.seal?.id && result.seal?.htmlPath) {
+ replayRegistry.set(result.seal.id, result.seal.htmlPath);
+ }
  if (!result.aborted) {
  sendNotification(
  'responseComplete',
@@ -875,12 +911,12 @@ export function startHub(config = loadConfig()) {
  status.continuum?.planes?.filter((p) => p.armed).length
  || status.armedCount
  || (status.demo ? 12 : 0);
- return json(res, 200, {
- ok: true,
-      version: '3.5.1',
- codename: 'Crystal Membrane',
- live: true,
- sseClients: clientCount(),
+    return json(res, 200, {
+      ok: true,
+      version: '3.6.0',
+      codename: 'Crystal Membrane',
+      live: true,
+      sseClients: clientCount(),
  morph: status.continuum?.morph || { id: config.continuum?.morph || 'research' },
  efficacy: {
  score,

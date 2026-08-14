@@ -1,7 +1,7 @@
 {
   "name": "ghost-continuum",
-  "version": "3.5.1",
-  "description": "Living Digital Immune System - v3.5.1 Crystal Membrane. Hardened hub write path (O(1) Merkle ledger, flood-resistant control plane), command palette, time-window queries, keyboard cockpit, Command Nexus, Home Shield, Merkle forensics. Zero core deps.",
+  "version": "3.6.0",
+  "description": "Living Digital Immune System - v3.6.0 Crystal Seal. Sealed HTML forensic replay, local seal/verify CLI, hardened hub write path (O(1) Merkle ledger, flood-resistant control plane), Command Nexus, Home Shield, Merkle forensics. Zero core deps.",
   "type": "module",
   "bin": {
     "ghost-continuum": "./bin/ghost-continuum.js"
@@ -23,7 +23,7 @@
     "install:unix": "sh bin/install.sh",
     "tray": "powershell -ExecutionPolicy Bypass -File apps/desktop/tray.ps1",
     "watch": "node apps/desktop/watch.js",
-    "test": "node test/verify.js && node test/nl-query.js && node test/command-palette.js && node test/genome.js && node test/continuum.js && node test/metrics.js && node test/phases.js && node test/integration.js && node test/stack.js && node test/edge-worker.js && node test/plane-toggles.js && node test/trench-cloak.js && node test/omega-v2.js && node test/threat-response.js && node test/home-suite.js && node test/hardening.js",
+    "test": "node test/verify.js && node test/nl-query.js && node test/command-palette.js && node test/genome.js && node test/continuum.js && node test/metrics.js && node test/phases.js && node test/integration.js && node test/stack.js && node test/edge-worker.js && node test/plane-toggles.js && node test/trench-cloak.js && node test/omega-v2.js && node test/threat-response.js && node test/home-suite.js && node test/seal-bundle.js && node test/hardening.js",
     "demo:campaign": "node -e \"import('./packages/hub-api/src/demo-campaign.js').then(m=>console.log(JSON.stringify(m.injectDemoCampaign({persist:false}),null,2)))\"",
     "deploy:edge:jonbailey": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-edge.ps1",
     "deploy:hub:pages": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-pages.ps1",

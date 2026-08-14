@@ -1,14 +1,27 @@
 # Changelog
 
-## [3.5.1] - 2026-08-14 - Crystal Membrane (hardening)
+## [3.6.0] - 2026-08-14 - Crystal Seal
 
-### Hub write path + forensics
-- Merkle ledger now tracks its entry count incrementally instead of re-reading the entire chain on every append. Event persistence is O(1) per event again; previously a growing chain made writes O(n) (and campaign/threat bursts O(n²)), stalling the hub under sustained load.
+### Sealed forensic replay
+- Incident export now hashes evidence **after** files are written (portable relative paths in `MANIFEST.json`).
+- Each seal includes a standalone `replay.html` — open offline, print to PDF, step events with j/k.
+- Local CLI: `ghost-continuum seal [label]` and `ghost-continuum verify [dir|.tgz]`.
+- Hub returns `manifestHash` + `replayUrl`; Forensics strip offers OPEN REPLAY.
+- Threat-response SEAL uses the same bundle path.
+
+### Hub write-path hardening (first cut as v3.5.1)
+- Merkle ledger tracks its entry count incrementally instead of re-reading the entire chain on every append — event persistence is O(1) per event again (was O(n)/append, O(n²) under campaign/threat bursts, stalling the hub under sustained load).
 - `verifyLedger` anchors on the first entry of its verification window, so chains longer than the window (default 5000) verify correctly and terminate at the stored root instead of falsely reporting a chain break.
-- Mutating `POST /api/*` routes are now protected by a per-IP fixed-window rate limit (default 120 requests / 10s, `429` with `Retry-After` when exceeded). A write flood can no longer monopolize the serialized persistence path; the read path stays responsive. Tune with `writeRateLimitMax` / `writeRateLimitWindowMs` in the hub config (set max to `0` to disable).
+- Mutating `POST /api/*` routes are protected by a per-IP fixed-window rate limit (default 120/10s, `429` with `Retry-After`; tune with `writeRateLimitMax` / `writeRateLimitWindowMs`, `0` disables). A write flood can no longer monopolize the serialized persistence path; the read path stays responsive.
+
+### Release + ops
+- `.github/workflows/release.yml` auto-publishes a GitHub Release from the matching CHANGELOG section on every `vX.Y.Z` tag push.
+- Portable `scripts/deploy-site.sh` (`npm run deploy:site:unix`) and `scripts/post-deploy-seo.sh` (`npm run deploy:seo:unix`) mirror the Windows-only deploy/SEO scripts so the site can be published from Linux/macOS/CI.
+- Release checklist for contributors: `docs/RELEASING.md`.
 
 ### Tests
-- `test/hardening.js`: covers the write-side rate limiter (per-IP window, reset, disable, `x-forwarded-for`) and the ledger counter + windowed verification.
+- `test/seal-bundle.js` (hash-after-write, tamper, HTML escape, CLI verify).
+- `test/hardening.js` (write-side rate limiter + ledger counter/windowed verification).
 
 ### Philosophy (unchanged)
 - Defensive-only · local-first · zero core npm dependencies · authorized networks only · MIT · no eval.

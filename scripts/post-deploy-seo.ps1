@@ -39,7 +39,7 @@ try {
   $checks = @(
     @{ n = "og:image share-card.jpg"; p = 'share-card.jpg' },
     @{ n = "twitter:card large"; p = 'twitter:card" content="summary_large_image"' },
-    @{ n = "softwareVersion 3.5.1"; p = '3.5.1' },
+    @{ n = "softwareVersion 3.6.0"; p = '3.6.0' },
     @{ n = "Crystal Membrane"; p = 'Crystal Membrane' },
     @{ n = "llms.txt link"; p = 'llms.txt' },
     @{ n = "canonical"; p = 'rel="canonical"' }

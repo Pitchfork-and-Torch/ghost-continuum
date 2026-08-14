@@ -86,7 +86,7 @@ async function main() {
   const { url } = await startHub(config);
   console.log(`  Command hub   ${url}`);
   console.log(`  Data dir      ${CONFIG_PATH.replace(/config\.json$/i, '')}`);
-  console.log(`  Version       3.5.1 Crystal Membrane`);
+  console.log(`  Version       3.6.0 Crystal Seal`);
   if (process.env.GC_PORTABLE === '1') {
     console.log('  Mode          portable package (bundled Node)');
   }

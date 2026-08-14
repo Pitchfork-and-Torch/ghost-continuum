@@ -1,4 +1,4 @@
-# Ghost Continuum v3.5.1 - Crystal Membrane
+# Ghost Continuum v3.6.0 - Crystal Seal
 
 <p align="center">
  <img src="assets/ghost-continuum-logo.png" alt="Ghost Continuum" width="320" />
@@ -6,7 +6,7 @@
 
 <p align="center">
  <a href="https://ghost.jonbailey.xyz/"><img src="https://img.shields.io/badge/live-ghost.jonbailey.xyz-5ec8c0?style=flat-square" alt="live" /></a>
- <img src="https://img.shields.io/badge/version-3.5.1-5ec8c0?style=flat-square" alt="version" />
+ <img src="https://img.shields.io/badge/version-3.6.0-5ec8c0?style=flat-square" alt="version" />
  <img src="https://img.shields.io/badge/design-Crystal%20Membrane-8eb8c8?style=flat-square" alt="design" />
  <img src="https://img.shields.io/badge/node-%3E%3D18-5ec8c0?style=flat-square" alt="node" />
  <img src="https://img.shields.io/badge/core%20deps-zero-6bc4a0?style=flat-square" alt="zero deps" />
@@ -16,7 +16,7 @@
 
 > *The immune system that watches back.*
 
-**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.5.1 Crystal Membrane** hardens the hub write path - an O(1) tamper-evident Merkle ledger and a flood-resistant control plane - on top of the v3.5.0 Command Nexus (command palette, time-window queries, keyboard cockpit), without changing defensive scope or zero-core-deps discipline.
+**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.6.0 Crystal Seal** adds a standalone HTML forensic replay and a local `seal` / `verify` CLI so Merkle-backed incident bundles can be opened offline and checked later — without changing defensive scope or zero-core-deps discipline.
 
 ```
 listen · breed · morph · remember · seal · evolve · contain
@@ -36,14 +36,13 @@ npm start
 
 ---
 
-## What's new in v3.5.1 Crystal Membrane
+## What's new in v3.6.0 Crystal Seal
 
 | Pillar | Capability |
 |--------|------------|
-| **O(1) Merkle ledger** | Incremental entry counting keeps event persistence constant-time as the chain grows (was O(n)/append) |
-| **Robust verification** | `verifyLedger` anchors on its window, so long chains verify cleanly instead of false "chain break" |
-| **Flood-resistant hub** | Per-IP rate limit on mutating `POST /api/*` (default 120/10s → `429`); read path stays responsive under write floods |
-| **Tests** | `test/hardening.js` covers the rate limiter and ledger counter/verify |
+| **Sealed replay** | Each SEAL writes `replay.html` — open offline, print to PDF, step with j/k |
+| **Integrity** | Evidence hashed after write; portable `MANIFEST.json`; tamper fails verify |
+| **CLI** | `ghost-continuum seal [label]` · `ghost-continuum verify [dir\|.tgz]` |
 
 ## What's new in v3.5.0 Crystal Membrane
 
@@ -112,12 +111,12 @@ Architecture diagram: [landing/infographic.svg](landing/infographic.svg)
 
 ## First 5 minutes
 
-1. `npm start` â†’ open **http://127.0.0.1:30000**
+1. `npm start` → open **http://127.0.0.1:30000**
 2. Click **DEMO** - inject a sealed synthetic campaign
 3. Explore the fabric map · switch **Sentinel Morphs**
 4. Scrub the **Forensic Time Machine**
 5. Open **Home Shield** if this is a home or lab network
-6. **SEAL INCIDENT** when you want a Merkle-backed export
+6. **SEAL INCIDENT** (or `ghost-continuum seal lab`) — open `replay.html`, then `ghost-continuum verify` on the folder
 
 ---
 

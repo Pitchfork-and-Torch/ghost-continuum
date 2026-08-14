@@ -1,12 +1,12 @@
 /* Ghost Continuum PWA - cache shell only; never cache API/events */
-const CACHE = 'gc-nexus-v3.5.1-shell';
+const CACHE = 'gc-nexus-v3.6.0-shell';
 const SHELL = [
   '/',
   '/index.html',
-  '/assets/ui.css?v=3.5.1',
-  '/assets/ui-nexus-3.3.css?v=3.5.1',
-  '/assets/ui-nexus-3.5.css?v=3.5.1',
-  '/assets/app.js?v=3.5.1',
+  '/assets/ui.css?v=3.5.0',
+  '/assets/ui-nexus-3.3.css?v=3.5.0',
+  '/assets/ui-nexus-3.5.css?v=3.5.0',
+  '/assets/app.js?v=3.6.0',
   '/assets/simple-help.js',
   '/assets/ghost-lan-panel.js',
   '/assets/holo-map.js',
