@@ -248,4 +248,4 @@ cd ghost-continuum
 powershell -ExecutionPolicy Bypass -File deploy\jonbailey\scripts\start-production.ps1
 ```
 
-Mutating `/api/*` routes require `hubToken` / `GC_HUB_TOKEN` as a second layer after Access login.
+Every `/api/*` route (GET included) requires `hubToken` / `GC_HUB_TOKEN` as a second layer after Access login. The hub will not inject the bearer into tunneled HTML — set `localStorage.dm-hub-token` after Access login (see above). Extra hosts without a token receive `401`.

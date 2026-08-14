@@ -95,7 +95,7 @@ async function cmdDoctor() {
   }
 
   if (extraHosts.length && !hubTokenSet) {
-    console.log('\n  Tip: extra hubAllowedHosts without hubToken — set GC_HUB_TOKEN for the tunnel');
+    console.log('\n  Tip: extra hubAllowedHosts require hubToken — set GC_HUB_TOKEN or the hub will 401 /api on that host');
   }
   if (!lan.armed) {
     console.log('\n  Tip: npm start — starts Ghost LAN + local edge + hub');

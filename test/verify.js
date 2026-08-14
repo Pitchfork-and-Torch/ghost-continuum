@@ -8,7 +8,19 @@ import { enrichConfig, getPrimaryDomain } from '../packages/core/src/config.js';
 import { BUNDLED_GHOST_LAN } from '../packages/core/src/paths.js';
 import fs from 'fs';
 import { cached, invalidatePrefix } from '../packages/hub-api/src/cache.js';
-import { hubTokenOk, parseHostHeader, allowedHubHosts, extraHubHosts, hubHostOk, hubOriginOk } from '../packages/hub-api/src/safe.js';
+import {
+  hubTokenOk,
+  parseHostHeader,
+  allowedHubHosts,
+  extraHubHosts,
+  hubHostOk,
+  hubOriginOk,
+  hubHostIsLoopback,
+  hubApiAuthOk,
+  readCookie,
+  hubTokenCookieHeader,
+  HUB_TOKEN_COOKIE,
+} from '../packages/hub-api/src/safe.js';
 import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters/cell-wire.js';
 import { listBuiltinProbes } from '../packages/hub-api/src/adapters/builtin-validator.js';
 import { listScopeProbes } from '../packages/hub-api/src/adapters/scope-cell.js';
@@ -62,6 +74,19 @@ assert.strictEqual(hubTokenOk({ headers: {} }, {}), true);
 assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer secret' } }, { hubToken: 'secret' }), true);
 assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer wrong' } }, { hubToken: 'secret' }), false);
 assert.strictEqual(hubTokenOk({ headers: {} }, { hubToken: 'secret' }), false);
+assert.strictEqual(hubTokenOk({ headers: { cookie: `${HUB_TOKEN_COOKIE}=secret` } }, { hubToken: 'secret' }), true);
+assert.strictEqual(hubTokenOk({ headers: { cookie: `${HUB_TOKEN_COOKIE}=wrong` } }, { hubToken: 'secret' }), false);
+assert.strictEqual(readCookie({ headers: { cookie: 'a=1; gc-hub-token=secret' } }, HUB_TOKEN_COOKIE), 'secret');
+assert.ok(hubTokenCookieHeader('secret').includes('HttpOnly'));
+assert.ok(hubTokenCookieHeader('secret').includes('SameSite=Strict'));
+assert.ok(!hubTokenCookieHeader('secret').includes('__GC_HUB_TOKEN'));
+
+assert.strictEqual(hubHostIsLoopback({ headers: { host: '127.0.0.1:30000' } }), true);
+assert.strictEqual(hubHostIsLoopback({ headers: { host: 'ghost.jonbailey.xyz' } }), false);
+assert.strictEqual(hubApiAuthOk({ headers: { host: '127.0.0.1:30000' } }, {}), true);
+assert.strictEqual(hubApiAuthOk({ headers: { host: 'ghost.jonbailey.xyz' } }, { hubAllowedHosts: ['ghost.jonbailey.xyz'] }), false);
+assert.strictEqual(hubApiAuthOk({ headers: { host: 'ghost.jonbailey.xyz', authorization: 'Bearer secret' } }, { hubToken: 'secret', hubAllowedHosts: ['ghost.jonbailey.xyz'] }), true);
+assert.strictEqual(hubApiAuthOk({ headers: { host: '127.0.0.1:30000' } }, { hubToken: 'secret' }), false);
 
 assert.strictEqual(parseHostHeader('127.0.0.1:30000'), '127.0.0.1');
 assert.strictEqual(parseHostHeader('localhost'), 'localhost');
