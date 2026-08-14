@@ -81,7 +81,8 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'gc-seal-test-'));
   assert.ok(sealed.ok);
   assert.ok(fs.existsSync(path.join(dir, 'MANIFEST.json')));
   assert.ok(fs.existsSync(sealed.htmlPath));
-  assert.ok(fs.readFileSync(sealed.htmlPath, 'utf8').includes('Sealed forensic replay'));
+  const html = fs.readFileSync(sealed.htmlPath, 'utf8');
+  assert.ok(/sealed forensic replay/i.test(html), 'replay.html names the product');
   const verified = await verifySealedTarget(dir);
   assert.equal(verified.ok, true, JSON.stringify(verified.mismatches));
   if (sealed.archivePath && fs.existsSync(sealed.archivePath)) {
