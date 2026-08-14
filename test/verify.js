@@ -8,6 +8,7 @@ import { enrichConfig, getPrimaryDomain } from '../packages/core/src/config.js';
 import { BUNDLED_GHOST_LAN } from '../packages/core/src/paths.js';
 import fs from 'fs';
 import { cached, invalidatePrefix } from '../packages/hub-api/src/cache.js';
+import { hubTokenOk } from '../packages/hub-api/src/safe.js';
 import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters/cell-wire.js';
 import { listBuiltinProbes } from '../packages/hub-api/src/adapters/builtin-validator.js';
 import { listScopeProbes } from '../packages/hub-api/src/adapters/scope-cell.js';
@@ -56,6 +57,11 @@ assert.strictEqual(v1, 42);
 assert.strictEqual(v2, 42);
 assert.strictEqual(cacheHits, 1);
 invalidatePrefix('t');
+
+assert.strictEqual(hubTokenOk({ headers: {} }, {}), true);
+assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer secret' } }, { hubToken: 'secret' }), true);
+assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer wrong' } }, { hubToken: 'secret' }), false);
+assert.strictEqual(hubTokenOk({ headers: {} }, { hubToken: 'secret' }), false);
 
 const ep = cellEndpoints(3333);
 assert.ok(ep.ping.includes('/api/health'));

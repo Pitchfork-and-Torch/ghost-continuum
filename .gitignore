@@ -1,55 +1,52 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
 node_modules/
-.DS_Store
-*.log
-.env
-.env.*
-!.env.example
-.dev.vars
+.pnp
+.pnp.js
 
-# Local runtime (never commit operator data)
-.dm-sentinel-local/
-.ghost-continuum-local/
-deploy/jonbailey/site-public/
-
-# Build / deploy artifacts
+# Build / cache
 dist/
 build/
-target/
-*.tgz
-.wrangler/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
 
-# Test / coverage
+# Logs & coverage
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 coverage/
 .nyc_output/
 
-# IDE
-.vscode/
-.idea/
-Thumbs.db
-*.pid
-
-# Runtime data if created inside repo
-incident-snapshots/
-*.jsonl
-
-# Operator / production secrets (never commit)
-deploy/jonbailey/jonbailey-production.json
-deploy/jonbailey/**/*-secrets*
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
 *.pem
-*.key
 
-# Local marketing render caches / large video worktrees
-scripts/video-build/
-assets/video/
-docs/archives/
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Personal operator portrait (local only — never push face photos)
-packages/hub-ui/public/assets/operator.jpg
-packages/hub-ui/public/assets/operator.jpeg
-packages/hub-ui/public/assets/operator.png
-packages/hub-ui/public/assets/jonnyb.***/.wrangler/
-**/wrangler-account.json
-_stack_out.txt
-_hub_err.txt
-_hub_out.txt
-_stack_err.txt
+# Local Ghost Continuum runtime
+data/
+*.db
+*.sqlite
+.cache/
+tmp/
+
+# Cloudflare / wrangler local
+.wrangler/
+.dev.vars
+
+# Test artifacts
+playwright-report/
+test-results/
