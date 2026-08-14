@@ -74,10 +74,10 @@ try {
 }
 
 Write-Host "`n=== Share card Content-Type (critical for X) ===" -ForegroundColor Cyan
+$CardUrl = if ($env:SEO_CARD_URL) { $env:SEO_CARD_URL } else { "$Base/share-card.jpg?v=$ExpectVersion" }
 foreach ($ua in @("Mozilla/5.0", "Twitterbot/1.0", "facebookexternalhit/1.1")) {
   try {
-    $tmp = Join-Path $env:TEMP "share-card-check.jpg"
-    $hdr = & curl.exe -sI "https://ghost.jonbailey.xyz/share-card.jpg" -A $ua 2>$null | Out-String
+    $hdr = & curl.exe -sI $CardUrl -A $ua 2>$null | Out-String
     $ct = if ($hdr -match '(?im)^Content-Type:\s*(.+)$') { $Matches[1].Trim() } else { '?' }
     Write-Host ("  UA={0}  CT={1}" -f $ua, $ct)
     if ($ct -notmatch 'image/') {

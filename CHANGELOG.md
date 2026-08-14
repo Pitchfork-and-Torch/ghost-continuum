@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell versioned tweet-card URL
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` tweet-card gate requests `share-card.jpg?v=` the expected version (or `SEO_CARD_URL`). Matches the Unix script. Landing untouched.
+
 ## [Unreleased] - PowerShell SEO live dataset.version
 
 ### Public site ops
