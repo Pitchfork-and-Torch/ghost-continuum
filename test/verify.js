@@ -20,6 +20,7 @@ import {
   readCookie,
   hubTokenCookieHeader,
   HUB_TOKEN_COOKIE,
+  hubSecurityHeaders,
 } from '../packages/hub-api/src/safe.js';
 import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters/cell-wire.js';
 import { listBuiltinProbes } from '../packages/hub-api/src/adapters/builtin-validator.js';
@@ -106,6 +107,13 @@ assert.strictEqual(hubOriginOk({ headers: {} }, {}), true);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'http://127.0.0.1:30000' } }, {}), true);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'https://evil.example' } }, {}), false);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'null' } }, {}), false);
+
+const sec = hubSecurityHeaders();
+assert.strictEqual(sec['X-Content-Type-Options'], 'nosniff');
+assert.strictEqual(sec['X-Frame-Options'], 'DENY');
+assert.strictEqual(sec['Content-Security-Policy'], "frame-ancestors 'none'");
+assert.strictEqual(sec['Referrer-Policy'], 'no-referrer');
+assert.ok(!String(sec['Content-Security-Policy']).includes('script-src'), 'CSP must stay framing-only');
 
 assert.strictEqual(typeof runHubWatchJobs, 'function');
 assert.strictEqual(typeof resetHubWatchJobs, 'function');

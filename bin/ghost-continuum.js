@@ -82,6 +82,7 @@ async function cmdDoctor() {
   const trustProxy = hubTrustProxy(config);
   checks.push(['hub host lock (loopback)', true]);
   checks.push([trustProxy ? 'hubTrustProxy on (XFF first hop if IP)' : 'hub rate-limit uses socket IP', true]);
+  checks.push(['hub security headers (nosniff / DENY / frame-ancestors)', true]);
   if (extraHosts.length) {
     checks.push(['hubAllowedHosts declared', extraHosts.length > 0]);
     checks.push(['hub token set for extra hosts', hubTokenSet]);

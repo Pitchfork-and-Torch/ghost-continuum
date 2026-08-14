@@ -64,6 +64,8 @@ The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the ext
 
 Write-path rate limits key on the TCP socket address. A browser tab can send any `X-Forwarded-For`, so that header is ignored unless you opt in with `"hubTrustProxy": true` or `GC_HUB_TRUST_PROXY=1` (only behind a proxy you control). Even then the first hop must be a real IP; garbage falls back to the socket.
 
+Every Command Nexus response also sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, and `Referrer-Policy: no-referrer`. The CSP is framing-only so the local UI scripts still run.
+
 ## Deployment rules
 
 1. Do not expose honeypot ports (8080, 8443, 5901, rotating 40xxx) to the public internet.

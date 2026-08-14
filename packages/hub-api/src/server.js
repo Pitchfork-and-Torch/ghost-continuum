@@ -69,6 +69,7 @@ import {
   configuredHubToken,
   hubTokenCookieHeader,
   rateLimit,
+  applyHubSecurityHeaders,
 } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
@@ -205,6 +206,7 @@ export function startHub(config = loadConfig()) {
     : 15_000;
 
   const server = http.createServer(async (req, res) => {
+ applyHubSecurityHeaders(res);
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
     if (!hubHostOk(req, config)) {

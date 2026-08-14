@@ -4,6 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { hubSecurityHeaders } from './safe.js';
 
 const bus = new EventEmitter();
 bus.setMaxListeners(100);
@@ -30,6 +31,7 @@ export function publishEvent(type, payload = {}) {
 
 export function sseHandler(req, res) {
   res.writeHead(200, {
+    ...hubSecurityHeaders(),
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache, no-transform',
     Connection: 'keep-alive',

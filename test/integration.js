@@ -55,11 +55,25 @@ try {
     http.get(`http://127.0.0.1:${port}/`, (res) => {
       let data = '';
       res.on('data', (c) => { data += c; });
-      res.on('end', () => resolve({ status: res.statusCode, body: data }));
+      res.on('end', () => resolve({ status: res.statusCode, body: data, headers: res.headers }));
     }).on('error', reject);
   });
   assert.strictEqual(home.status, 200);
   assert.ok(home.body.includes('Ghost Continuum'));
+  assert.strictEqual(home.headers['x-content-type-options'], 'nosniff');
+  assert.strictEqual(home.headers['x-frame-options'], 'DENY');
+  assert.strictEqual(home.headers['content-security-policy'], "frame-ancestors 'none'");
+  assert.strictEqual(home.headers['referrer-policy'], 'no-referrer');
+
+  const statusHeaders = await new Promise((resolve, reject) => {
+    http.get(`http://127.0.0.1:${port}/api/status`, (res) => {
+      let data = '';
+      res.on('data', (c) => { data += c; });
+      res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: JSON.parse(data) }));
+    }).on('error', reject);
+  });
+  assert.strictEqual(statusHeaders.headers['x-content-type-options'], 'nosniff');
+  assert.strictEqual(statusHeaders.headers['x-frame-options'], 'DENY');
 
   const status = await get('/api/status');
   assert.strictEqual(status.status, 200);
