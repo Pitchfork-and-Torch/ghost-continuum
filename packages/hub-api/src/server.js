@@ -79,13 +79,13 @@ import {
  isDemoEvent,
 } from './demo-campaign.js';
 import { assessThreats, executeThreatResponse, threatWatch } from './threat-response.js';
+import { runHubWatchJobs } from './watch-jobs.js';
 import {
  getHomeStatus,
  listProfiles,
  applyProfile,
  loadHome,
  updateHomeSettings,
- tickQuietHours,
  buildShieldCard,
 } from './home-shield.js';
 import {
@@ -202,6 +202,11 @@ export function startHub(config = loadConfig()) {
   // Write-side rate limit for mutating /api routes. Set writeRateLimitMax to 0 to disable.
   const writeRlMax = Number.isFinite(config.writeRateLimitMax) ? config.writeRateLimitMax : 120;
   const writeRlWindowMs = Number.isFinite(config.writeRateLimitWindowMs) ? config.writeRateLimitWindowMs : 10_000;
+  // Quiet-hours / notify jobs used to ride on GET /api/threat/watch (CSRF-able).
+  // 0 disables (tests). Default 15s.
+  const watchMs = Number.isFinite(Number(config.hubWatchIntervalMs))
+    ? Number(config.hubWatchIntervalMs)
+    : 15_000;
 
   const server = http.createServer(async (req, res) => {
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
@@ -719,29 +724,8 @@ export function startHub(config = loadConfig()) {
 
  // ── Real threat response (defensive-only playbook) ─────
  if (url.pathname === '/api/threat/watch' && req.method === 'GET') {
- // Quiet-hours morph tick (lightweight)
- try {
- const qh = tickQuietHours(config, loadHome());
- if (qh.changed) {
- Object.assign(config, enrichConfig(loadConfig()));
- publishEvent('morph-switch', { morph: qh.morph, reason: qh.reason });
- }
- } catch {
- /* */
- }
- const w = threatWatch();
- // Throttle threat push notifications (max once / 15 min per top IP)
- if (w.realThreat) {
- const key = `threat-notify:${w.topIp}:${w.topScore}`;
- const now = Date.now();
- if (!globalThis.__gcThreatNotify) globalThis.__gcThreatNotify = new Map();
- const last = globalThis.__gcThreatNotify.get(key) || 0;
- if (now - last > 15 * 60 * 1000) {
- globalThis.__gcThreatNotify.set(key, now);
- sendNotification('realThreat', `Real threat: ${w.topIp || 'unknown'} score ${w.topScore}`, w).catch(() => {});
- }
- }
- return json(res, 200, w);
+ // Read-only. Quiet-hours + notify run on the hub timer, not this GET.
+ return json(res, 200, threatWatch());
  }
 
  if (url.pathname === '/api/threat/assess' && req.method === 'GET') {
@@ -1195,6 +1179,21 @@ export function startHub(config = loadConfig()) {
 
  notFound(res);
  });
+
+  let watchTimer = null;
+  if (watchMs > 0) {
+    watchTimer = setInterval(() => {
+      try {
+        runHubWatchJobs(config);
+      } catch {
+        /* */
+      }
+    }, watchMs);
+    watchTimer.unref();
+  }
+  server.on('close', () => {
+    if (watchTimer) clearInterval(watchTimer);
+  });
 
  return new Promise((resolve) => {
  server.listen(port, '127.0.0.1', () => resolve({ server, port, url: `http://127.0.0.1:${port}` }));

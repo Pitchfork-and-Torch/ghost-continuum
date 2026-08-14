@@ -6,6 +6,12 @@
 - Command Nexus responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and `Cross-Origin-Resource-Policy: same-origin` (HTML, JSON, assets, SSE, 404s).
 - Stops a random site from iframing `127.0.0.1:30000` and clickjacking SEAL / RESPOND. No HSTS on loopback HTTP; CSP left unset so WebGL/CDN still works.
 
+## [Unreleased] - Hub safe GET /api/threat/watch
+
+### Control-plane hygiene
+- `GET /api/threat/watch` is read-only. Quiet-hours morph ticks and threat notifications no longer run on GET (a foreign tab can fire a no-`Origin` GET via `<img>`, which bypasses the mutating-route CSRF lock).
+- Those jobs run on a hub timer instead (`hubWatchIntervalMs`, default 15s, `0` disables). No tokens in HTML. Landing untouched.
+
 ## [Unreleased] - Hub read-path lock
 
 ### Control-plane hygiene
