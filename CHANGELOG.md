@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - Hub bearer hash-then-compare
+
+### Control-plane hygiene
+- Hub token compare SHA-256s both sides, then `timingSafeEqual` on the 32-byte digests. A length mismatch no longer short-circuits.
+- Missing cookie vs wrong cookie takes the same compare path. Landing untouched.
+
 ## [Unreleased] - Hub security headers
 
 ### Control-plane hygiene

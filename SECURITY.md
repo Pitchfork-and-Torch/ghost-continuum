@@ -26,7 +26,7 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Target allowlist validation before probes
 - Exploit operator roles blocked at the hub
 - Hub API is loopback-only
-- Optional hub bearer token compared with constant-time equality when set
+- Optional hub bearer token compared with SHA-256-then-`timingSafeEqual` (no length short-circuit) when set
 - Hub **Host** allowlist (loopback by default) blocks DNS rebinding
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
 - Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token

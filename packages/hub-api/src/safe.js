@@ -62,10 +62,13 @@ export function configuredHubToken(config = {}) {
   return config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN || '';
 }
 
-function timingSafeStringEqual(a, b) {
-  const left = Buffer.from(String(a));
-  const right = Buffer.from(String(b));
-  if (left.length !== right.length) return false;
+/**
+ * Compare secrets without leaking length. SHA-256 both sides first so
+ * timingSafeEqual always runs on 32-byte digests (no length short-circuit).
+ */
+export function timingSafeStringEqual(a, b) {
+  const left = crypto.createHash('sha256').update(String(a), 'utf8').digest();
+  const right = crypto.createHash('sha256').update(String(b), 'utf8').digest();
   return crypto.timingSafeEqual(left, right);
 }
 
@@ -97,7 +100,7 @@ export function hubTokenOk(req, config) {
   const auth = req.headers.authorization || '';
   if (timingSafeStringEqual(auth, `Bearer ${token}`)) return true;
   const cookie = readCookie(req, HUB_TOKEN_COOKIE);
-  return cookie.length > 0 && timingSafeStringEqual(cookie, token);
+  return timingSafeStringEqual(cookie, token);
 }
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
