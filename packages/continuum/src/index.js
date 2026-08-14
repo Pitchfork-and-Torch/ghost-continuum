@@ -4,6 +4,7 @@ export { computeEfficacy, engagementHeatmap, computeReadiness, mergeLivePlaneSta
 export { buildContinuumStatus, continuumTick, probeContinuumFeatures } from './nexus.js';
 export { evaluateTriggers } from './triggers.js';
 export { buildSessionTimeline, saveReplaySession, listReplaySessions, loadReplaySession, replayAtStep } from './time-machine.js';
+export { renderSealedReplayHtml, sanitizeSealedEvent } from './sealed-replay.js';
 export {
   buildHolographicScene,
   omegaDemoScene,

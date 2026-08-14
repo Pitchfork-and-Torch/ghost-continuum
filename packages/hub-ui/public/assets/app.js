@@ -21,7 +21,7 @@ import {
 import { createCommandPalette } from './command-palette.js';
 
 const $ = (id) => document.getElementById(id);
-const VERSION = '3.5.0';
+const VERSION = '3.6.0';
 let ghostLanPanel = null;
 let currentView = 'overview';
 let commandPalette = null;
@@ -1364,10 +1364,15 @@ function runPaletteCommand(id) {
  });
  const j = await res.json();
  if (j.ok) {
- const root = j.merkleRoot || j.root || j.hash || j.id || 'sealed';
+ const root = j.manifestHash || j.merkleRoot || j.root || j.hash || j.id || 'sealed';
  const short = String(root).length > 48 ? `${String(root).slice(0, 20)}...${String(root).slice(-12)}` : String(root);
  if ($('merkleRoot')) $('merkleRoot').textContent = short;
  if ($('merkleStatus')) $('merkleStatus').textContent = 'CHAIN HEAD PINNED';
+ const replay = $('merkleReplay');
+ if (replay && j.replayUrl) {
+ replay.href = j.replayUrl;
+ replay.hidden = false;
+ }
  }
  toast(j.ok ? `Sealed: ${j.id || 'bundle'}` : j.error || 'Export failed');
  } catch (e) {

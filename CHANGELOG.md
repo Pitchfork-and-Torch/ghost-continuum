@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.6.0] - 2026-08-14 - Crystal Seal
+
+### Sealed forensic replay
+- Incident export now hashes evidence **after** files are written (portable relative paths in `MANIFEST.json`).
+- Each seal includes a standalone `replay.html` — open offline, print to PDF, step events with j/k.
+- Local CLI: `ghost-continuum seal [label]` and `ghost-continuum verify [dir|.tgz]`.
+- Hub returns `manifestHash` + `replayUrl`; Forensics strip offers OPEN REPLAY.
+- Threat-response SEAL uses the same bundle path.
+
+### Tests
+- `test/seal-bundle.js` (hash-after-write, tamper, HTML escape, CLI verify).
+
+### Philosophy (unchanged)
+- Defensive-only · local-first · zero core npm dependencies · authorized networks only · MIT · no eval.
+
 ## [3.5.0] - 2026-08-13 - Crystal Membrane (engine)
 
 ### Command Nexus + engine

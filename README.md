@@ -1,4 +1,4 @@
-# Ghost Continuum v3.5.0 - Crystal Membrane
+# Ghost Continuum v3.6.0 - Crystal Seal
 
 <p align="center">
  <img src="assets/ghost-continuum-logo.png" alt="Ghost Continuum" width="320" />
@@ -6,7 +6,7 @@
 
 <p align="center">
  <a href="https://ghost.jonbailey.xyz/"><img src="https://img.shields.io/badge/live-ghost.jonbailey.xyz-5ec8c0?style=flat-square" alt="live" /></a>
- <img src="https://img.shields.io/badge/version-3.5.0-5ec8c0?style=flat-square" alt="version" />
+ <img src="https://img.shields.io/badge/version-3.6.0-5ec8c0?style=flat-square" alt="version" />
  <img src="https://img.shields.io/badge/design-Crystal%20Membrane-8eb8c8?style=flat-square" alt="design" />
  <img src="https://img.shields.io/badge/node-%3E%3D18-5ec8c0?style=flat-square" alt="node" />
  <img src="https://img.shields.io/badge/core%20deps-zero-6bc4a0?style=flat-square" alt="zero deps" />
@@ -16,7 +16,7 @@
 
 > *The immune system that watches back.*
 
-**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.5.0 Crystal Membrane** upgrades Command Nexus (command palette, time-window queries, keyboard cockpit) and the public landing on the Luminous Membrane design system - without changing defensive scope or zero-core-deps discipline.
+**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.6.0 Crystal Seal** adds a standalone HTML forensic replay and a local `seal` / `verify` CLI so Merkle-backed incident bundles can be opened offline and checked later — without changing defensive scope or zero-core-deps discipline.
 
 ```
 listen · breed · morph · remember · seal · evolve · contain
@@ -35,6 +35,14 @@ npm start
 **Public site:** https://ghost.jonbailey.xyz/ · **Preview:** https://ghost.jonbailey.xyz/hub/
 
 ---
+
+## What's new in v3.6.0 Crystal Seal
+
+| Pillar | Capability |
+|--------|------------|
+| **Sealed replay** | Each SEAL writes `replay.html` — open offline, print to PDF, step with j/k |
+| **Integrity** | Evidence hashed after write; portable `MANIFEST.json`; tamper fails verify |
+| **CLI** | `ghost-continuum seal [label]` · `ghost-continuum verify [dir\|.tgz]` |
 
 ## What's new in v3.5.0 Crystal Membrane
 
@@ -108,7 +116,7 @@ Architecture diagram: [landing/infographic.svg](landing/infographic.svg)
 3. Explore the fabric map · switch **Sentinel Morphs**
 4. Scrub the **Forensic Time Machine**
 5. Open **Home Shield** if this is a home or lab network
-6. **SEAL INCIDENT** when you want a Merkle-backed export
+6. **SEAL INCIDENT** (or `ghost-continuum seal lab`) — open `replay.html`, then `ghost-continuum verify` on the folder
 
 ---
 

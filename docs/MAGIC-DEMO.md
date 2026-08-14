@@ -55,13 +55,22 @@ Probe again. Notice fingerprint shifts: CSS variables, decoy paths, comment scra
 
 ## 5. Seal an incident
 
+Hub running is optional — the CLI writes the bundle directly:
+
 ```bash
-curl -X POST http://127.0.0.1:30000/api/incident/export \
+ghost-continuum seal magic-demo
+ghost-continuum verify
+```
+
+Or from the hub:
+
+```bash
+curl -s -X POST http://127.0.0.1:30000/api/incident/export \
   -H "Content-Type: application/json" \
   -d '{"label":"magic-demo"}'
 ```
 
-Download the `.tgz`. It includes events, status snapshot, and **Merkle ledger provenance**.
+Open `replay.html` in the snapshot folder (offline). The `.tgz` includes events, status, `MANIFEST.json` (hashed after write), and the HTML replay. Re-check later with `ghost-continuum verify <dir-or-tgz>`.
 
 ## 6. Optional — narrative layer
 

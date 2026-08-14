@@ -74,6 +74,13 @@ try {
   const snapshot = await post('/api/incident/snapshot', { label: 'test' });
   assert.strictEqual(snapshot.status, 200);
   assert.ok(snapshot.body.manifest?.manifestHash);
+  assert.ok(snapshot.body.replayUrl);
+
+  const exported = await post('/api/incident/export', { label: 'test-export' });
+  assert.strictEqual(exported.status, 200);
+  assert.ok(/^[a-f0-9]{64}$/.test(exported.body.manifestHash));
+  const verified = await get(exported.body.replayUrl.replace('/replay/', '/verify/'));
+  assert.strictEqual(verified.body.ok, true);
 
   console.log('ghost-continuum integration: OK');
 } finally {
