@@ -1,4 +1,5 @@
 import path from 'path';
+import crypto from 'crypto';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const SAFE_LABEL = /^[a-zA-Z0-9._-]{1,64}$/;
@@ -58,5 +59,9 @@ export function hubTokenOk(req, config) {
   const token = config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN || '';
   if (!token) return true;
   const auth = req.headers.authorization || '';
-  return auth === `Bearer ${token}`;
+  const expected = `Bearer ${token}`;
+  const a = Buffer.from(auth);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }

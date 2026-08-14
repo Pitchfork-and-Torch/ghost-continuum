@@ -33,6 +33,8 @@ incident-snapshots/
 *.jsonl
 
 # Operator / production secrets (never commit)
+config.json
+!config.example.json
 deploy/jonbailey/jonbailey-production.json
 deploy/jonbailey/**/*-secrets*
 *.pem
