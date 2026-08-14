@@ -21,6 +21,7 @@ import {
   hubTokenCookieHeader,
   HUB_TOKEN_COOKIE,
   hubSecurityHeaders,
+  timingSafeStringEqual,
 } from '../packages/hub-api/src/safe.js';
 import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters/cell-wire.js';
 import { listBuiltinProbes } from '../packages/hub-api/src/adapters/builtin-validator.js';
@@ -78,6 +79,14 @@ assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer wrong' } }, { 
 assert.strictEqual(hubTokenOk({ headers: {} }, { hubToken: 'secret' }), false);
 assert.strictEqual(hubTokenOk({ headers: { cookie: `${HUB_TOKEN_COOKIE}=secret` } }, { hubToken: 'secret' }), true);
 assert.strictEqual(hubTokenOk({ headers: { cookie: `${HUB_TOKEN_COOKIE}=wrong` } }, { hubToken: 'secret' }), false);
+assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer x' } }, { hubToken: 'secret' }), false);
+assert.strictEqual(hubTokenOk({ headers: { authorization: 'Bearer much-longer-than-secret' } }, { hubToken: 'secret' }), false);
+assert.ok(timingSafeStringEqual('same', 'same'));
+assert.ok(!timingSafeStringEqual('short', 'much-longer-secret'));
+assert.ok(!timingSafeStringEqual('', 'secret'));
+const safeSrc = fs.readFileSync(new URL('../packages/hub-api/src/safe.js', import.meta.url), 'utf8');
+assert.ok(safeSrc.includes("createHash('sha256')"), 'hub token compare must hash both sides');
+assert.ok(!/if \(left\.length !== right\.length\) return false/.test(safeSrc), 'hub token compare must not short-circuit on length');
 assert.strictEqual(readCookie({ headers: { cookie: 'a=1; gc-hub-token=secret' } }, HUB_TOKEN_COOKIE), 'secret');
 assert.ok(hubTokenCookieHeader('secret').includes('HttpOnly'));
 assert.ok(hubTokenCookieHeader('secret').includes('SameSite=Strict'));

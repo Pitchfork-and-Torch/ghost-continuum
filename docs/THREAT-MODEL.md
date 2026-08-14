@@ -33,6 +33,7 @@ DM-Sentinel is a **defensive-only** local deception platform. This model covers 
 | Tunneled hub read / token leak | Extra hosts require `hubToken`; all `/api/*` methods check bearer or HttpOnly cookie; HTML never injects the token into JavaScript |
 | Rate-limit identity spoof | Ignore `X-Forwarded-For` unless `hubTrustProxy` / `GC_HUB_TRUST_PROXY=1`; first hop must pass `net.isIP` |
 | Clickjack / MIME sniff of hub UI | `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` |
+| Hub token length oracle | Hash both presented values, then `timingSafeEqual` on fixed 32-byte digests |
 | Unauthorized scope probes | Allowlist + `blockExploitOperators` |
 | Attacker escapes honeypot to host | Minimal listeners, no shell escape paths, container mirage isolated to localhost |
 | Ledger tampering | Merkle append-only chain + verify on export |
