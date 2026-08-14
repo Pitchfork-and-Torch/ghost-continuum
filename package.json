@@ -28,6 +28,7 @@
     "deploy:edge:jonbailey": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-edge.ps1",
     "deploy:hub:pages": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-pages.ps1",
     "deploy:site": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-site.ps1",
+    "deploy:site:unix": "bash scripts/deploy-site.sh",
     "deploy:seo": "powershell -ExecutionPolicy Bypass -File scripts/post-deploy-seo.ps1",
     "deploy:site:full": "powershell -ExecutionPolicy Bypass -Command \"& './deploy/jonbailey/scripts/deploy-site.ps1'; if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) { exit $LASTEXITCODE }; & './scripts/post-deploy-seo.ps1'\"",
     "deploy:hub:gateway": "powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/deploy-hub-gateway.ps1",
