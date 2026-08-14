@@ -93,6 +93,7 @@ export function hubTokenCookieHeader(token) {
 export const HUB_SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
+  'Content-Security-Policy': "frame-ancestors 'none'",
   'Referrer-Policy': 'no-referrer',
   'Cross-Origin-Resource-Policy': 'same-origin',
 };

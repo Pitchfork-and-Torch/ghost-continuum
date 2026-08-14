@@ -62,6 +62,7 @@ try {
   assert.ok(home.body.includes('Ghost Continuum'));
   assert.strictEqual(home.headers['x-content-type-options'], 'nosniff');
   assert.strictEqual(home.headers['x-frame-options'], 'DENY');
+  assert.strictEqual(home.headers['content-security-policy'], "frame-ancestors 'none'");
   assert.strictEqual(home.headers['referrer-policy'], 'no-referrer');
   assert.strictEqual(home.headers['cross-origin-resource-policy'], 'same-origin');
 
@@ -69,6 +70,7 @@ try {
   assert.strictEqual(status.status, 200);
   assert.strictEqual(status.headers['x-content-type-options'], 'nosniff');
   assert.strictEqual(status.headers['x-frame-options'], 'DENY');
+  assert.strictEqual(status.headers['content-security-policy'], "frame-ancestors 'none'");
   assert.ok(status.body.ok);
   assert.ok(status.body.polymorph?.ok);
   assert.ok(Array.isArray(status.body.feed));

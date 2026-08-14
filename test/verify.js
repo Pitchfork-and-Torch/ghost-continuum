@@ -86,6 +86,7 @@ assert.ok(!hubTokenCookieHeader('secret').includes('__GC_HUB_TOKEN'));
 const sec = hubSecurityHeaders({ 'Content-Type': 'application/json' });
 assert.strictEqual(sec['X-Content-Type-Options'], 'nosniff');
 assert.strictEqual(sec['X-Frame-Options'], 'DENY');
+assert.strictEqual(sec['Content-Security-Policy'], "frame-ancestors 'none'");
 assert.strictEqual(sec['Referrer-Policy'], 'no-referrer');
 assert.strictEqual(sec['Cross-Origin-Resource-Policy'], 'same-origin');
 assert.strictEqual(sec['Content-Type'], 'application/json');

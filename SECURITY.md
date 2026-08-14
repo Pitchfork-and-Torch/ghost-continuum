@@ -31,7 +31,7 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
 - Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
 - Loopback HTML may set an HttpOnly `SameSite=Strict` cookie — the bearer is never injected into JavaScript
-- Hub responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and `Cross-Origin-Resource-Policy: same-origin`
+- Hub responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, and `Cross-Origin-Resource-Policy: same-origin`
 - Hub **safe GET watch**: `GET /api/threat/watch` is side-effect free (no morph switch, no outbound notify). Quiet-hours + alerts run on a hub timer. Missing-`Origin` GETs (img/navigation) cannot CSRF those jobs.
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
@@ -68,11 +68,12 @@ The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the ext
 Command Nexus responses (HTML, JSON, assets, SSE, 404s) include:
 
 - `X-Frame-Options: DENY` — a random site cannot iframe `127.0.0.1:30000` and clickjack SEAL / RESPOND
+- `Content-Security-Policy: frame-ancestors 'none'` — modern framing lock (does not restrict scripts)
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: no-referrer`
 - `Cross-Origin-Resource-Policy: same-origin`
 
-No HSTS on loopback HTTP. CSP is left unset so the Nexus WebGL/CDN path keeps working.
+No HSTS on loopback HTTP. No script CSP, so the Nexus WebGL/CDN path keeps working.
 
 ## Deployment rules
 
