@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO 403 is non-fatal
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` live HEAD treats a Cloudflare 403 challenge as expected. Only 404 / 5xx fail, matching Unix. Landing untouched.
+
 ## [Unreleased] - PowerShell versioned tweet-card URL
 
 ### Public site ops

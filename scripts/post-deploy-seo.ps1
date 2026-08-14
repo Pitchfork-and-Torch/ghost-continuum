@@ -26,12 +26,22 @@ $fail = 0
 foreach ($u in $Urls) {
   try {
     $r = Invoke-WebRequest -Uri $u -Method Head -UseBasicParsing -TimeoutSec 30
+    $code = [int]$r.StatusCode
     $ct = $r.Headers["Content-Type"]
-    Write-Host ("  {0}  {1}  {2}" -f $r.StatusCode, $u, $ct)
-    if ($r.StatusCode -ge 400) { $fail++ }
+    Write-Host ("  {0}  {1}  {2}" -f $code, $u, $ct)
+    # Cloudflare managed-challenge (403) on the apex is expected for automated
+    # clients. Match Unix: only 404 / 5xx are hard failures.
+    if ($code -eq 404 -or $code -ge 500) { $fail++ }
   } catch {
-    Write-Host ("  FAIL  {0}  {1}" -f $u, $_.Exception.Message) -ForegroundColor Red
-    $fail++
+    $code = $null
+    if ($_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }
+    if ($code) {
+      Write-Host ("  {0}  {1}" -f $code, $u)
+      if ($code -eq 404 -or $code -ge 500) { $fail++ }
+    } else {
+      Write-Host ("  FAIL  {0}  {1}" -f $u, $_.Exception.Message) -ForegroundColor Red
+      $fail++
+    }
   }
 }
 
