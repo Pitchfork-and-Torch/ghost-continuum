@@ -25,6 +25,7 @@ import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters
 import { listBuiltinProbes } from '../packages/hub-api/src/adapters/builtin-validator.js';
 import { listScopeProbes } from '../packages/hub-api/src/adapters/scope-cell.js';
 import { isDemoMode } from '../packages/hub-api/src/adapters/demo.js';
+import { runHubWatchJobs, resetHubWatchJobs } from '../packages/hub-api/src/watch-jobs.js';
 
 assert.strictEqual(scoreEventType('trap-trip'), 6);
 assert.strictEqual(scoreEventType('honeypot-http'), 5);
@@ -105,6 +106,16 @@ assert.strictEqual(hubOriginOk({ headers: {} }, {}), true);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'http://127.0.0.1:30000' } }, {}), true);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'https://evil.example' } }, {}), false);
 assert.strictEqual(hubOriginOk({ headers: { origin: 'null' } }, {}), false);
+
+assert.strictEqual(typeof runHubWatchJobs, 'function');
+assert.strictEqual(typeof resetHubWatchJobs, 'function');
+const watchSrc = fs.readFileSync(new URL('../packages/hub-api/src/server.js', import.meta.url), 'utf8');
+const watchSlice = watchSrc.split("url.pathname === '/api/threat/watch'")[1] || '';
+const watchHandler = watchSlice.slice(0, 280);
+assert.ok(watchHandler.includes('threatWatch()'), 'GET /api/threat/watch must return a read-only payload');
+assert.ok(!watchHandler.includes('tickQuietHours'), 'GET /api/threat/watch must not tick quiet hours');
+assert.ok(!watchHandler.includes('sendNotification'), 'GET /api/threat/watch must not send notifications');
+assert.ok(!watchHandler.includes('runHubWatchJobs'), 'GET /api/threat/watch must not run hub watch jobs');
 
 const landingHtml = fs.readFileSync(new URL('../landing/index.html', import.meta.url), 'utf8');
 assert.ok(landingHtml.includes('<!DOCTYPE html>'), 'landing/index.html must be a real HTML document');
