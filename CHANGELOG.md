@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO Crystal Seal check
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` spot-checks Crystal Seal (was Crystal Membrane, a false miss on 3.6.0). Matches the Unix script. Landing untouched.
+
 ## [Unreleased] - Hub bearer hash-then-compare
 
 ### Control-plane hygiene

@@ -45,7 +45,7 @@ Tag on `main` after your PR merges so the release reflects shipped code. `/relea
 
 ## 3. Publish the public site
 
-From Windows: `npm run deploy:site` then `npm run deploy:seo`.
+From Windows: `npm run deploy:site` then `npm run deploy:seo` (spot-check is Crystal Seal).
 From Linux / macOS / CI (no PowerShell needed):
 
 ```bash

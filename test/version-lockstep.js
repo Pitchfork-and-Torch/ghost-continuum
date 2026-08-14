@@ -89,6 +89,9 @@ assert.ok(seoUnix.includes('Twitterbot/1.0'), 'unix SEO script must gate Twitter
 assert.ok(seoUnix.includes('facebookexternalhit/1.1'), 'unix SEO script must gate Facebook Content-Type');
 assert.ok(seoUnix.includes("dataset.version = '${EXPECT_VERSION}'"), 'unix SEO script must check live dataset.version');
 assert.ok(seoUnix.includes('Crystal Seal'), 'unix SEO script must spot-check Crystal Seal');
+const seoWin = read('scripts/post-deploy-seo.ps1');
+assert.ok(seoWin.includes('Crystal Seal'), 'PowerShell SEO script must spot-check Crystal Seal');
+assert.ok(!seoWin.includes("p = 'Crystal Membrane'"), 'PowerShell SEO script must not require Crystal Membrane');
 const deployUnix = read('scripts/deploy-site.sh');
 assert.ok(deployUnix.includes('ffd8ff'), 'deploy-site.sh must JPEG-gate share-card.jpg');
 console.log('  ✓ tweet-card JPEG + unix SEO/deploy gates');
