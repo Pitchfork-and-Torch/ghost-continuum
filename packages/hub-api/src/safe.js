@@ -96,6 +96,7 @@ export const HUB_SECURITY_HEADERS = {
   'Content-Security-Policy': "frame-ancestors 'none'",
   'Referrer-Policy': 'no-referrer',
   'Cross-Origin-Resource-Policy': 'same-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
 };
 
 export function hubSecurityHeaders(extra = {}) {

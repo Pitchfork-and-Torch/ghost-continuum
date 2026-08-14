@@ -31,7 +31,7 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
 - Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
 - Loopback HTML may set an HttpOnly `SameSite=Strict` cookie — the bearer is never injected into JavaScript
-- Hub responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, and `Cross-Origin-Resource-Policy: same-origin`
+- Hub responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, `Referrer-Policy: no-referrer`, `Cross-Origin-Resource-Policy: same-origin`, and `Permissions-Policy: camera=(), microphone=(), geolocation=()`
 - Hub **safe GET watch**: `GET /api/threat/watch` is side-effect free (no morph switch, no outbound notify). Quiet-hours + alerts run on a hub timer. Missing-`Origin` GETs (img/navigation) cannot CSRF those jobs.
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
@@ -72,6 +72,7 @@ Command Nexus responses (HTML, JSON, assets, SSE, 404s) include:
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: no-referrer`
 - `Cross-Origin-Resource-Policy: same-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()` — the hub does not need those browser features
 
 No HSTS on loopback HTTP. No script CSP, so the Nexus WebGL/CDN path keeps working.
 

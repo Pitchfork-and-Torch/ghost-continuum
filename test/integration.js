@@ -65,6 +65,7 @@ try {
   assert.strictEqual(home.headers['content-security-policy'], "frame-ancestors 'none'");
   assert.strictEqual(home.headers['referrer-policy'], 'no-referrer');
   assert.strictEqual(home.headers['cross-origin-resource-policy'], 'same-origin');
+  assert.strictEqual(home.headers['permissions-policy'], 'camera=(), microphone=(), geolocation=()');
 
   const status = await get('/api/status');
   assert.strictEqual(status.status, 200);

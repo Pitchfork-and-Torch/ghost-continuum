@@ -89,6 +89,7 @@ assert.strictEqual(sec['X-Frame-Options'], 'DENY');
 assert.strictEqual(sec['Content-Security-Policy'], "frame-ancestors 'none'");
 assert.strictEqual(sec['Referrer-Policy'], 'no-referrer');
 assert.strictEqual(sec['Cross-Origin-Resource-Policy'], 'same-origin');
+assert.strictEqual(sec['Permissions-Policy'], 'camera=(), microphone=(), geolocation=()');
 assert.strictEqual(sec['Content-Type'], 'application/json');
 
 assert.strictEqual(hubHostIsLoopback({ headers: { host: '127.0.0.1:30000' } }), true);
