@@ -49,13 +49,20 @@ From Windows: `npm run deploy:site` then `npm run deploy:seo`.
 From Linux / macOS / CI (no PowerShell needed):
 
 ```bash
-npm run deploy:site:unix   # build tree + wrangler pages deploy (needs CLOUDFLARE_API_TOKEN)
-npm run deploy:seo:unix    # verify endpoints + IndexNow ping
+npm run deploy:site:unix   # tweet-card JPEG gate, then build tree + wrangler pages deploy
+npm run deploy:seo:unix    # tweet-card Content-Type + live dataset.version + IndexNow
 ```
 
+`deploy:site:unix` refuses to assemble the tree unless `landing/share-card.jpg` is a JPEG.
+`deploy:seo:unix` then fails if Twitterbot / Facebook / Mozilla get a non-`image/*`
+Content-Type for `share-card.jpg`, or if live `js/main.js` is not the expected
+`dataset.version`.
+
 The custom domain `ghost.jonbailey.xyz` sits behind a Cloudflare managed bot challenge,
-so `curl` gets `403`; verify content against `https://ghost-continuum.pages.dev/` or in a
-real browser. The production alias has a ~5-minute CDN cache.
+so `curl` gets `403` on HTML; verify content against `https://ghost-continuum.pages.dev/`
+or in a real browser. Apex `js/main.js` is cached (`s-maxage=604800`). If the Pages
+alias is current but the apex still serves an old `dataset.version`, purge that URL
+(and `?v=` variants) on the zone — do not wipe `landing/index.html`.
 
 ## Lessons (2026-08-14)
 
@@ -74,3 +81,8 @@ What went wrong, and the guardrails now in place:
 - **Deploy tooling was Windows-only.** `deploy:site` / `deploy:seo` were PowerShell, so the
   site couldn't be published from Cloud/CI. → **Fix:** portable `deploy:site:unix` /
   `deploy:seo:unix` equivalents.
+- **Tweet card or apex JS drifted.** A ship can look green while X gets HTML for
+  `share-card.jpg`, or while apex `js/main.js` stays on an old `dataset.version` behind
+  a week-long CDN cache. → **Fix:** local JPEG gate before assemble; Unix SEO script
+  fails on non-`image/*` cards and on a live version miss; purge apex JS if Pages is
+  current and the custom domain is not.

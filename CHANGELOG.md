@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] - Unix tweet-card + live version gate
+
+### Public site ops
+- `scripts/post-deploy-seo.sh` now matches the PowerShell tweet-card Content-Type gate (Twitterbot / Facebook / Mozilla must get `image/*`) and checks live `js/main.js` `dataset.version`.
+- Copy check is Crystal Seal (was Crystal Membrane, a false miss on 3.6.0).
+- `scripts/deploy-site.sh` refuses to assemble the tree unless `landing/share-card.jpg` is a real JPEG. Landing HTML untouched.
+
 ## [Unreleased] - Hub safe GET /api/threat/watch
 
 ### Control-plane hygiene
