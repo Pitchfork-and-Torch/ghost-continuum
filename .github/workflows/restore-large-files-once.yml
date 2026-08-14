@@ -1,0 +1,41 @@
+name: restore-large-files-once
+on:
+  push:
+    branches: [cursor/ghost-continuum-improvements-f500]
+    paths:
+      - '.github/workflows/restore-large-files-once.yml'
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cursor/ghost-continuum-improvements-f500
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Restore Crystal Seal and SkyCache files
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # ghost-continuum server.js from pre-stub commit, Crystal Seal rename
+          git show b50bb03843b9e71d729c95e24bf3bc3fce65fff2:packages/hub-api/src/server.js \
+            | sed 's/Crystal Membrane/Crystal Seal/g' > packages/hub-api/src/server.js
+
+          # hub-ui app.js Crystal Seal labels
+          if git cat-file -e b50bb03843b9e71d729c95e24bf3bc3fce65fff2:packages/hub-ui/public/assets/app.js 2>/dev/null; then
+            git show b50bb03843b9e71d729c95e24bf3bc3fce65fff2:packages/hub-ui/public/assets/app.js \
+              | sed 's/v3.5 Crystal Membrane/v3.6 Crystal Seal/g; s/Crystal Membrane/Crystal Seal/g' \
+              > packages/hub-ui/public/assets/app.js
+          fi
+
+          git add packages/hub-api/src/server.js packages/hub-ui/public/assets/app.js || true
+          if git diff --cached --quiet; then
+            echo 'No ghost-continuum changes to commit'
+          else
+            git commit -m 'fix: restore hub-api/hub-ui Crystal Seal full sources'
+            git push
+          fi
