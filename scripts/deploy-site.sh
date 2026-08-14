@@ -27,6 +27,20 @@ if [ ! -f "$L/index.html" ]; then
   exit 1
 fi
 
+# Tweet-card gate first: never assemble/publish if share-card.jpg is missing or not JPEG.
+# A prior ship served HTML (or a challenge page) as the card and broke X previews.
+card="$L/share-card.jpg"
+if [ ! -f "$card" ]; then
+  echo "Tweet-card gate FAIL: missing $card" >&2
+  exit 1
+fi
+sig="$(od -An -tx1 -N3 "$card" | tr -d ' \n')"
+if [ "$sig" != "ffd8ff" ]; then
+  echo "Tweet-card gate FAIL: $card is not a JPEG (got $sig)" >&2
+  exit 1
+fi
+echo "Tweet-card gate OK (local JPEG, $(wc -c < "$card" | tr -d ' ') bytes)."
+
 echo "Assembling site tree at $SITE ..."
 rm -rf "$SITE"
 mkdir -p "$SITE/hub" "$SITE/css" "$SITE/js"

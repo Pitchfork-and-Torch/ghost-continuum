@@ -39,6 +39,21 @@ for u in "${URLS[@]}"; do
 done
 
 echo ""
+echo "=== Share card Content-Type (tweet-card gate) ==="
+# X / Facebook / browsers must see image/*, not a challenge HTML page. Gate first
+# so a 3.4.0-style HTML-as-image regression cannot be reported as a successful ship.
+CARD="${SEO_CARD_URL:-$BASE/share-card.jpg?v=$EXPECT_VERSION}"
+for ua in "Mozilla/5.0" "Twitterbot/1.0" "facebookexternalhit/1.1"; do
+  ct=$(curl -sI -m 30 -A "$ua" "$CARD" | tr -d '\r' | awk -F': ' 'tolower($1)=="content-type"{print tolower($2); exit}')
+  ct="${ct%%;*}"
+  printf "  UA=%s  CT=%s\n" "$ua" "${ct:-?}"
+  case "${ct:-}" in
+    image/*) ;;
+    *) echo "  FAIL: share-card.jpg must be image/* for $ua"; fail=$((fail+1)) ;;
+  esac
+done
+
+echo ""
 echo "=== HTML / version spot-check ==="
 CONTENT_ALIAS="${SEO_CONTENT_ALIAS:-https://ghost-continuum.pages.dev}"
 html=$(curl -s -m 30 -A "$UA" "$BASE/" || true)
@@ -46,7 +61,7 @@ html=$(curl -s -m 30 -A "$UA" "$BASE/" || true)
 # real HTML is only reachable via a browser. For the content check, fall back to the
 # Pages production alias (same deployment, not challenged) whenever the apex response
 # is empty, is the challenge interstitial, or lacks the expected release marker.
-if [ -z "$html" ] || printf '%s' "$html" | grep -qiE "just a moment|cf-mitigated|cf_chl|challenge-platform" || ! printf '%s' "$html" | grep -qF "Crystal Membrane"; then
+if [ -z "$html" ] || printf '%s' "$html" | grep -qiE "just a moment|cf-mitigated|cf_chl|challenge-platform" || ! printf '%s' "$html" | grep -qF "Crystal Seal"; then
   html=$(curl -s -m 30 -A "$UA" "$CONTENT_ALIAS/" || true)
   echo "  (apex challenged to bots; verified content via $CONTENT_ALIAS)"
 fi
@@ -55,9 +70,23 @@ check() { # <label> <regex>
   if printf '%s' "$html" | grep -Eq "$2"; then echo "  OK  $1"; else echo "  MISS  $1"; fail=$((fail+1)); fi
 }
 check "softwareVersion $EXPECT_VERSION" "\"softwareVersion\": *\"$ver_re\""
-check "Crystal Membrane" "Crystal Membrane"
+check "Crystal Seal" "Crystal Seal"
 check "llms.txt link" "llms\.txt"
 check "canonical" "rel=\"canonical\""
+
+echo ""
+echo "=== Live js/main.js dataset.version ==="
+js=$(curl -s -m 30 -A "$UA" "$BASE/js/main.js" || true)
+if ! printf '%s' "$js" | grep -qF "dataset.version"; then
+  js=$(curl -s -m 30 -A "$UA" "$CONTENT_ALIAS/js/main.js" || true)
+  echo "  (apex js missed; verified via $CONTENT_ALIAS/js/main.js)"
+fi
+if printf '%s' "$js" | grep -qF "dataset.version = '${EXPECT_VERSION}'"; then
+  echo "  OK  dataset.version ${EXPECT_VERSION}"
+else
+  echo "  MISS  dataset.version ${EXPECT_VERSION}"
+  fail=$((fail+1))
+fi
 
 echo ""
 echo "=== IndexNow submit ==="

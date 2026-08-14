@@ -80,6 +80,19 @@ const ds = landingMain.match(/root\.dataset\.version = '(\d+\.\d+\.\d+)'/);
 assert.ok(ds, 'landing main.js must set dataset.version');
 assert.strictEqual(ds[1], VERSION, 'landing dataset.version must match package.json');
 
+const cardPath = path.join(root, 'landing/share-card.jpg');
+assert.ok(fs.existsSync(cardPath), 'landing/share-card.jpg must exist');
+const cardHead = fs.readFileSync(cardPath).subarray(0, 3);
+assert.ok(cardHead[0] === 0xff && cardHead[1] === 0xd8 && cardHead[2] === 0xff, 'share-card.jpg must be a JPEG');
+const seoUnix = read('scripts/post-deploy-seo.sh');
+assert.ok(seoUnix.includes('Twitterbot/1.0'), 'unix SEO script must gate Twitterbot Content-Type');
+assert.ok(seoUnix.includes('facebookexternalhit/1.1'), 'unix SEO script must gate Facebook Content-Type');
+assert.ok(seoUnix.includes("dataset.version = '${EXPECT_VERSION}'"), 'unix SEO script must check live dataset.version');
+assert.ok(seoUnix.includes('Crystal Seal'), 'unix SEO script must spot-check Crystal Seal');
+const deployUnix = read('scripts/deploy-site.sh');
+assert.ok(deployUnix.includes('ffd8ff'), 'deploy-site.sh must JPEG-gate share-card.jpg');
+console.log('  ✓ tweet-card JPEG + unix SEO/deploy gates');
+
 const cacheBustFiles = [
   'packages/hub-ui/public/index.html',
   'packages/hub-ui/public/sw.js',
