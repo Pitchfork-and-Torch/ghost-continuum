@@ -227,3 +227,24 @@ export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now(), 
 export function resetRateLimits() {
   rlBuckets.clear();
 }
+
+/**
+ * Framing / MIME / referrer lock for Command Nexus responses.
+ * CSP is frame-ancestors only — no script policy, so the local UI keeps working.
+ */
+export function hubSecurityHeaders() {
+  return {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Content-Security-Policy': "frame-ancestors 'none'",
+    'Referrer-Policy': 'no-referrer',
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  };
+}
+
+export function applyHubSecurityHeaders(res) {
+  for (const [key, value] of Object.entries(hubSecurityHeaders())) {
+    res.setHeader(key, value);
+  }
+}

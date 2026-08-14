@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - Hub security headers
+
+### Control-plane hygiene
+- Command Nexus responses set `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, and `Referrer-Policy: no-referrer` (plus same-origin CORP and a tight Permissions-Policy).
+- CSP is framing-only — no script policy — so the local UI keeps working. Applied to JSON, HTML, assets, SSE, and 404s. Landing untouched.
+
 ## [Unreleased] - Hub ignore X-Forwarded-For
 
 ### Control-plane hygiene
