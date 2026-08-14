@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - Hub security headers
+
+### Control-plane hygiene
+- Command Nexus responses send `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, and `Cross-Origin-Resource-Policy: same-origin` (HTML, JSON, assets, SSE, 404s).
+- Stops a random site from iframing `127.0.0.1:30000` and clickjacking SEAL / RESPOND. No HSTS on loopback HTTP; CSP left unset so WebGL/CDN still works.
+
 ## [Unreleased] - Hub read-path lock
 
 ### Control-plane hygiene

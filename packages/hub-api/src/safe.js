@@ -90,6 +90,17 @@ export function hubTokenCookieHeader(token) {
   return `${HUB_TOKEN_COOKIE}=${encodeURIComponent(token)}; Path=/; SameSite=Strict; HttpOnly`;
 }
 
+export const HUB_SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'no-referrer',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+};
+
+export function hubSecurityHeaders(extra = {}) {
+  return { ...HUB_SECURITY_HEADERS, ...extra };
+}
+
 export function hubTokenOk(req, config) {
   const token = configuredHubToken(config);
   if (!token) return true;

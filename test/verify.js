@@ -19,6 +19,7 @@ import {
   hubApiAuthOk,
   readCookie,
   hubTokenCookieHeader,
+  hubSecurityHeaders,
   HUB_TOKEN_COOKIE,
 } from '../packages/hub-api/src/safe.js';
 import { cellEndpoints, resolveCellRoot } from '../packages/hub-api/src/adapters/cell-wire.js';
@@ -80,6 +81,13 @@ assert.strictEqual(readCookie({ headers: { cookie: 'a=1; gc-hub-token=secret' } 
 assert.ok(hubTokenCookieHeader('secret').includes('HttpOnly'));
 assert.ok(hubTokenCookieHeader('secret').includes('SameSite=Strict'));
 assert.ok(!hubTokenCookieHeader('secret').includes('__GC_HUB_TOKEN'));
+
+const sec = hubSecurityHeaders({ 'Content-Type': 'application/json' });
+assert.strictEqual(sec['X-Content-Type-Options'], 'nosniff');
+assert.strictEqual(sec['X-Frame-Options'], 'DENY');
+assert.strictEqual(sec['Referrer-Policy'], 'no-referrer');
+assert.strictEqual(sec['Cross-Origin-Resource-Policy'], 'same-origin');
+assert.strictEqual(sec['Content-Type'], 'application/json');
 
 assert.strictEqual(hubHostIsLoopback({ headers: { host: '127.0.0.1:30000' } }), true);
 assert.strictEqual(hubHostIsLoopback({ headers: { host: 'ghost.jonbailey.xyz' } }), false);

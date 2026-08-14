@@ -66,6 +66,7 @@ import {
   hubHostIsLoopback,
   configuredHubToken,
   hubTokenCookieHeader,
+  hubSecurityHeaders,
   rateLimit,
 } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
@@ -123,8 +124,13 @@ function bodyHours(body, fallback) {
 }
 
 function json(res, code, body) {
- res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+ res.writeHead(code, hubSecurityHeaders({ 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }));
  res.end(JSON.stringify(body));
+}
+
+function notFound(res) {
+ res.writeHead(404, hubSecurityHeaders({ 'Content-Type': 'text/plain; charset=utf-8' }));
+ res.end('Not found');
 }
 
 function contentType(file) {
@@ -233,7 +239,7 @@ export function startHub(config = loadConfig()) {
  if (url.pathname === '/' || url.pathname === '/index.html') {
  const file = path.join(UI_ROOT, 'index.html');
  const html = fs.readFileSync(file, 'utf8');
- const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
+ const headers = hubSecurityHeaders({ 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
  const hubToken = configuredHubToken(config);
  // Loopback only: HttpOnly cookie so EventSource/fetch work without
  // putting the bearer in JavaScript (tunneled HTML must not leak it).
@@ -247,7 +253,7 @@ export function startHub(config = loadConfig()) {
  if (url.pathname === '/logo.png') {
  const file = path.join(ASSETS_ROOT, 'ghost-continuum-logo.png');
  if (fs.existsSync(file)) {
- res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+ res.writeHead(200, hubSecurityHeaders({ 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' }));
  return res.end(fs.readFileSync(file));
  }
  }
@@ -256,11 +262,11 @@ export function startHub(config = loadConfig()) {
  if (url.pathname === '/manifest.webmanifest' || url.pathname === '/sw.js') {
  const file = safeUiPath(UI_ROOT, url.pathname.slice(1));
  if (file && fs.existsSync(file)) {
- res.writeHead(200, {
+ res.writeHead(200, hubSecurityHeaders({
  'Content-Type': contentType(file),
  'Cache-Control': 'no-store',
  'Service-Worker-Allowed': '/',
- });
+ }));
  return res.end(fs.readFileSync(file));
  }
  }
@@ -268,7 +274,7 @@ export function startHub(config = loadConfig()) {
  if (url.pathname === '/assets/map-layouts.js') {
  const file = path.join(__dirname, '../../continuum/src/map-layouts.js');
  if (fs.existsSync(file)) {
- res.writeHead(200, { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-store' });
+ res.writeHead(200, hubSecurityHeaders({ 'Content-Type': 'application/javascript', 'Cache-Control': 'no-store' }));
  return res.end(fs.readFileSync(file, 'utf8'));
  }
  }
@@ -276,7 +282,7 @@ export function startHub(config = loadConfig()) {
  if (url.pathname.startsWith('/assets/')) {
  const file = safeUiPath(UI_ROOT, url.pathname.slice(1));
  if (file && fs.existsSync(file)) {
- res.writeHead(200, { 'Content-Type': contentType(file), 'Cache-Control': 'no-store' });
+ res.writeHead(200, hubSecurityHeaders({ 'Content-Type': contentType(file), 'Cache-Control': 'no-store' }));
  return res.end(fs.readFileSync(file));
  }
  }
@@ -416,10 +422,9 @@ export function startHub(config = loadConfig()) {
  const id = sanitizeId(url.pathname.split('/').pop());
  const htmlPath = id ? replayRegistry.get(id) : null;
  if (!htmlPath || !fs.existsSync(htmlPath)) {
- res.writeHead(404);
- return res.end('Not found');
+ return notFound(res);
  }
- res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+ res.writeHead(200, hubSecurityHeaders({ 'Content-Type': 'text/html; charset=utf-8' }));
  return res.end(fs.readFileSync(htmlPath));
  }
 
@@ -434,13 +439,12 @@ export function startHub(config = loadConfig()) {
  const id = sanitizeId(url.pathname.split('/').pop());
  const archivePath = id ? exportRegistry.get(id) : null;
  if (!archivePath || !fs.existsSync(archivePath)) {
- res.writeHead(404);
- return res.end('Not found');
+ return notFound(res);
  }
- res.writeHead(200, {
+ res.writeHead(200, hubSecurityHeaders({
  'Content-Type': 'application/gzip',
  'Content-Disposition': `attachment; filename="${id}.tgz"`,
- });
+ }));
  return res.end(fs.readFileSync(archivePath));
  }
 
@@ -871,13 +875,12 @@ export function startHub(config = loadConfig()) {
  const id = sanitizeId(url.pathname.split('/').pop());
  const p = id ? getBackupPath(id) : null;
  if (!p) {
- res.writeHead(404);
- return res.end('Not found');
+ return notFound(res);
  }
- res.writeHead(200, {
+ res.writeHead(200, hubSecurityHeaders({
  'Content-Type': 'application/json',
  'Content-Disposition': `attachment; filename="${id}.json"`,
- });
+ }));
  return res.end(fs.readFileSync(p));
  }
 
@@ -1190,8 +1193,7 @@ export function startHub(config = loadConfig()) {
  return json(res, 200, { ok: true, plugins: await collectPluginStatus(config) });
  }
 
- res.writeHead(404);
- res.end('Not found');
+ notFound(res);
  });
 
  return new Promise((resolve) => {

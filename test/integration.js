@@ -18,7 +18,7 @@ function get(path) {
     http.get(`http://127.0.0.1:${port}${path}`, (res) => {
       let data = '';
       res.on('data', (c) => { data += c; });
-      res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data), headers: res.headers }));
     }).on('error', reject);
   });
 }
@@ -51,14 +51,20 @@ try {
     http.get(`http://127.0.0.1:${port}/`, (res) => {
       let data = '';
       res.on('data', (c) => { data += c; });
-      res.on('end', () => resolve({ status: res.statusCode, body: data }));
+      res.on('end', () => resolve({ status: res.statusCode, body: data, headers: res.headers }));
     }).on('error', reject);
   });
   assert.strictEqual(home.status, 200);
   assert.ok(home.body.includes('Ghost Continuum'));
+  assert.strictEqual(home.headers['x-content-type-options'], 'nosniff');
+  assert.strictEqual(home.headers['x-frame-options'], 'DENY');
+  assert.strictEqual(home.headers['referrer-policy'], 'no-referrer');
+  assert.strictEqual(home.headers['cross-origin-resource-policy'], 'same-origin');
 
   const status = await get('/api/status');
   assert.strictEqual(status.status, 200);
+  assert.strictEqual(status.headers['x-content-type-options'], 'nosniff');
+  assert.strictEqual(status.headers['x-frame-options'], 'DENY');
   assert.ok(status.body.ok);
   assert.ok(status.body.polymorph?.ok);
   assert.ok(Array.isArray(status.body.feed));
