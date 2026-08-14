@@ -1,0 +1,7 @@
+{
+  "name": "@ghost-continuum/genome",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Deception Genome — evolvable polymorphic trap genetics",
+  "main": "src/index.js"
+}

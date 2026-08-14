@@ -1,0 +1,22 @@
+# Optional local packaging for Ghost Continuum v3.0 OMEGA ASCENDANT.
+# Core engine: zero npm runtime deps. This compose file is convenience only.
+# Defensive use: authorized networks only. Prefer loopback + Cloudflare Tunnel over public ports.
+
+services:
+  ghost-continuum:
+    build: .
+    container_name: ghost-continuum
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:30000:30000"
+    volumes:
+      - ghost-data:/data
+    environment:
+      - NODE_ENV=production
+      # Set a long random token for mutating API routes
+      # - GC_HUB_TOKEN=change-me
+    # Uncomment for interactive stack logs
+    # tty: true
+
+volumes:
+  ghost-data:

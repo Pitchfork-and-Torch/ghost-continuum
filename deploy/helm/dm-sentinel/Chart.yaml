@@ -1,0 +1,12 @@
+apiVersion: v2
+name: ghost-continuum
+description: Living Deception Continuum — polymorphic defensive deception platform
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - deception
+  - honeypot
+  - security
+maintainers:
+  - name: Pitchfork-and-Torch
