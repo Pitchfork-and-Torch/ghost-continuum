@@ -1,5 +1,8 @@
 import assert from 'assert';
+import fs from 'fs';
 import http from 'http';
+import os from 'os';
+import path from 'path';
 import { startHub } from '../packages/hub-api/src/server.js';
 import { enrichConfig } from '../packages/core/src/config.js';
 import { invalidatePrefix } from '../packages/hub-api/src/cache.js';
@@ -9,6 +12,7 @@ const config = enrichConfig({
   demoMode: true,
   useBuiltinValidator: true,
   hubPort: 30100,
+  hubWatchIntervalMs: 0,
 });
 
 const { server, port } = await startHub(config);
@@ -127,6 +131,38 @@ try {
   assert.strictEqual(csrf.status, 403);
   assert.strictEqual(csrf.body.error, 'origin not allowed');
 
+  const watchCsrf = await new Promise((resolve, reject) => {
+    http.get(
+      {
+        hostname: '127.0.0.1',
+        port,
+        path: '/api/threat/watch',
+        headers: { Origin: 'https://evil.example' },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => {
+          data += c;
+        });
+        res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      },
+    ).on('error', reject);
+  });
+  assert.strictEqual(watchCsrf.status, 200);
+  assert.ok(watchCsrf.body.ok);
+  assert.ok(['CLEAR', 'ELEVATED', 'REAL_THREAT'].includes(watchCsrf.body.verdict));
+
+  const fileMtime = (p) => (fs.existsSync(p) ? fs.statSync(p).mtimeMs : 0);
+  const cfgPath = path.join(os.homedir(), '.ghost-continuum', 'config.json');
+  const notifyPath = path.join(os.homedir(), '.ghost-continuum', 'notifications.json');
+  const cfgBefore = fileMtime(cfgPath);
+  const notifyBefore = fileMtime(notifyPath);
+  const watchGet = await get('/api/threat/watch');
+  assert.strictEqual(watchGet.status, 200);
+  assert.ok(watchGet.body.ok);
+  assert.strictEqual(fileMtime(cfgPath), cfgBefore, 'GET /api/threat/watch must not write config');
+  assert.strictEqual(fileMtime(notifyPath), notifyBefore, 'GET /api/threat/watch must not write notifications');
+
   const locked = enrichConfig({
     primaryDomain: 'example.com',
     demoMode: true,
@@ -134,6 +170,7 @@ try {
     hubPort: 30101,
     hubToken: 'secret',
     hubAllowedHosts: ['ghost.jonbailey.xyz'],
+    hubWatchIntervalMs: 0,
   });
   const lockedHub = await startHub(locked);
   try {
@@ -218,6 +255,7 @@ try {
       useBuiltinValidator: true,
       hubPort: 30102,
       hubAllowedHosts: ['ghost.jonbailey.xyz'],
+      hubWatchIntervalMs: 0,
     }),
   );
   try {

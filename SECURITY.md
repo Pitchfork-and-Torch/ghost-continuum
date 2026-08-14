@@ -32,6 +32,7 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
 - Loopback HTML may set an HttpOnly `SameSite=Strict` cookie — the bearer is never injected into JavaScript
 - Write rate limits ignore `X-Forwarded-For` unless `hubTrustProxy` / `GC_HUB_TRUST_PROXY` is set
+- Hub **safe GET watch**: `GET /api/threat/watch` is side-effect free (no morph switch, no outbound notify). Quiet-hours + alerts run on a hub timer. Missing-`Origin` GETs (img/navigation) cannot CSRF those jobs.
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
 
