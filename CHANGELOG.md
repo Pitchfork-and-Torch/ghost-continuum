@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] - Hub Host / Origin lock
+
+### Control-plane hygiene
+- Command Nexus rejects non-loopback `Host` headers (`421`) so a DNS-rebinding tab cannot read `/api/status` or the HTML boot token.
+- Mutating `/api/*` rejects a foreign `Origin` (`403`) so a random website cannot CSRF the local hub. CLI / curl (no `Origin`) still work.
+- Extra tunnel hostnames are opt-in via `hubAllowedHosts` or `GC_HUB_ALLOWED_HOSTS` — hostnames only, never secrets.
+- `ghost-continuum doctor` reports the lock and warns when extra hosts are declared without a hub token.
+
 ## [3.6.0] - 2026-08-14 - Crystal Seal
 
 ### Sealed forensic replay

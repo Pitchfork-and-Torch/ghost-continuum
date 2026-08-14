@@ -123,7 +123,7 @@ Architecture diagram: [landing/infographic.svg](landing/infographic.svg)
 ## Philosophy (non-negotiable)
 
 - **Defensive only** - authorized networks you own or may defend
-- **Local-first** - brain and data under `~/.ghost-continuum` by default
+- **Local-first** - brain and data under `~/.ghost-continuum` by default; hub Host/Origin lock keeps the Command Nexus on loopback (see [SECURITY.md](SECURITY.md))
 - **Zero core npm dependencies** for the engine (Node 18+ only)
 - **Open source MIT** - auditable; no `eval`
 - **No offensive capabilities**

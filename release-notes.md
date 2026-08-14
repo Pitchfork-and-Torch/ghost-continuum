@@ -8,6 +8,7 @@ Sealed forensic replay plus hub write-path hardening - same defensive scope, zer
 - **O(1) Merkle ledger appends** - the tamper-evident ledger no longer re-reads the whole chain on every event (was O(n)/event, O(n^2) under bursts).
 - **Robust ledger verification** - `verifyLedger` anchors on its window, so long chains verify cleanly instead of falsely reporting a chain break.
 - **Flood-resistant control plane** - per-IP rate limit on mutating `POST /api/*` (default 120/10s -> `429`, `writeRateLimitMax` / `writeRateLimitWindowMs`, `0` disables). Plus a timing-safe hub bearer check.
+- **Hub Host / Origin lock** (unreleased follow-up) - loopback `Host` allowlist blocks DNS rebinding; mutating `/api/*` rejects a foreign `Origin` (CLI without Origin still works). Tunnel hostnames go in `hubAllowedHosts` / `GC_HUB_ALLOWED_HOSTS` — never secrets.
 - **Release + ops automation** - `.github/workflows/release.yml` auto-publishes this Release from the CHANGELOG on tag push; `npm run deploy:site:unix` / `deploy:seo:unix` publish the public site from Linux/macOS/CI. See `docs/RELEASING.md`.
 - Defensive-only - local-first - zero core npm deps - MIT.
 

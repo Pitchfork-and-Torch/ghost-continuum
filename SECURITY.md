@@ -27,8 +27,30 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Exploit operator roles blocked at the hub
 - Hub API is loopback-only
 - Optional hub bearer token compared with constant-time equality when set
+- Hub **Host** allowlist (loopback by default) blocks DNS rebinding
+- Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
+
+## Hub Host / Origin lock
+
+The Command Nexus binds to `127.0.0.1`, but a browser tab on another site can still talk to that port (localhost CSRF), and a DNS-rebinding page can make the browser treat the hub as same-origin (then read `/api/status` or the HTML boot token).
+
+Default allowlist: `127.0.0.1`, `localhost`, `::1`.
+
+- Requests whose `Host` header is not on the list receive `421 host not allowed`.
+- Mutating `/api/*` requests whose `Origin` is present and not on the list receive `403 origin not allowed`.
+- CLI / curl / Node `http` clients that omit `Origin` still work.
+
+If you front the hub with a Cloudflare Tunnel (or similar) on a public hostname, add that hostname — never a secret — to config:
+
+```json
+{
+  "hubAllowedHosts": ["ghost.jonbailey.xyz"]
+}
+```
+
+Or set `GC_HUB_ALLOWED_HOSTS=ghost.jonbailey.xyz` (comma-separated). Pair extra hosts with `hubToken` / `GC_HUB_TOKEN` and Cloudflare Access. `npm run doctor` warns when extra hosts are declared without a token.
 
 ## Deployment rules
 

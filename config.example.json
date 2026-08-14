@@ -11,6 +11,7 @@
   "tripwireUrl": "",
   "cloudflareWorkerName": "",
   "hubToken": "",
+  "hubAllowedHosts": [],
   "demoMode": false,
   "useBuiltinValidator": true,
   "paths": { "ghostLan": "packages/ghost-lan" },

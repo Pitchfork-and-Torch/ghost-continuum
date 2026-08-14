@@ -91,7 +91,8 @@ Merge `deploy/jonbailey/config.jonbailey.json` into `~/.ghost-continuum/config.j
   "useLocalEdge": false,
   "edgeStatusUrl": "https://jonbailey.xyz/.__dm/status",
   "tripwireUrl": "https://jonbailey.xyz/.__dm/tripwire",
-  "hubToken": "YOUR_LONG_RANDOM_TOKEN"
+  "hubToken": "YOUR_LONG_RANDOM_TOKEN",
+  "hubAllowedHosts": ["ghost.jonbailey.xyz"]
 }
 ```
 
@@ -236,6 +237,7 @@ This deploys Pages then runs `scripts/post-deploy-seo.ps1` (live HEAD checks, me
 - [ ] Edge Worker deployed + routes on apex/www
 - [ ] Tunnel + DNS for `sentinel.<your-domain>`
 - [ ] `hubToken` / `GC_HUB_TOKEN` configured
+- [ ] `hubAllowedHosts` includes the tunnel hostname (e.g. `ghost.jonbailey.xyz`) — hostname only, not a secret
 - [ ] Cloudflare Access policy on Command Hub hostname
 - [ ] Edge status + tripwire verified
 

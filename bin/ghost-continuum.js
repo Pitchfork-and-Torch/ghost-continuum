@@ -71,6 +71,15 @@ async function cmdDoctor() {
   checks.push(['edge mode', Boolean(config.edgeMode)]);
   checks.push(['builtin validator', config.useBuiltinValidator !== false]);
 
+  const { extraHubHosts } = await import('../packages/hub-api/src/safe.js');
+  const extraHosts = extraHubHosts(config);
+  const hubTokenSet = Boolean(config.hubToken || process.env.GC_HUB_TOKEN || process.env.DM_HUB_TOKEN);
+  checks.push(['hub host lock (loopback)', true]);
+  if (extraHosts.length) {
+    checks.push(['hubAllowedHosts declared', extraHosts.length > 0]);
+    checks.push(['hub token set for extra hosts', hubTokenSet]);
+  }
+
   const [lan, edge, audit] = await Promise.all([
     fetchGhostLan(config),
     fetchEdge(config),
@@ -85,6 +94,9 @@ async function cmdDoctor() {
     console.log(`  ${ok ? '✓' : '✗'} ${name}`);
   }
 
+  if (extraHosts.length && !hubTokenSet) {
+    console.log('\n  Tip: extra hubAllowedHosts without hubToken — set GC_HUB_TOKEN for the tunnel');
+  }
   if (!lan.armed) {
     console.log('\n  Tip: npm start — starts Ghost LAN + local edge + hub');
   }
