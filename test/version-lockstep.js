@@ -92,6 +92,8 @@ assert.ok(seoUnix.includes('Crystal Seal'), 'unix SEO script must spot-check Cry
 const seoWin = read('scripts/post-deploy-seo.ps1');
 assert.ok(seoWin.includes('Crystal Seal'), 'PowerShell SEO script must spot-check Crystal Seal');
 assert.ok(!seoWin.includes("p = 'Crystal Membrane'"), 'PowerShell SEO script must not require Crystal Membrane');
+assert.ok(seoWin.includes('ghost-continuum.pages.dev'), 'PowerShell SEO must fall back to Pages alias');
+assert.ok(seoWin.includes('cf-mitigated') || seoWin.includes('challenge-platform'), 'PowerShell SEO must detect apex challenge HTML');
 const deployUnix = read('scripts/deploy-site.sh');
 assert.ok(deployUnix.includes('ffd8ff'), 'deploy-site.sh must JPEG-gate share-card.jpg');
 console.log('  ✓ tweet-card JPEG + unix SEO/deploy gates');

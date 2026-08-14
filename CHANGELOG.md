@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO Pages fallback
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` falls back to `https://ghost-continuum.pages.dev` when apex HTML is empty, is a Cloudflare challenge, or lacks Crystal Seal. Matches the Unix script. Landing untouched.
+
 ## [Unreleased] - PowerShell SEO Crystal Seal check
 
 ### Public site ops
