@@ -1,5 +1,6 @@
 import path from 'path';
 import crypto from 'crypto';
+import net from 'net';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const SAFE_LABEL = /^[a-zA-Z0-9._-]{1,64}$/;
@@ -172,10 +173,28 @@ export function hubOriginOk(req, config = {}) {
   }
 }
 
-export function clientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (xff) return String(xff).split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
+/** True only when the operator opted in. Env: GC_HUB_TRUST_PROXY=1. */
+export function hubTrustProxy(config = {}) {
+  if (config.hubTrustProxy === true) return true;
+  if (config.hubTrustProxy === false) return false;
+  const env = String(process.env.GC_HUB_TRUST_PROXY || '').trim().toLowerCase();
+  return env === '1' || env === 'true' || env === 'yes';
+}
+
+/**
+ * Rate-limit identity. Default: socket address only.
+ * X-Forwarded-For is attacker-controlled on a loopback hub, so it is ignored
+ * unless hubTrustProxy / GC_HUB_TRUST_PROXY=1. Even then the first hop must
+ * pass net.isIP; garbage falls back to the socket.
+ */
+export function clientIp(req, config = {}) {
+  const socket = req.socket?.remoteAddress || 'unknown';
+  if (!hubTrustProxy(config)) return socket;
+  const xff = req.headers?.['x-forwarded-for'];
+  if (!xff) return socket;
+  let first = String(xff).split(',')[0].trim();
+  if (first.startsWith('[') && first.endsWith(']')) first = first.slice(1, -1);
+  return net.isIP(first) ? first : socket;
 }
 
 // Fixed-window, per-IP rate limiter for mutating control-plane routes. Keeps a
@@ -183,9 +202,9 @@ export function clientIp(req) {
 const rlBuckets = new Map();
 const RL_MAX_BUCKETS = 10_000;
 
-export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() } = {}) {
+export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now(), config = {} } = {}) {
   if (max <= 0) return { ok: true, remaining: Infinity, retryAfterMs: 0 };
-  const ip = clientIp(req);
+  const ip = clientIp(req, config);
   const bucket = rlBuckets.get(ip);
 
   if (!bucket || now - bucket.start >= windowMs) {

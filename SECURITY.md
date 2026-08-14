@@ -62,6 +62,8 @@ location.reload();
 
 The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the extra-host token check when it is missing.
 
+Write-path rate limits key on the TCP socket address. A browser tab can send any `X-Forwarded-For`, so that header is ignored unless you opt in with `"hubTrustProxy": true` or `GC_HUB_TRUST_PROXY=1` (only behind a proxy you control). Even then the first hop must be a real IP; garbage falls back to the socket.
+
 ## Deployment rules
 
 1. Do not expose honeypot ports (8080, 8443, 5901, rotating 40xxx) to the public internet.

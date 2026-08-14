@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { rateLimit, resetRateLimits, clientIp } from '../packages/hub-api/src/safe.js';
+import { rateLimit, resetRateLimits, clientIp, hubTrustProxy } from '../packages/hub-api/src/safe.js';
 import { appendLedgerEntry, verifyLedger, getLedgerRoot, countEntries } from '../packages/trust/src/index.js';
 
 // --- Write-side rate limiter -------------------------------------------------
@@ -22,13 +22,41 @@ console.log('  ✓ rate limit is per-IP');
 assert.ok(rateLimit(req('9.9.9.9'), { windowMs: 1000, max: 5, now: t0 + 1001 }).ok, 'window resets');
 console.log('  ✓ rate limit window resets over time');
 
+const spoof = {
+  headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' },
+  socket: { remoteAddress: '127.0.0.1' },
+};
+assert.strictEqual(clientIp(spoof, { hubTrustProxy: false }), '127.0.0.1', 'clientIp ignores XFF by default');
+assert.strictEqual(clientIp(spoof, { hubTrustProxy: true }), '203.0.113.5', 'clientIp honours XFF when hubTrustProxy');
 assert.strictEqual(
-  clientIp({ headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' }, socket: {} }),
-  '203.0.113.5',
-  'clientIp honours x-forwarded-for',
+  clientIp(
+    { headers: { 'x-forwarded-for': 'not-an-ip, 10.0.0.1' }, socket: { remoteAddress: '127.0.0.1' } },
+    { hubTrustProxy: true },
+  ),
+  '127.0.0.1',
+  'garbage XFF falls back to socket',
+);
+assert.strictEqual(
+  clientIp(
+    { headers: { 'x-forwarded-for': '[2001:db8::1]' }, socket: { remoteAddress: '127.0.0.1' } },
+    { hubTrustProxy: true },
+  ),
+  '2001:db8::1',
+  'bracketed IPv6 XFF is accepted when trusted',
+);
+resetRateLimits();
+const spoofReq = { headers: { 'x-forwarded-for': '203.0.113.5' }, socket: { remoteAddress: '9.9.9.9' } };
+for (let i = 0; i < 5; i++) {
+  assert.ok(rateLimit(spoofReq, { windowMs: 1000, max: 5, now: t0, config: { hubTrustProxy: false } }).ok);
+}
+assert.ok(
+  !rateLimit(spoofReq, { windowMs: 1000, max: 5, now: t0, config: { hubTrustProxy: false } }).ok,
+  'spoofed XFF must not mint a fresh rate-limit bucket',
 );
 assert.ok(rateLimit(req('9.9.9.9'), { max: 0 }).ok, 'max<=0 disables limiting');
-console.log('  ✓ clientIp + disable path');
+assert.strictEqual(hubTrustProxy({ hubTrustProxy: false }), false);
+assert.strictEqual(hubTrustProxy({ hubTrustProxy: true }), true);
+console.log('  ✓ clientIp ignores XFF unless hubTrustProxy');
 
 // --- Merkle ledger: incremental counter + windowed verify --------------------
 const n0 = countEntries();
