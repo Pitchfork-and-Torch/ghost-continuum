@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ghost-continuum.fullname" . }}
+  labels:
+    app: ghost-continuum
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ghost-continuum
+  template:
+    metadata:
+      labels:
+        app: ghost-continuum
+    spec:
+      containers:
+        - name: ghost-continuum
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["node", "bin/start-stack.js"]
+          env:
+            - name: GC_NO_BROWSER
+              value: "1"
+            - name: HOME
+              value: "/data"
+          ports:
+            - name: hub
+              containerPort: {{ .Values.service.hubPort }}
+            - name: ghost-lan
+              containerPort: {{ .Values.service.ghostLanPort }}
+            - name: edge
+              containerPort: {{ .Values.service.edgePort }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "ghost-continuum.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

@@ -1,0 +1,7 @@
+{
+  "name": "@ghost-continuum/narrative",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Cognitive deception — Echo Realities, Phantom Personas, local LLM bridge",
+  "main": "src/index.js"
+}
