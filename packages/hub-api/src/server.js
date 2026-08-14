@@ -59,7 +59,7 @@ import {
  startTrenchCloak,
  status as trenchStatus,
 } from '../../planes/src/trench-cloak.js';
-import { readBody, safeUiPath, sanitizeIncidentLabel, sanitizeId, hubTokenOk } from './safe.js';
+import { readBody, safeUiPath, sanitizeIncidentLabel, sanitizeId, hubTokenOk, rateLimit } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -174,14 +174,30 @@ export async function buildStatus(config) {
 }
 
 export function startHub(config = loadConfig()) {
- const port = config.hubPort || 30000;
+  const port = config.hubPort || 30000;
+  // Write-side rate limit for mutating /api routes. Set writeRateLimitMax to 0 to disable.
+  const writeRlMax = Number.isFinite(config.writeRateLimitMax) ? config.writeRateLimitMax : 120;
+  const writeRlWindowMs = Number.isFinite(config.writeRateLimitWindowMs) ? config.writeRateLimitWindowMs : 10_000;
 
- const server = http.createServer(async (req, res) => {
+  const server = http.createServer(async (req, res) => {
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
- if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
- return json(res, 401, { ok: false, error: 'Hub token required' });
- }
+    if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
+      return json(res, 401, { ok: false, error: 'Hub token required' });
+    }
+
+    if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
+      const rl = rateLimit(req, { windowMs: writeRlWindowMs, max: writeRlMax });
+      if (!rl.ok) {
+        const retryAfterSec = Math.max(1, Math.ceil(rl.retryAfterMs / 1000));
+        res.setHeader('Retry-After', String(retryAfterSec));
+        return json(res, 429, {
+          ok: false,
+          error: 'rate limited',
+          retryAfterMs: rl.retryAfterMs,
+        });
+      }
+    }
 
  if (url.pathname === '/' || url.pathname === '/index.html') {
  const file = path.join(UI_ROOT, 'index.html');
