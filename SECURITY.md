@@ -77,7 +77,7 @@ Only set this if a real reverse proxy you control is the only path to the hub:
 }
 ```
 
-Or `GC_HUB_TRUST_PROXY=1`. Cloudflare Tunnel to `127.0.0.1:30000` does not need this — one shared loopback bucket is the safer default.
+Or `GC_HUB_TRUST_PROXY=1`. Even then, only a valid IPv4/IPv6 first hop is used; anything else falls back to the socket address. Cloudflare Tunnel to `127.0.0.1:30000` does not need this — one shared loopback bucket is the safer default.
 
 ## Deployment rules
 

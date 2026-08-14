@@ -37,6 +37,14 @@ assert.strictEqual(
   '203.0.113.5',
   'clientIp honours x-forwarded-for when hubTrustProxy is set',
 );
+assert.strictEqual(
+  clientIp(
+    { headers: { 'x-forwarded-for': 'not-an-ip, 203.0.113.5' }, socket: { remoteAddress: '127.0.0.1' } },
+    { hubTrustProxy: true },
+  ),
+  '127.0.0.1',
+  'clientIp rejects non-IP X-Forwarded-For even when hubTrustProxy is set',
+);
 
 resetRateLimits();
 const spoof = (n) => ({

@@ -4,7 +4,7 @@
 
 ### Control-plane hygiene
 - Write-side rate limits ignore `X-Forwarded-For` by default so a loopback client cannot rotate that header to skip the 120/10s cap.
-- Opt-in only: `hubTrustProxy` or `GC_HUB_TRUST_PROXY=1` when a reverse proxy you control is the only path to the hub.
+- Opt-in only: `hubTrustProxy` or `GC_HUB_TRUST_PROXY=1` when a reverse proxy you control is the only path to the hub. Even then, the first hop must be a valid IPv4/IPv6 (`net.isIP`); garbage values fall back to the socket address so they cannot explode the limiter map.
 - `ghost-continuum doctor` reports the default-safe path and tips when the proxy flag is on.
 
 ## [Unreleased] - Hub safe GET /api/threat/watch

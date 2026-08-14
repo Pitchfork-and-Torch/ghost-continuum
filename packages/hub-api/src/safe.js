@@ -1,5 +1,6 @@
 import path from 'path';
 import crypto from 'crypto';
+import net from 'net';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const SAFE_LABEL = /^[a-zA-Z0-9._-]{1,64}$/;
@@ -180,11 +181,8 @@ export function hubTrustProxy(config = {}) {
 
 export function clientIp(req, config = {}) {
   if (hubTrustProxy(config)) {
-    const xff = req.headers?.['x-forwarded-for'];
-    if (xff) {
-      const first = String(xff).split(',')[0].trim();
-      if (first) return first;
-    }
+    const first = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
+    if (first && net.isIP(first)) return first;
   }
   return req.socket?.remoteAddress || 'unknown';
 }
