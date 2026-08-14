@@ -1,5 +1,5 @@
 /**
- * Ghost Continuum v3.5 Crystal Membrane - Command Nexus orchestrator.
+ * Ghost Continuum v3.6 Crystal Seal - Command Nexus orchestrator.
  * Data-driven, real-time: status poll + SSE push -> fabric map, gauge, timeline.
  * Keyboard cockpit + command palette (Ctrl/Cmd+K).
  */
@@ -871,7 +871,7 @@ async function refreshOmega() {
  const ver = j.version || VERSION;
  const code = j.codename ? ` · ${j.codename}` : '';
  $('nxVersion').textContent = `v${ver}${code}`;
- $('nxVersion').title = j.codename || 'Crystal Membrane';
+ $('nxVersion').title = j.codename || 'Crystal Seal';
  }
  const eff = j.efficacy || {};
  const score = eff.score || eff.containment || 0;
@@ -1470,7 +1470,7 @@ function runPaletteCommand(id) {
 async function boot() {
  if ($('nxVersion')) {
  $('nxVersion').textContent = `v${VERSION}`;
- $('nxVersion').title = 'Crystal Membrane';
+ $('nxVersion').title = 'Crystal Seal';
  }
  tickClock();
  setInterval(tickClock, 1000);
