@@ -5,6 +5,7 @@
   "tripwireUrl": "https://jonbailey.xyz/.__dm/tripwire",
   "cloudflareWorkerName": "jonbailey-sentinel-edge",
   "hubToken": "GENERATE_WITH_node_-e_console.log(require('crypto').randomBytes(32).toString('hex'))",
+  "hubAllowedHosts": ["ghost.jonbailey.xyz"],
   "allowedDomains": ["jonbailey.xyz", "www.jonbailey.xyz", "ghost.jonbailey.xyz", "localhost", "127.0.0.1"],
   "continuum": {
     "morph": "research",

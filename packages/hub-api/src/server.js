@@ -56,7 +56,7 @@ import {
  startTrenchCloak,
  status as trenchStatus,
 } from '../../planes/src/trench-cloak.js';
-import { readBody, safeUiPath, sanitizeId, hubTokenOk, rateLimit } from './safe.js';
+import { readBody, safeUiPath, sanitizeId, hubTokenOk, hubHostOk, hubOriginOk, rateLimit } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -188,6 +188,19 @@ export function startHub(config = loadConfig()) {
 
   const server = http.createServer(async (req, res) => {
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
+
+    if (!hubHostOk(req, config)) {
+      return json(res, 421, { ok: false, error: 'host not allowed' });
+    }
+
+    if (
+      req.method !== 'GET' &&
+      req.method !== 'HEAD' &&
+      url.pathname.startsWith('/api/') &&
+      !hubOriginOk(req, config)
+    ) {
+      return json(res, 403, { ok: false, error: 'origin not allowed' });
+    }
 
     if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
       return json(res, 401, { ok: false, error: 'Hub token required' });

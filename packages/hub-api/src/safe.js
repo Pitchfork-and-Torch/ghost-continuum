@@ -66,6 +66,64 @@ export function hubTokenOk(req, config) {
   return crypto.timingSafeEqual(a, b);
 }
 
+const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
+
+/** Strip :port from a Host header. IPv6 must be bracketed (`[::1]:30000`). */
+export function parseHostHeader(host) {
+  const raw = String(host || '').trim().toLowerCase();
+  if (!raw) return '';
+  if (raw.startsWith('[')) {
+    const end = raw.indexOf(']');
+    if (end === -1) return '';
+    return raw.slice(0, end + 1);
+  }
+  const colon = raw.lastIndexOf(':');
+  if (colon > -1 && raw.indexOf(':') === colon) return raw.slice(0, colon);
+  return raw;
+}
+
+export function allowedHubHosts(config = {}) {
+  const extra = [
+    ...(Array.isArray(config.hubAllowedHosts) ? config.hubAllowedHosts : []),
+    ...String(process.env.GC_HUB_ALLOWED_HOSTS || '').split(','),
+  ]
+    .map((s) => String(s).trim().toLowerCase())
+    .filter(Boolean)
+    .map((s) => parseHostHeader(s) || s);
+  return new Set([...LOOPBACK_HOSTS, ...extra]);
+}
+
+export function extraHubHosts(config = {}) {
+  return [...allowedHubHosts(config)].filter((h) => !LOOPBACK_HOSTS.has(h));
+}
+
+/**
+ * DNS-rebinding lock: reject Host headers that are not loopback
+ * (or an operator-declared tunnel hostname in hubAllowedHosts).
+ */
+export function hubHostOk(req, config = {}) {
+  const host = parseHostHeader(req.headers?.host);
+  if (!host) return false;
+  return allowedHubHosts(config).has(host);
+}
+
+/**
+ * Localhost CSRF lock for mutating /api routes.
+ * Missing Origin is allowed (CLI, curl, Node http). A present Origin must
+ * resolve to an allowed hub host.
+ */
+export function hubOriginOk(req, config = {}) {
+  const origin = req.headers?.origin;
+  if (origin == null || origin === '') return true;
+  try {
+    const hostname = new URL(String(origin)).hostname.toLowerCase();
+    const normalized = hostname.includes(':') && !hostname.startsWith('[') ? `[${hostname}]` : hostname;
+    return allowedHubHosts(config).has(normalized);
+  } catch {
+    return false;
+  }
+}
+
 export function clientIp(req) {
   const xff = req.headers['x-forwarded-for'];
   if (xff) return String(xff).split(',')[0].trim();

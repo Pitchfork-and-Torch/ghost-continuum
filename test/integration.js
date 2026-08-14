@@ -82,6 +82,51 @@ try {
   const verified = await get(exported.body.replayUrl.replace('/replay/', '/verify/'));
   assert.strictEqual(verified.body.ok, true);
 
+  const rebound = await new Promise((resolve, reject) => {
+    http.get(
+      {
+        hostname: '127.0.0.1',
+        port,
+        path: '/api/status',
+        headers: { Host: 'evil.example' },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => { data += c; });
+        res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      },
+    ).on('error', reject);
+  });
+  assert.strictEqual(rebound.status, 421);
+  assert.strictEqual(rebound.body.error, 'host not allowed');
+
+  const csrf = await new Promise((resolve, reject) => {
+    const payload = JSON.stringify({ label: 'csrf' });
+    const req = http.request(
+      {
+        hostname: '127.0.0.1',
+        port,
+        path: '/api/incident/snapshot',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+          Origin: 'https://evil.example',
+        },
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => { data += c; });
+        res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
+      },
+    );
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+  assert.strictEqual(csrf.status, 403);
+  assert.strictEqual(csrf.body.error, 'origin not allowed');
+
   console.log('ghost-continuum integration: OK');
 } finally {
   server.close();
