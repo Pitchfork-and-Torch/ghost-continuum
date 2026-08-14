@@ -56,7 +56,7 @@ import {
  startTrenchCloak,
  status as trenchStatus,
 } from '../../planes/src/trench-cloak.js';
-import { readBody, safeUiPath, sanitizeId, hubTokenOk } from './safe.js';
+import { readBody, safeUiPath, sanitizeId, hubTokenOk, rateLimit } from './safe.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -181,14 +181,30 @@ export async function buildStatus(config) {
 }
 
 export function startHub(config = loadConfig()) {
- const port = config.hubPort || 30000;
+  const port = config.hubPort || 30000;
+  // Write-side rate limit for mutating /api routes. Set writeRateLimitMax to 0 to disable.
+  const writeRlMax = Number.isFinite(config.writeRateLimitMax) ? config.writeRateLimitMax : 120;
+  const writeRlWindowMs = Number.isFinite(config.writeRateLimitWindowMs) ? config.writeRateLimitWindowMs : 10_000;
 
- const server = http.createServer(async (req, res) => {
+  const server = http.createServer(async (req, res) => {
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
- if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
- return json(res, 401, { ok: false, error: 'Hub token required' });
- }
+    if (req.method === 'POST' && url.pathname.startsWith('/api/') && !hubTokenOk(req, config)) {
+      return json(res, 401, { ok: false, error: 'Hub token required' });
+    }
+
+    if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
+      const rl = rateLimit(req, { windowMs: writeRlWindowMs, max: writeRlMax });
+      if (!rl.ok) {
+        const retryAfterSec = Math.max(1, Math.ceil(rl.retryAfterMs / 1000));
+        res.setHeader('Retry-After', String(retryAfterSec));
+        return json(res, 429, {
+          ok: false,
+          error: 'rate limited',
+          retryAfterMs: rl.retryAfterMs,
+        });
+      }
+    }
 
  if (url.pathname === '/' || url.pathname === '/index.html') {
  const file = path.join(UI_ROOT, 'index.html');
@@ -517,14 +533,14 @@ export function startHub(config = loadConfig()) {
  // Live mode: always build from real events (may be sparse / quiet immune system)
  if (!feed.length) {
  return {
- ok: true,
- version: '3.6.0',
- live: true,
- demo: false,
- morph: morphId,
- nodes: [
- {
- id: 'immune-core',
+      ok: true,
+      version: '3.6.0',
+      live: true,
+      demo: false,
+      morph: morphId,
+      nodes: [
+        {
+          id: 'immune-core',
  label: 'NEXUS-CORE',
  state: 'guardian',
  color: '#69f0ae',
@@ -895,12 +911,12 @@ export function startHub(config = loadConfig()) {
  status.continuum?.planes?.filter((p) => p.armed).length
  || status.armedCount
  || (status.demo ? 12 : 0);
- return json(res, 200, {
- ok: true,
- version: '3.6.0',
- codename: 'Crystal Membrane',
- live: true,
- sseClients: clientCount(),
+    return json(res, 200, {
+      ok: true,
+      version: '3.6.0',
+      codename: 'Crystal Membrane',
+      live: true,
+      sseClients: clientCount(),
  morph: status.continuum?.morph || { id: config.continuum?.morph || 'research' },
  efficacy: {
  score,

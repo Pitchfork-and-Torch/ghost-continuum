@@ -1,16 +1,17 @@
-# Ghost Continuum v3.3.7 - Crystal Nexus
+# Ghost Continuum v3.6.0 - Crystal Seal
 
-Premium tabbed **Command Nexus** under the Luminous Membrane design system.
+Sealed forensic replay plus hub write-path hardening - same defensive scope, zero core deps.
 
 ## Highlights
 
-- Tabbed cockpit: Overview · Ghost LAN · Genome · Forensics · Home Shield
-- Hover-expand fabric map fills the center bento for clean node interaction
-- Under-map deck: Protection · OPS · Devices · Hygiene (expand upward on hover)
-- Native Ghost LAN tab (hub-proxied APIs)
-- Simple help tips in plain language (toggle off anytime)
-- Operator chip links to [@suddenlyjon](https://x.com/suddenlyjon) on X
-- Defensive-only · local-first · zero core npm deps · MIT
+- **Sealed HTML forensic replay** - incident exports hash evidence after write (portable relative paths in `MANIFEST.json`) and ship a standalone `replay.html` you can open offline, print to PDF, and step with j/k. New CLI: `ghost-continuum seal [label]` / `ghost-continuum verify [dir|.tgz]`.
+- **O(1) Merkle ledger appends** - the tamper-evident ledger no longer re-reads the whole chain on every event (was O(n)/event, O(n^2) under bursts).
+- **Robust ledger verification** - `verifyLedger` anchors on its window, so long chains verify cleanly instead of falsely reporting a chain break.
+- **Flood-resistant control plane** - per-IP rate limit on mutating `POST /api/*` (default 120/10s -> `429`, `writeRateLimitMax` / `writeRateLimitWindowMs`, `0` disables). Plus a timing-safe hub bearer check.
+- **Release + ops automation** - `.github/workflows/release.yml` auto-publishes this Release from the CHANGELOG on tag push; `npm run deploy:site:unix` / `deploy:seo:unix` publish the public site from Linux/macOS/CI. See `docs/RELEASING.md`.
+- Defensive-only - local-first - zero core npm deps - MIT.
+
+> The hub write-path hardening was first cut on a parallel branch as v3.5.1 and is folded into 3.6.0 here.
 
 ## Install
 

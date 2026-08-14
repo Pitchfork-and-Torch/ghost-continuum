@@ -65,3 +65,40 @@ export function hubTokenOk(req, config) {
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
+
+export function clientIp(req) {
+  const xff = req.headers['x-forwarded-for'];
+  if (xff) return String(xff).split(',')[0].trim();
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+// Fixed-window, per-IP rate limiter for mutating control-plane routes. Keeps a
+// flood of writes from monopolizing the (necessarily serialized) persistence path.
+const rlBuckets = new Map();
+const RL_MAX_BUCKETS = 10_000;
+
+export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() } = {}) {
+  if (max <= 0) return { ok: true, remaining: Infinity, retryAfterMs: 0 };
+  const ip = clientIp(req);
+  const bucket = rlBuckets.get(ip);
+
+  if (!bucket || now - bucket.start >= windowMs) {
+    if (rlBuckets.size > RL_MAX_BUCKETS) {
+      for (const [key, b] of rlBuckets) {
+        if (now - b.start >= windowMs) rlBuckets.delete(key);
+      }
+    }
+    rlBuckets.set(ip, { start: now, count: 1 });
+    return { ok: true, remaining: max - 1, retryAfterMs: 0 };
+  }
+
+  bucket.count += 1;
+  if (bucket.count > max) {
+    return { ok: false, remaining: 0, retryAfterMs: bucket.start + windowMs - now };
+  }
+  return { ok: true, remaining: max - bucket.count, retryAfterMs: 0 };
+}
+
+export function resetRateLimits() {
+  rlBuckets.clear();
+}
