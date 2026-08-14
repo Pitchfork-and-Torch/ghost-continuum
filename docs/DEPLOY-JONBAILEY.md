@@ -96,6 +96,8 @@ Merge `deploy/jonbailey/config.jonbailey.json` into `~/.ghost-continuum/config.j
 }
 ```
 
+Leave `hubTrustProxy` off (default). The hub rate-limits on the socket address so a tab cannot spoof `X-Forwarded-For`. Only set `"hubTrustProxy": true` or `GC_HUB_TRUST_PROXY=1` if a proxy you control is the only path to the hub.
+
 Restart hub: `npm start`
 
 ---

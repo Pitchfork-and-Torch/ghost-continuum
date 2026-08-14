@@ -225,7 +225,7 @@ export function startHub(config = loadConfig()) {
     }
 
     if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
-      const rl = rateLimit(req, { windowMs: writeRlWindowMs, max: writeRlMax });
+      const rl = rateLimit(req, { windowMs: writeRlWindowMs, max: writeRlMax, config });
       if (!rl.ok) {
         const retryAfterSec = Math.max(1, Math.ceil(rl.retryAfterMs / 1000));
         res.setHeader('Retry-After', String(retryAfterSec));

@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] - Hub ignore X-Forwarded-For
+
+### Control-plane hygiene
+- Write-path rate limits key on the socket address by default. `X-Forwarded-For` is ignored unless `hubTrustProxy` / `GC_HUB_TRUST_PROXY=1`.
+- Even when trusted, the first hop must pass Node `net.isIP`; garbage falls back to the socket so a spoofed header cannot mint a fresh bucket.
+- `ghost-continuum doctor` reports the default and warns when the proxy trust flag is on. Landing untouched.
+
 ## [Unreleased] - Unix tweet-card + live version gate
 
 ### Public site ops

@@ -31,6 +31,7 @@ DM-Sentinel is a **defensive-only** local deception platform. This model covers 
 | Localhost CSRF from a random website | Mutating `/api/*` requires loopback (or declared) `Origin`; missing `Origin` still allowed for CLI |
 | Localhost CSRF via mutating GET | `GET /api/threat/watch` is read-only; quiet-hours / notify run on a hub timer (img tags omit `Origin`) |
 | Tunneled hub read / token leak | Extra hosts require `hubToken`; all `/api/*` methods check bearer or HttpOnly cookie; HTML never injects the token into JavaScript |
+| Rate-limit identity spoof | Ignore `X-Forwarded-For` unless `hubTrustProxy` / `GC_HUB_TRUST_PROXY=1`; first hop must pass `net.isIP` |
 | Unauthorized scope probes | Allowlist + `blockExploitOperators` |
 | Attacker escapes honeypot to host | Minimal listeners, no shell escape paths, container mirage isolated to localhost |
 | Ledger tampering | Merkle append-only chain + verify on export |
@@ -54,7 +55,7 @@ DM-Sentinel is a **defensive-only** local deception platform. This model covers 
 ## Recommendations
 
 1. Keep hub on loopback
-2. Do not add public names to `hubAllowedHosts` unless the hub is tunneled there — extra hosts **require** `hubToken` (enforced on `/api/*`)
+2. Do not add public names to `hubAllowedHosts` unless the hub is tunneled there — extra hosts **require** `hubToken` (enforced on `/api/*`). Do not set `hubTrustProxy` unless a proxy you control is the only path to the hub.
 3. Review `continuum.plugins` paths before enable
 4. Run `npm run doctor` after upgrades
 5. Export incidents via sealed `.tgz` for forensics chain of custody
