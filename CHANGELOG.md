@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.5.1] - 2026-08-14 - Crystal Membrane (hardening)
+
+### Hub write path + forensics
+- Merkle ledger now tracks its entry count incrementally instead of re-reading the entire chain on every append. Event persistence is O(1) per event again; previously a growing chain made writes O(n) (and campaign/threat bursts O(n²)), stalling the hub under sustained load.
+- `verifyLedger` anchors on the first entry of its verification window, so chains longer than the window (default 5000) verify correctly and terminate at the stored root instead of falsely reporting a chain break.
+- Mutating `POST /api/*` routes are now protected by a per-IP fixed-window rate limit (default 120 requests / 10s, `429` with `Retry-After` when exceeded). A write flood can no longer monopolize the serialized persistence path; the read path stays responsive. Tune with `writeRateLimitMax` / `writeRateLimitWindowMs` in the hub config (set max to `0` to disable).
+
+### Tests
+- `test/hardening.js`: covers the write-side rate limiter (per-IP window, reset, disable, `x-forwarded-for`) and the ledger counter + windowed verification.
+
+### Philosophy (unchanged)
+- Defensive-only · local-first · zero core npm dependencies · authorized networks only · MIT · no eval.
+
 ## [3.5.0] - 2026-08-13 - Crystal Membrane (engine)
 
 ### Command Nexus + engine

@@ -1,4 +1,4 @@
-# Ghost Continuum v3.5.0 - Crystal Membrane
+# Ghost Continuum v3.5.1 - Crystal Membrane
 
 <p align="center">
  <img src="assets/ghost-continuum-logo.png" alt="Ghost Continuum" width="320" />
@@ -6,7 +6,7 @@
 
 <p align="center">
  <a href="https://ghost.jonbailey.xyz/"><img src="https://img.shields.io/badge/live-ghost.jonbailey.xyz-5ec8c0?style=flat-square" alt="live" /></a>
- <img src="https://img.shields.io/badge/version-3.5.0-5ec8c0?style=flat-square" alt="version" />
+ <img src="https://img.shields.io/badge/version-3.5.1-5ec8c0?style=flat-square" alt="version" />
  <img src="https://img.shields.io/badge/design-Crystal%20Membrane-8eb8c8?style=flat-square" alt="design" />
  <img src="https://img.shields.io/badge/node-%3E%3D18-5ec8c0?style=flat-square" alt="node" />
  <img src="https://img.shields.io/badge/core%20deps-zero-6bc4a0?style=flat-square" alt="zero deps" />
@@ -16,7 +16,7 @@
 
 > *The immune system that watches back.*
 
-**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.5.0 Crystal Membrane** upgrades Command Nexus (command palette, time-window queries, keyboard cockpit) and the public landing on the Luminous Membrane design system - without changing defensive scope or zero-core-deps discipline.
+**Ghost Continuum** is a local-first **Living Digital Immune System**: polymorphic deception that evolves, morphs, contains, and seals. Version **3.5.1 Crystal Membrane** hardens the hub write path - an O(1) tamper-evident Merkle ledger and a flood-resistant control plane - on top of the v3.5.0 Command Nexus (command palette, time-window queries, keyboard cockpit), without changing defensive scope or zero-core-deps discipline.
 
 ```
 listen · breed · morph · remember · seal · evolve · contain
@@ -35,6 +35,15 @@ npm start
 **Public site:** https://ghost.jonbailey.xyz/ · **Preview:** https://ghost.jonbailey.xyz/hub/
 
 ---
+
+## What's new in v3.5.1 Crystal Membrane
+
+| Pillar | Capability |
+|--------|------------|
+| **O(1) Merkle ledger** | Incremental entry counting keeps event persistence constant-time as the chain grows (was O(n)/append) |
+| **Robust verification** | `verifyLedger` anchors on its window, so long chains verify cleanly instead of false "chain break" |
+| **Flood-resistant hub** | Per-IP rate limit on mutating `POST /api/*` (default 120/10s → `429`); read path stays responsive under write floods |
+| **Tests** | `test/hardening.js` covers the rate limiter and ledger counter/verify |
 
 ## What's new in v3.5.0 Crystal Membrane
 

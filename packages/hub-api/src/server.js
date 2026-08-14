@@ -501,7 +501,7 @@ export function startHub(config = loadConfig()) {
  if (!feed.length) {
  return {
  ok: true,
- version: '3.5.0',
+      version: '3.5.1',
  live: true,
  demo: false,
  morph: morphId,
@@ -877,7 +877,7 @@ export function startHub(config = loadConfig()) {
  || (status.demo ? 12 : 0);
  return json(res, 200, {
  ok: true,
- version: '3.5.0',
+      version: '3.5.1',
  codename: 'Crystal Membrane',
  live: true,
  sseClients: clientCount(),

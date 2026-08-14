@@ -1,5 +1,5 @@
 # Ghost Continuum
-> Open-source Living Digital Immune System - v3.5.0 Crystal Membrane. Command Nexus with command palette, time-window NL queries, keyboard cockpit, hover-expand fabric map, Ghost LAN tab, Home Shield, Merkle forensics. Defensive only. Local-first. Zero core npm deps.
+> Open-source Living Digital Immune System - v3.5.1 Crystal Membrane. Hardened hub write path (O(1) tamper-evident Merkle ledger, flood-resistant control plane), Command Nexus with command palette, time-window NL queries, keyboard cockpit, hover-expand fabric map, Ghost LAN tab, Home Shield, Merkle forensics. Defensive only. Local-first. Zero core npm deps.
 
 Site: https://ghost.jonbailey.xyz/
 Hub preview: https://ghost.jonbailey.xyz/hub/
@@ -8,14 +8,14 @@ License: MIT
 
 ## What it is
 
-Ghost Continuum is an open-source polymorphic honeypot and defensive deception engine: traps evolve via NSGA-II, personas morph at runtime, and evidence is Merkle-sealed - for authorized targets on your own network only. Version 3.5.0 Crystal Membrane upgrades Command Nexus (Ctrl/Cmd+K palette, last-24h queries that actually filter time, keyboard views) and the public landing.
+Ghost Continuum is an open-source polymorphic honeypot and defensive deception engine: traps evolve via NSGA-II, personas morph at runtime, and evidence is Merkle-sealed - for authorized targets on your own network only. Version 3.5.1 Crystal Membrane hardens the hub write path (constant-time Merkle ledger appends, per-IP rate limiting on mutating routes) on top of the v3.5.0 Command Nexus (Ctrl/Cmd+K palette, last-24h queries that actually filter time, keyboard views).
 
 ## Quick answers
 
 - **Offensive?** No. Defensive only.
 - **Cloud required?** No. Local-first. Optional Cloudflare edge for sites you already host.
 - **Core dependencies?** Zero npm packages in the engine. Node.js 18+.
-- **Latest version?** 3.5.0 Crystal Membrane - https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest
+- **Latest version?** 3.5.1 Crystal Membrane - https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest
 - **Install:** git clone, npm run setup, npm start -> http://127.0.0.1:30000
 - **Command Nexus 3.5:** Ctrl/Cmd+K palette, 1-5 views, / query, time-window + IP NL search
 - **Home Shield:** wizard + kid mode + quiet hours for home / lab operators
@@ -27,4 +27,4 @@ Ghost Continuum is an open-source polymorphic honeypot and defensive deception e
 - Hub preview: https://ghost.jonbailey.xyz/hub/
 - Design system: docs/DESIGN-SYSTEM-LUMINOUS-MEMBRANE.md
 
-# refreshed: 2026-08-13 · v3.5.0 Crystal Membrane
+# refreshed: 2026-08-14 · v3.5.1 Crystal Membrane

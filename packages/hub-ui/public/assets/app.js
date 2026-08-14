@@ -21,7 +21,7 @@ import {
 import { createCommandPalette } from './command-palette.js';
 
 const $ = (id) => document.getElementById(id);
-const VERSION = '3.5.0';
+const VERSION = '3.5.1';
 let ghostLanPanel = null;
 let currentView = 'overview';
 let commandPalette = null;

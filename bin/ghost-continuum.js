@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const BANNER = `
    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-   ▓  GHOST CONTINUUM v3.5.0 CRYSTAL MEMBRANE ▓
+   ▓  GHOST CONTINUUM v3.5.1 CRYSTAL MEMBRANE ▓
    ▓  Orchestration Nexus · Genome Engine ▓
    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓`;
 

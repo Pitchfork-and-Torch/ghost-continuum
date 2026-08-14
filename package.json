@@ -1,7 +1,7 @@
 {
   "name": "ghost-continuum",
-  "version": "3.5.0",
-  "description": "Living Digital Immune System - v3.5.0 Crystal Membrane. Command palette, time-window queries, keyboard cockpit, Command Nexus, Home Shield, Merkle forensics. Zero core deps.",
+  "version": "3.5.1",
+  "description": "Living Digital Immune System - v3.5.1 Crystal Membrane. Hardened hub write path (O(1) Merkle ledger, flood-resistant control plane), command palette, time-window queries, keyboard cockpit, Command Nexus, Home Shield, Merkle forensics. Zero core deps.",
   "type": "module",
   "bin": {
     "ghost-continuum": "./bin/ghost-continuum.js"
