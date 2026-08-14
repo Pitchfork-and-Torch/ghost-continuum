@@ -2,6 +2,6 @@
 
 Low-risk leftover for the next COOK tick:
 
-1. PowerShell tweet-card gate should request `share-card.jpg?v=` the expected version (Unix already does). Do not bump the version.
+1. PowerShell live endpoint HEAD should treat a Cloudflare 403 challenge as non-fatal (Unix only fails 404/5xx). Do not bump the version.
 
 Hold (not a COOK leftover): hardened eBPF probes, K8s operator, hosted plugin registry, production Tauri builds.
