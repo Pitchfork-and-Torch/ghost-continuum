@@ -10,12 +10,8 @@ import {
   saveConfig,
   appendEvent,
   readEvents,
-  exportIncidentSnapshot,
-  writeIncidentBundle,
-  createIncidentArchive,
-  sealManifest,
-  buildManifest,
 } from '../../core/src/index.js';
+import { createSealedIncident } from './seal-incident.js';
 import { rotateGhostLan } from './adapters/ghost-lan.js';
 import { runEvolutionCycle, loadPool, getChampion } from '../../genome/src/index.js';
 import { SENTINEL_MORPHS } from '../../continuum/src/morphs.js';
@@ -26,10 +22,6 @@ import { toStixBundle } from '../../trust/src/stix.js';
 import { filterLiveEvents, isDemoEvent } from './demo-campaign.js';
 import { runNlQuery } from './nl-query.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import fs from 'fs';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const HIGH_SCORE = 6;
 const CRITICAL_SCORE = 7;
@@ -378,7 +370,6 @@ export async function executeThreatResponse(options = {}) {
   if (doSeal && options.seal !== false) {
     try {
       const label = sanitizeLabel(options.label || `threat-${assessment.severity}-${Date.now()}`);
-      const dir = exportIncidentSnapshot(label);
       const events = filterLiveEvents(readEvents(1000));
       const statusSlice = {
         assessment,
@@ -389,36 +380,29 @@ export async function executeThreatResponse(options = {}) {
         generatedAt: new Date().toISOString(),
         defensiveOnly: true,
       };
-      const legalPath = path.join(__dirname, '../../../LEGAL.md');
-      writeIncidentBundle(dir, {
-        'threat-assessment.json': assessment,
-        'response-log.json': { log, actionsTaken },
-        'status-slice.json': statusSlice,
-        'events.jsonl': events.map((e) => JSON.stringify(e)).join('\n'),
-        'stix-bundle.json': toStixBundle(events.slice(0, 200), { org: config.primaryDomain || 'ghost-continuum-local' }),
-        'LEGAL.md': fs.existsSync(legalPath) ? fs.readFileSync(legalPath, 'utf8') : 'Defensive use only.',
+      const sealed = await createSealedIncident({
+        label,
+        events,
+        status: statusSlice,
+        extraFiles: {
+          'threat-assessment.json': assessment,
+          'response-log.json': { log, actionsTaken },
+          'stix-bundle.json': toStixBundle(events.slice(0, 200), { org: config.primaryDomain || 'ghost-continuum-local' }),
+        },
+        archive: true,
       });
-      const manifest = sealManifest(
-        buildManifest([
-          { path: path.join(dir, 'threat-assessment.json'), note: 'assessment' },
-          { path: path.join(dir, 'events.jsonl'), note: 'events' },
-        ]),
-      );
-      let archivePath = null;
-      let downloadId = null;
-      try {
-        archivePath = await createIncidentArchive(dir);
-        downloadId = path.basename(archivePath, '.tgz');
-      } catch {
-        /* archive optional if tar unavailable */
-      }
+      const downloadId = sealed.archivePath ? path.basename(sealed.archivePath, '.tgz') : sealed.id;
       sealResult = {
         ok: true,
-        dir,
-        manifestHash: manifest.manifestHash,
-        archivePath,
+        dir: sealed.dir,
+        id: sealed.id,
+        manifestHash: sealed.manifestHash,
+        merkleRoot: sealed.merkleRoot,
+        archivePath: sealed.archivePath,
+        htmlPath: sealed.htmlPath,
         downloadId,
-        downloadUrl: downloadId ? `/api/incident/download/${downloadId}` : null,
+        downloadUrl: sealed.downloadUrl,
+        replayUrl: sealed.replayUrl,
       };
       // Register download if archive created — caller/server may re-register
       appendEvent({

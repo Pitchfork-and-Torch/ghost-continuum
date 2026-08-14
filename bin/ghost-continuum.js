@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const BANNER = `
    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-   ▓  GHOST CONTINUUM v3.5.0 CRYSTAL MEMBRANE ▓
+   ▓  GHOST CONTINUUM v3.6.0 CRYSTAL SEAL ▓
    ▓  Orchestration Nexus · Genome Engine ▓
    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓`;
 
@@ -164,6 +164,47 @@ async function cmdPlanes() {
   process.exit(1);
 }
 
+async function cmdSeal() {
+  const { createSealedIncident } = await import('../packages/hub-api/src/seal-incident.js');
+  const label = process.argv[3] || 'cli-seal';
+  const sealed = await createSealedIncident({ label, archive: true });
+  console.log(BANNER);
+  console.log('\n  Sealed forensic bundle\n');
+  console.log(`  Directory  ${sealed.dir}`);
+  console.log(`  Hash       ${sealed.manifestHash}`);
+  console.log(`  Events     ${sealed.eventCount} · branches ${sealed.branches}`);
+  console.log(`  Replay     ${sealed.htmlPath}`);
+  if (sealed.archivePath) console.log(`  Archive    ${sealed.archivePath}`);
+  console.log(`\n  Open replay.html in a browser (offline). Verify later:`);
+  console.log(`  ghost-continuum verify ${sealed.dir}\n`);
+}
+
+async function cmdVerify() {
+  const { verifySealedTarget } = await import('../packages/core/src/seal-bundle.js');
+  const target = process.argv[3];
+  const result = await verifySealedTarget(target);
+  console.log(BANNER);
+  console.log('\n  Verify sealed bundle\n');
+  if (result.dir) console.log(`  Directory  ${result.dir}`);
+  if (result.archive) console.log(`  Archive    ${result.archive}`);
+  if (result.manifestHash) console.log(`  Hash       ${result.manifestHash}`);
+  if (result.entries != null) console.log(`  Files      ${result.entries}`);
+  if (result.ok) {
+    console.log('  Result     OK — hashes match the manifest\n');
+    return;
+  }
+  console.log(`  Result     FAIL — ${result.error || 'integrity mismatch'}`);
+  for (const m of result.mismatches || []) {
+    console.log(`  · ${m.path}: ${m.reason}${m.expected ? ` expected ${String(m.expected).slice(0, 12)}…` : ''}`);
+  }
+  console.log('');
+  process.exit(1);
+}
+
+function printUsage() {
+  console.log('Usage: ghost-continuum start | doctor | planes | seal [label] | verify [path]');
+}
+
 const cmd = process.argv[2] || 'start';
 
 if (cmd === 'start') {
@@ -181,7 +222,17 @@ if (cmd === 'start') {
     console.error(e);
     process.exit(1);
   });
+} else if (cmd === 'seal') {
+  cmdSeal().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+} else if (cmd === 'verify') {
+  cmdVerify().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 } else {
-  console.log('Usage: ghost-continuum start | doctor | planes');
+  printUsage();
   process.exit(1);
 }
