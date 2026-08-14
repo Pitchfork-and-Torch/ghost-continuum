@@ -99,6 +99,7 @@ assert.ok(seoWin.includes('SEO_EXPECT_VERSION') || seoWin.includes('$ExpectVersi
 assert.ok(seoWin.includes('share-card.jpg?v=') || seoWin.includes('SEO_CARD_URL'), 'PowerShell tweet-card gate must use a versioned card URL');
 assert.ok(!seoWin.includes('StatusCode -ge 400'), 'PowerShell HEAD must not treat 403 challenge as a hard fail');
 assert.ok(seoWin.includes('-eq 404') && seoWin.includes('-ge 500'), 'PowerShell HEAD must fail only on 404/5xx');
+assert.ok(seoWin.includes('ghost-continuum-seo/1.0'), 'PowerShell SEO must send the Unix SEO user-agent');
 const deployUnix = read('scripts/deploy-site.sh');
 assert.ok(deployUnix.includes('ffd8ff'), 'deploy-site.sh must JPEG-gate share-card.jpg');
 console.log('  ✓ tweet-card JPEG + unix SEO/deploy gates');

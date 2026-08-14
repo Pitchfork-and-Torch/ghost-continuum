@@ -4,6 +4,7 @@ $ErrorActionPreference = "Continue"
 $Base = "https://ghost.jonbailey.xyz"
 $ExpectVersion = if ($env:SEO_EXPECT_VERSION) { $env:SEO_EXPECT_VERSION } else { "3.6.0" }
 $ContentAlias = if ($env:SEO_CONTENT_ALIAS) { $env:SEO_CONTENT_ALIAS } else { "https://ghost-continuum.pages.dev" }
+$Ua = "Mozilla/5.0 (compatible; ghost-continuum-seo/1.0)"
 $Key = "7577922ed4d3ec3df303933b78cbd0ee"
 $Urls = @(
   "$Base/",
@@ -25,7 +26,7 @@ Write-Host "=== Live endpoint verification ===" -ForegroundColor Cyan
 $fail = 0
 foreach ($u in $Urls) {
   try {
-    $r = Invoke-WebRequest -Uri $u -Method Head -UseBasicParsing -TimeoutSec 30
+    $r = Invoke-WebRequest -Uri $u -Method Head -UseBasicParsing -TimeoutSec 30 -UserAgent $Ua
     $code = [int]$r.StatusCode
     $ct = $r.Headers["Content-Type"]
     Write-Host ("  {0}  {1}  {2}" -f $code, $u, $ct)
@@ -49,7 +50,7 @@ Write-Host "`n=== HTML meta / AEO spot-check ===" -ForegroundColor Cyan
 try {
   $html = ""
   try {
-    $html = (Invoke-WebRequest -Uri "$Base/" -UseBasicParsing -TimeoutSec 30).Content
+    $html = (Invoke-WebRequest -Uri "$Base/" -UseBasicParsing -TimeoutSec 30 -UserAgent $Ua).Content
   } catch {
     $html = ""
   }
@@ -59,7 +60,7 @@ try {
     $html -match '(?i)just a moment|cf-mitigated|cf_chl|challenge-platform' -or
     $html -notmatch 'Crystal Seal'
   if ($challenged) {
-    $html = (Invoke-WebRequest -Uri "$ContentAlias/" -UseBasicParsing -TimeoutSec 30).Content
+    $html = (Invoke-WebRequest -Uri "$ContentAlias/" -UseBasicParsing -TimeoutSec 30 -UserAgent $Ua).Content
     Write-Host ("  (apex challenged to bots; verified content via {0})" -f $ContentAlias)
   }
   $checks = @(
@@ -104,12 +105,12 @@ Write-Host "`n=== Live js/main.js dataset.version ===" -ForegroundColor Cyan
 try {
   $js = ""
   try {
-    $js = (Invoke-WebRequest -Uri "$Base/js/main.js" -UseBasicParsing -TimeoutSec 30).Content
+    $js = (Invoke-WebRequest -Uri "$Base/js/main.js" -UseBasicParsing -TimeoutSec 30 -UserAgent $Ua).Content
   } catch {
     $js = ""
   }
   if ($js -notmatch 'dataset\.version') {
-    $js = (Invoke-WebRequest -Uri "$ContentAlias/js/main.js" -UseBasicParsing -TimeoutSec 30).Content
+    $js = (Invoke-WebRequest -Uri "$ContentAlias/js/main.js" -UseBasicParsing -TimeoutSec 30 -UserAgent $Ua).Content
     Write-Host ("  (apex js missed; verified via {0}/js/main.js)" -f $ContentAlias)
   }
   $expect = "dataset.version = '$ExpectVersion'"

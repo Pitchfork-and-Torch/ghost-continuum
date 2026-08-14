@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO user-agent
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` live HEAD / HTML / JS fetches send `ghost-continuum-seo/1.0`, matching Unix. Tweet-card gate still uses Twitterbot / Facebook / Mozilla. Landing untouched.
+
 ## [Unreleased] - PowerShell SEO 403 is non-fatal
 
 ### Public site ops
