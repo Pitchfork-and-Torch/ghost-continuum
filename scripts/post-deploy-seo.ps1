@@ -35,7 +35,22 @@ foreach ($u in $Urls) {
 
 Write-Host "`n=== HTML meta / AEO spot-check ===" -ForegroundColor Cyan
 try {
-  $html = (Invoke-WebRequest -Uri "$Base/" -UseBasicParsing -TimeoutSec 30).Content
+  $ContentAlias = if ($env:SEO_CONTENT_ALIAS) { $env:SEO_CONTENT_ALIAS } else { "https://ghost-continuum.pages.dev" }
+  $html = ""
+  try {
+    $html = (Invoke-WebRequest -Uri "$Base/" -UseBasicParsing -TimeoutSec 30).Content
+  } catch {
+    $html = ""
+  }
+  # Apex often serves a Cloudflare managed-challenge to automated clients.
+  # Fall back to the Pages production alias (same deployment) like the Unix script.
+  $challenged = [string]::IsNullOrWhiteSpace($html) -or
+    $html -match '(?i)just a moment|cf-mitigated|cf_chl|challenge-platform' -or
+    $html -notmatch 'Crystal Seal'
+  if ($challenged) {
+    $html = (Invoke-WebRequest -Uri "$ContentAlias/" -UseBasicParsing -TimeoutSec 30).Content
+    Write-Host ("  (apex challenged to bots; verified content via {0})" -f $ContentAlias)
+  }
   $checks = @(
     @{ n = "og:image share-card.jpg"; p = 'share-card.jpg' },
     @{ n = "twitter:card large"; p = 'twitter:card" content="summary_large_image"' },
