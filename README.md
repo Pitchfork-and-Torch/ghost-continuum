@@ -42,7 +42,7 @@ npm start
 |--------|------------|
 | **Sealed replay** | Each SEAL writes `replay.html` — open offline, print to PDF, step with j/k |
 | **Integrity** | Evidence hashed after write; portable `MANIFEST.json`; tamper fails verify |
-| **CLI** | `ghost-continuum seal [label]` · `ghost-continuum verify [dir\\|.tgz]` |
+| **CLI** | `ghost-continuum seal [label]` · `ghost-continuum verify [dir\|.tgz]` |
 
 ## What's new in v3.5.0 Crystal Membrane
 
