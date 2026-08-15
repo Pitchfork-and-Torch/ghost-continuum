@@ -45,7 +45,7 @@ Tag on `main` after your PR merges so the release reflects shipped code. `/relea
 
 ## 3. Publish the public site
 
-From Windows: `npm run deploy:site` then `npm run deploy:seo` (Crystal Seal, Pages fallback, live `dataset.version`, versioned tweet-card; 403 non-fatal; `ghost-continuum-seo/1.0` UA).
+From Windows: `npm run deploy:site` then `npm run deploy:seo` (same gates as Unix; override base with `SEO_BASE`).
 From Linux / macOS / CI (no PowerShell needed):
 
 ```bash

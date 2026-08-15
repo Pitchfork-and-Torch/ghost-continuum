@@ -1,7 +1,7 @@
 # Post-deploy SEO / AEO / IndexNow for Ghost Continuum (ghost.jonbailey.xyz)
 # Run after every major public site deploy: npm run deploy:site; then this script.
 $ErrorActionPreference = "Continue"
-$Base = "https://ghost.jonbailey.xyz"
+$Base = if ($env:SEO_BASE) { $env:SEO_BASE.Trim().TrimEnd('/') } else { "https://ghost.jonbailey.xyz" }
 $ExpectVersion = if ($env:SEO_EXPECT_VERSION) { $env:SEO_EXPECT_VERSION } else { "3.6.0" }
 $ContentAlias = if ($env:SEO_CONTENT_ALIAS) { $env:SEO_CONTENT_ALIAS } else { "https://ghost-continuum.pages.dev" }
 $Ua = "Mozilla/5.0 (compatible; ghost-continuum-seo/1.0)"
