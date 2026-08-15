@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - Unix HTML og:image + twitter:card gates
+
+### Public site ops
+- `scripts/post-deploy-seo.sh` HTML spot-check now requires `og:image` `share-card.jpg` and `twitter:card` `summary_large_image`, matching PowerShell. Landing untouched.
+
 ## [Unreleased] - Unix IndexNow urlList from URLS
 
 ### Public site ops

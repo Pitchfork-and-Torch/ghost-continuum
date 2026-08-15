@@ -69,6 +69,8 @@ ver_re="$(printf '%s' "$EXPECT_VERSION" | sed 's/\./\\./g')"
 check() { # <label> <regex>
   if printf '%s' "$html" | grep -Eq "$2"; then echo "  OK  $1"; else echo "  MISS  $1"; fail=$((fail+1)); fi
 }
+check "og:image share-card.jpg" 'share-card\.jpg'
+check "twitter:card large" 'twitter:card" content="summary_large_image"'
 check "softwareVersion $EXPECT_VERSION" "\"softwareVersion\": *\"$ver_re\""
 check "Crystal Seal" "Crystal Seal"
 check "llms.txt link" "llms\.txt"
