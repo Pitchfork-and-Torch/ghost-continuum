@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.ghost-continuum</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/opt/ghost-continuum/bin/start-stack.js</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>GC_NO_BROWSER</key>
+    <string>1</string>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>/opt/ghost-continuum</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/var/log/ghost-continuum.log</string>
+  <key>StandardErrorPath</key>
+  <string>/var/log/ghost-continuum.err</string>
+</dict>
+</plist>

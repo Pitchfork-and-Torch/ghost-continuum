@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Ghost Continuum v3.3.7 Crystal Nexus architecture</title>
+  <desc id="desc">Tabbed Command Nexus with hover-expand fabric map, Ghost LAN native tab, best decoy personalities, protection deck, simple help tips, Home Shield, and Merkle forensics. Defensive only, local-first, zero core npm deps.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1018"/>
+      <stop offset="45%" stop-color="#0f1620"/>
+      <stop offset="100%" stop-color="#121a24"/>
+    </linearGradient>
+    <linearGradient id="membrane" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5ec8c0"/>
+      <stop offset="55%" stop-color="#8eb8c8"/>
+      <stop offset="100%" stop-color="#6bc4a0"/>
+    </linearGradient>
+    <linearGradient id="planeFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(94,200,192,0.14)"/>
+      <stop offset="100%" stop-color="rgba(14,20,30,0.92)"/>
+    </linearGradient>
+    <linearGradient id="planeFillAlt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(142,184,200,0.12)"/>
+      <stop offset="100%" stop-color="rgba(14,20,30,0.92)"/>
+    </linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+    <pattern id="softGrid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="rgba(94,200,192,0.045)" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="orbL" cx="20%" cy="20%" r="55%">
+      <stop offset="0%" stop-color="rgba(94,200,192,0.12)"/>
+      <stop offset="100%" stop-color="rgba(94,200,192,0)"/>
+    </radialGradient>
+    <radialGradient id="orbR" cx="80%" cy="75%" r="50%">
+      <stop offset="0%" stop-color="rgba(142,184,200,0.1)"/>
+      <stop offset="100%" stop-color="rgba(142,184,200,0)"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="720" rx="28" fill="url(#bg)"/>
+  <rect width="1200" height="720" rx="28" fill="url(#softGrid)"/>
+  <rect width="1200" height="720" rx="28" fill="url(#orbL)"/>
+  <rect width="1200" height="720" rx="28" fill="url(#orbR)"/>
+  <rect x="1" y="1" width="1198" height="718" rx="27" fill="none" stroke="rgba(94,200,192,0.12)" stroke-width="1"/>
+
+  <text x="56" y="48" fill="#5ec8c0" font-family="system-ui,Segoe UI,sans-serif" font-size="13" font-weight="600" letter-spacing="5">GHOST CONTINUUM</text>
+  <text x="56" y="88" fill="#e8eef4" font-family="system-ui,Segoe UI,sans-serif" font-size="32" font-weight="700">Living Digital Immune System</text>
+  <text x="56" y="118" fill="#8eb8c8" font-family="system-ui,Segoe UI,sans-serif" font-size="14" font-weight="600" letter-spacing="1.2">v3.3.7 CRYSTAL NEXUS</text>
+  <text x="56" y="144" fill="#8b9aab" font-family="system-ui,Segoe UI,sans-serif" font-size="14">Detect · Morph · Contain · Seal · defensive only · local-first · zero core deps</text>
+
+  <!-- Tabs -->
+  <g font-family="system-ui,Segoe UI,sans-serif" font-size="11" font-weight="600">
+    <rect x="56" y="168" width="88" height="28" rx="14" fill="#5ec8c0"/>
+    <text x="100" y="186" text-anchor="middle" fill="#0b1018">Overview</text>
+    <rect x="152" y="168" width="90" height="28" rx="14" fill="rgba(18,26,36,0.9)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="197" y="186" text-anchor="middle" fill="#5ec8c0">Ghost LAN</text>
+    <rect x="250" y="168" width="78" height="28" rx="14" fill="rgba(18,26,36,0.9)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="289" y="186" text-anchor="middle" fill="#8b9aab">Genome</text>
+    <rect x="336" y="168" width="86" height="28" rx="14" fill="rgba(18,26,36,0.9)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="379" y="186" text-anchor="middle" fill="#8b9aab">Forensics</text>
+    <rect x="430" y="168" width="96" height="28" rx="14" fill="rgba(18,26,36,0.9)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="478" y="186" text-anchor="middle" fill="#8b9aab">Home Shield</text>
+  </g>
+
+  <!-- Left: efficacy + decoys -->
+  <g filter="url(#cardShadow)" font-family="system-ui,Segoe UI,sans-serif">
+    <rect x="56" y="214" width="220" height="200" rx="16" fill="url(#planeFill)" stroke="rgba(94,200,192,0.32)"/>
+    <text x="76" y="242" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1">THREAT EFFICACY</text>
+    <circle cx="166" cy="310" r="48" fill="none" stroke="rgba(94,200,192,0.15)" stroke-width="10"/>
+    <circle cx="166" cy="310" r="48" fill="none" stroke="#5ec8c0" stroke-width="10" stroke-dasharray="226" stroke-dashoffset="54" stroke-linecap="round" transform="rotate(-90 166 310)"/>
+    <text x="166" y="316" text-anchor="middle" fill="#e8eef4" font-size="22" font-weight="700">76%</text>
+    <text x="166" y="334" text-anchor="middle" fill="#8b9aab" font-size="10">CONTAINMENT</text>
+
+    <rect x="56" y="430" width="220" height="170" rx="16" fill="url(#planeFillAlt)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="76" y="458" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1">BEST DECOY PERSONALITIES</text>
+    <text x="76" y="488" fill="#e8eef4" font-size="13" font-weight="600">#1 CHAD ALPHA</text>
+    <text x="76" y="512" fill="#8b9aab" font-size="12">#2 BETA WARDEN</text>
+    <text x="76" y="536" fill="#8b9aab" font-size="12">#3 GEN-5</text>
+    <text x="76" y="568" fill="#6bc4a0" font-size="11">NSGA-II evolve pool</text>
+  </g>
+
+  <!-- Center: map banner + deck -->
+  <g filter="url(#cardShadow)" font-family="system-ui,Segoe UI,sans-serif">
+    <rect x="294" y="214" width="612" height="210" rx="16" fill="rgba(14,20,30,0.96)" stroke="url(#membrane)" stroke-width="1.8"/>
+    <text x="314" y="242" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1.5">LIVING FABRIC MAP</text>
+    <text x="860" y="242" text-anchor="end" fill="#8b9aab" font-size="10" letter-spacing="1">HOVER TO EXPAND</text>
+    <!-- map rings -->
+    <circle cx="600" cy="330" r="28" fill="none" stroke="rgba(94,200,192,0.35)" stroke-width="1.5"/>
+    <circle cx="600" cy="330" r="52" fill="none" stroke="rgba(94,200,192,0.2)" stroke-width="1"/>
+    <circle cx="600" cy="330" r="76" fill="none" stroke="rgba(94,200,192,0.12)" stroke-width="1"/>
+    <circle cx="600" cy="330" r="10" fill="#5ec8c0" filter="url(#softGlow)"/>
+    <text x="600" y="360" text-anchor="middle" fill="#e8eef4" font-size="11" font-weight="600">NEXUS CORE</text>
+    <circle cx="520" cy="300" r="6" fill="#8eb8c8"/>
+    <circle cx="680" cy="290" r="6" fill="#6bc4a0"/>
+    <circle cx="560" cy="370" r="5" fill="#c97884"/>
+    <circle cx="650" cy="360" r="5" fill="#5ec8c0"/>
+
+    <!-- deck 4 tiles -->
+    <rect x="294" y="438" width="144" height="100" rx="14" fill="url(#planeFill)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="366" y="470" text-anchor="middle" fill="#5ec8c0" font-size="11" font-weight="700">PROTECTION</text>
+    <text x="366" y="492" text-anchor="middle" fill="#8b9aab" font-size="11">layers · arm</text>
+    <text x="366" y="516" text-anchor="middle" fill="#8b9aab" font-size="10">hover expands up</text>
+
+    <rect x="450" y="438" width="144" height="100" rx="14" fill="url(#planeFillAlt)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="522" y="470" text-anchor="middle" fill="#5ec8c0" font-size="11" font-weight="700">OPS</text>
+    <text x="522" y="492" text-anchor="middle" fill="#8b9aab" font-size="11">seal · rotate</text>
+    <text x="522" y="516" text-anchor="middle" fill="#8b9aab" font-size="10">max · what-if</text>
+
+    <rect x="606" y="438" width="144" height="100" rx="14" fill="url(#planeFill)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="678" y="470" text-anchor="middle" fill="#5ec8c0" font-size="11" font-weight="700">DEVICES</text>
+    <text x="678" y="492" text-anchor="middle" fill="#8b9aab" font-size="11">household trust</text>
+    <text x="678" y="516" text-anchor="middle" fill="#8b9aab" font-size="10">Home Shield</text>
+
+    <rect x="762" y="438" width="144" height="100" rx="14" fill="url(#planeFillAlt)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="834" y="470" text-anchor="middle" fill="#5ec8c0" font-size="11" font-weight="700">HYGIENE</text>
+    <text x="834" y="492" text-anchor="middle" fill="#8b9aab" font-size="11">progress badges</text>
+    <text x="834" y="516" text-anchor="middle" fill="#8b9aab" font-size="10">weekly report</text>
+  </g>
+
+  <!-- Right: morph + intel + threat -->
+  <g filter="url(#cardShadow)" font-family="system-ui,Segoe UI,sans-serif">
+    <rect x="924" y="214" width="220" height="160" rx="16" fill="url(#planeFill)" stroke="rgba(94,200,192,0.3)"/>
+    <text x="944" y="242" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1">MORPH MODE</text>
+    <text x="944" y="272" fill="#e8eef4" font-size="13">Stealth · Research</text>
+    <text x="944" y="296" fill="#8b9aab" font-size="13">Aggressive · Forensic</text>
+    <text x="944" y="330" fill="#6bc4a0" font-size="12">defensive posture only</text>
+
+    <rect x="924" y="390" width="220" height="100" rx="16" fill="url(#planeFillAlt)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="944" y="418" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1">GHOST LAN TAB</text>
+    <text x="944" y="446" fill="#e8eef4" font-size="13">Native sentinel panel</text>
+    <text x="944" y="470" fill="#8b9aab" font-size="12">no second browser window</text>
+
+    <rect x="924" y="506" width="220" height="94" rx="16" fill="url(#planeFill)" stroke="rgba(94,200,192,0.28)"/>
+    <text x="944" y="534" fill="#5ec8c0" font-size="11" font-weight="700" letter-spacing="1">SIMPLE HELP TIPS</text>
+    <text x="944" y="562" fill="#e8eef4" font-size="12">Glass popups · plain language</text>
+    <text x="944" y="582" fill="#8b9aab" font-size="12">toggle TIPS ON / OFF</text>
+  </g>
+
+  <!-- Bottom rail -->
+  <g font-family="system-ui,Segoe UI,sans-serif" filter="url(#cardShadow)">
+    <rect x="56" y="624" width="1088" height="52" rx="14" fill="rgba(14,20,30,0.94)" stroke="rgba(94,200,192,0.22)"/>
+    <text x="78" y="646" fill="#5ec8c0" font-size="12" font-weight="700" letter-spacing="1">MERKLE · FORENSICS · HOME SHIELD · @SUDDENLYJON</text>
+    <text x="1108" y="646" text-anchor="end" fill="#6bc4a0" font-size="12" font-weight="700" letter-spacing="1">DEFENSIVE ONLY</text>
+  </g>
+</svg>
