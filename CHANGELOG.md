@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - IndexNow host from SEO_BASE
+
+### Public site ops
+- Both SEO scripts derive IndexNow `host` from `SEO_BASE` (fallback `ghost.jonbailey.xyz`). Landing untouched.
+
 ## [Unreleased] - PowerShell SEO_BASE
 
 ### Public site ops
