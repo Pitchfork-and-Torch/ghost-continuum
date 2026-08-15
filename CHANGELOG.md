@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - Unix IndexNow urlList from URLS
+
+### Public site ops
+- `scripts/post-deploy-seo.sh` builds IndexNow `urlList` from the same `URLS` array as the HEAD checks (PowerShell already did). Landing untouched.
+
 ## [Unreleased] - IndexNow host from SEO_BASE
 
 ### Public site ops

@@ -103,6 +103,10 @@ assert.ok(seoWin.includes('ghost-continuum-seo/1.0'), 'PowerShell SEO must send 
 assert.ok(seoWin.includes('SEO_BASE'), 'PowerShell SEO must honor SEO_BASE');
 assert.ok(!seoUnix.includes('host:"ghost.jonbailey.xyz"'), 'unix IndexNow host must derive from SEO_BASE');
 assert.ok(seoUnix.includes('new URL(base).hostname'), 'unix IndexNow host must parse SEO_BASE');
+assert.ok(!seoUnix.includes('["/","/hub/","/llms.txt"'), 'unix IndexNow urlList must not hardcode paths');
+assert.ok(!seoUnix.includes('.map(p=>base+p)'), 'unix IndexNow urlList must not rebuild paths from literals');
+assert.ok(seoUnix.includes('"${URLS[@]}"'), 'unix IndexNow urlList must come from the HEAD URLS array');
+assert.ok(seoWin.includes('urlList     = $Urls') || seoWin.includes('urlList = $Urls'), 'PowerShell IndexNow urlList must reuse $Urls');
 assert.ok(!/host\s*=\s*"ghost\.jonbailey\.xyz"/.test(seoWin), 'PowerShell IndexNow host must derive from SEO_BASE');
 assert.ok(seoWin.includes('[uri]$Base') || seoWin.includes('([uri]$Base)'), 'PowerShell IndexNow host must parse SEO_BASE');
 const deployUnix = read('scripts/deploy-site.sh');
