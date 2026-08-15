@@ -126,8 +126,10 @@ try {
 }
 
 Write-Host "`n=== IndexNow submit ===" -ForegroundColor Cyan
+$SeoHost = "ghost.jonbailey.xyz"
+try { $SeoHost = ([uri]$Base).Host } catch { /* keep default */ }
 $body = @{
-  host        = "ghost.jonbailey.xyz"
+  host        = $SeoHost
   key         = $Key
   keyLocation = "$Base/$Key.txt"
   urlList     = $Urls

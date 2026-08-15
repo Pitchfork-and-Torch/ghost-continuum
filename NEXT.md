@@ -2,6 +2,6 @@
 
 Low-risk leftover for the next COOK tick:
 
-1. IndexNow `host` should derive from `SEO_BASE` on both SEO scripts (currently hardcoded to ghost.jonbailey.xyz). Do not bump the version.
+1. Unix IndexNow `urlList` should be built from the same `URLS` array as the HEAD checks (currently duplicated). Do not bump the version.
 
 Hold (not a COOK leftover): hardened eBPF probes, K8s operator, hosted plugin registry, production Tauri builds.

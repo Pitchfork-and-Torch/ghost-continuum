@@ -45,7 +45,7 @@ Tag on `main` after your PR merges so the release reflects shipped code. `/relea
 
 ## 3. Publish the public site
 
-From Windows: `npm run deploy:site` then `npm run deploy:seo` (same gates as Unix; override base with `SEO_BASE`).
+From Windows: `npm run deploy:site` then `npm run deploy:seo` (same gates as Unix; override base with `SEO_BASE`; IndexNow `host` follows that base).
 From Linux / macOS / CI (no PowerShell needed):
 
 ```bash
