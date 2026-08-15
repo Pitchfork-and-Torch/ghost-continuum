@@ -90,13 +90,14 @@ fi
 
 echo ""
 echo "=== IndexNow submit ==="
+# Same URLS as the HEAD checks - do not keep a second path list here.
 payload=$(KEY="$KEY" BASE="$BASE" node -e '
 const key=process.env.KEY, base=process.env.BASE;
 let host="ghost.jonbailey.xyz";
 try { host = new URL(base).hostname; } catch { /* keep default */ }
-const urls=["/","/hub/","/llms.txt","/sitemap.xml","/robots.txt","/og-card.png","/og-card.jpg","/og-card-v3.png","/og-card-v3.jpg","/share-card.png","/share-card.jpg","/infographic.svg","/hub/command-nexus.png"].map(p=>base+p);
+const urls=process.argv.slice(1);
 process.stdout.write(JSON.stringify({host,key,keyLocation:`${base}/${key}.txt`,urlList:urls}));
-')
+' -- "${URLS[@]}")
 for ep in "https://api.indexnow.org/indexnow" "https://www.bing.com/indexnow"; do
   code=$(curl -s -m 45 -o /dev/null -w "%{http_code}" -X POST "$ep" \
     -H "Content-Type: application/json; charset=utf-8" --data "$payload")
