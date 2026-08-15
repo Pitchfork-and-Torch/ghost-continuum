@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] - PowerShell SEO_BASE
+
+### Public site ops
+- `scripts/post-deploy-seo.ps1` honors `SEO_BASE` (default `https://ghost.jonbailey.xyz`), matching Unix. Landing untouched.
+
 ## [Unreleased] - PowerShell SEO user-agent
 
 ### Public site ops
