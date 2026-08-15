@@ -90,7 +90,7 @@ fi
 
 echo ""
 echo "=== IndexNow submit ==="
-# Same URLS as the HEAD checks — do not keep a second path list here.
+# Same URLS as the HEAD checks - do not keep a second path list here.
 payload=$(KEY="$KEY" BASE="$BASE" node -e '
 const key=process.env.KEY, base=process.env.BASE;
 let host="ghost.jonbailey.xyz";
