@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <meta name="description" content="Ghost Continuum - open-source Living Digital Immune System. Command Nexus, NSGA-II genomes, multi-plane defensive fabric, Home Shield, Merkle forensics. Defensive only. Local-first. Zero core npm deps." />
+ <meta name="robots" content="index, follow, max-image-preview:large" />
+ <meta name="keywords" content="Ghost Continuum, living digital immune system, polymorphic honeypot, deception genome, Command Nexus, Home Shield, defensive deception, open source security, Ghost LAN, NSGA-II" />
+ <meta name="author" content="Pitchfork-and-Torch" />
+ <meta name="theme-color" content="#0b1018" />
+ <meta name="color-scheme" content="dark" />
+ <title>Ghost Continuum - Living Digital Immune System</title>
+ <link rel="canonical" href="https://ghost.jonbailey.xyz/" />
+ <link rel="icon" href="/logo.png" type="image/png" />
+ <link rel="alternate" type="text/plain" title="LLM site summary" href="https://ghost.jonbailey.xyz/llms.txt" />
+ <link rel="sitemap" type="application/xml" title="Sitemap" href="https://ghost.jonbailey.xyz/sitemap.xml" />
+ <link rel="preload" href="/fonts/fontshare/clash-display/woff2/ClashDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin />
+ <link rel="preload" href="/fonts/fontshare/satoshi/woff2/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
+ <link rel="preload" href="/logo.png" as="image" />
+ <meta property="og:type" content="website" />
+ <meta property="og:url" content="https://ghost.jonbailey.xyz/" />
+ <meta property="og:site_name" content="Ghost Continuum" />
+ <meta property="og:locale" content="en_US" />
+ <meta property="og:title" content="Ghost Continuum - Living Digital Immune System" />
+ <meta property="og:description" content="The immune system that watches back. Evolve, morph, contain, seal - open source, local-first, defensive only." />
+ <!-- JPEG preferred for X/Facebook crawlers (PNG paths have seen CF edge cache pollution as text/html) -->
+ <meta property="og:image" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3" />
+ <meta property="og:image:secure_url" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3" />
+ <meta property="og:image:type" content="image/jpeg" />
+ <meta property="og:image:width" content="1200" />
+ <meta property="og:image:height" content="630" />
+ <meta property="og:image:alt" content="Ghost Continuum - Living Digital Immune System. Evolve, morph, contain, seal. Defensive only." />
+ <meta name="twitter:card" content="summary_large_image" />
+ <meta name="twitter:site" content="@suddenlyjon" />
+ <meta name="twitter:creator" content="@suddenlyjon" />
+ <meta name="twitter:title" content="Ghost Continuum - Living Digital Immune System" />
+ <meta name="twitter:description" content="Living Digital Immune System - Command Nexus, polymorphic planes, Home Shield. Defensive only · local-first · zero core deps." />
+ <meta name="twitter:image" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3" />
+ <meta name="twitter:image:src" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3" />
+ <meta name="twitter:image:alt" content="Ghost Continuum - Living Digital Immune System" />
+ <meta name="twitter:url" content="https://ghost.jonbailey.xyz/" />
+ <meta name="twitter:domain" content="ghost.jonbailey.xyz" />
+ <link rel="stylesheet" href="/fonts/fontshare/fonts-critical.css" />
+ <link rel="stylesheet" href="/css/ascend.css?v=3.6.3" />
+ <link rel="stylesheet" href="/css/polish-2.css?v=3.6.3" />
+ <script type="application/ld+json">
+ {
+ "@context": "https://schema.org",
+ "@type": "SoftwareApplication",
+ "name": "Ghost Continuum",
+ "applicationCategory": "SecurityApplication",
+ "operatingSystem": "Windows, macOS, Linux",
+ "softwareVersion": "3.6.3",
+ "description": "Living Digital Immune System - holographic Command Nexus, NSGA-II multi-objective genomes, multi-plane polymorphic deception, Home Shield, Merkle-sealed forensics. Defensive only, local-first, zero core npm dependencies.",
+ "url": "https://ghost.jonbailey.xyz/",
+ "downloadUrl": "https://github.com/Pitchfork-and-Torch/ghost-continuum",
+ "license": "https://opensource.org/licenses/MIT",
+ "image": "https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3",
+ "screenshot": "https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.3",
+ "author": { "@type": "Organization", "name": "Pitchfork-and-Torch", "url": "https://jonbailey.xyz/" },
+ "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+ }
+ </script>
+ <script type="application/ld+json">
+ {
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+ {
+ "@type": "Question",
+ "name": "What is Ghost Continuum?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "Ghost Continuum is an open-source Living Digital Immune System - polymorphic honeypots and edge tripwires that evolve via genetic algorithms, morph at runtime, and seal evidence in a Merkle ledger. The public site and Command Nexus use the Luminous Membrane visual language for calm, precise operator clarity."
+ }
+ },
+ {
+ "@type": "Question",
+ "name": "Is Ghost Continuum offensive?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "No. Defensive only. Designed for authorized targets on networks you own or are explicitly allowed to defend. Scope probes are defensive presets; exploit roles are blocked; the hub binds to 127.0.0.1 by default."
+ }
+ },
+ {
+ "@type": "Question",
+ "name": "How do I install Ghost Continuum?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "git clone https://github.com/Pitchfork-and-Torch/ghost-continuum.git, cd ghost-continuum, npm run setup, npm start. Requires Node.js 18+. Zero npm dependencies in the core engine. Open http://127.0.0.1:30000 for Command Nexus."
+ }
+ },
+ {
+ "@type": "Question",
+ "name": "Does it require the cloud?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "No. Local-first. Cloudflare Edge is optional for sites you already host there. Core brain and data stay on your machine under ~/.ghost-continuum."
+ }
+ },
+ {
+ "@type": "Question",
+ "name": "What is Home Shield?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "Home Shield is the family-friendly and home-lab operator path: setup wizard, kid mode, quiet hours, device trust, alerts, weekly reports, and PWA install - without needing to be a security engineer."
+ }
+ },
+ {
+        "@type": "Question",
+        "name": "What is new in Command Nexus 3.6?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Crystal Seal adds sealed HTML forensic replay you can open offline and print to PDF, a local seal/verify CLI, and a hardened hub write path (O(1) Merkle ledger plus per-IP rate limiting on mutating routes). Still loopback, still defensive only."
+        }
+ },
+ {
+ "@type": "Question",
+ "name": "Where is the GitHub repository?",
+ "acceptedAnswer": {
+ "@type": "Answer",
+ "text": "https://github.com/Pitchfork-and-Torch/ghost-continuum - latest release at /releases/latest"
+ }
+ }
+ ]
+ }
+ </script>
+ <script type="application/ld+json">
+ {
+ "@context": "https://schema.org",
+ "@type": "HowTo",
+ "name": "Install Ghost Continuum",
+ "description": "From zero to local Command Nexus in about five minutes.",
+ "totalTime": "PT5M",
+ "tool": [{ "@type": "HowToTool", "name": "Node.js 18+" }],
+ "step": [
+ { "@type": "HowToStep", "name": "Clone", "text": "git clone https://github.com/Pitchfork-and-Torch/ghost-continuum.git" },
+ { "@type": "HowToStep", "name": "Setup", "text": "cd ghost-continuum and run npm run setup" },
+ { "@type": "HowToStep", "name": "Start", "text": "npm start then open http://127.0.0.1:30000" }
+ ]
+ }
+ </script>
+</head>
+<body>
+ <a class="skip-link" href="#main">Skip to content</a>
+ <div class="scroll-progress" aria-hidden="true"></div>
+ <div class="page">
+ <header class="site-nav" role="banner">
+ <div class="nav-inner">
+ <div class="brand-island">
+ <a class="x-follow" href="https://x.com/suddenlyjon" target="_blank" rel="noopener noreferrer" aria-label="Follow @suddenlyjon on X" title="Follow @suddenlyjon on X">
+ <span class="x-follow-mark">
+ <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.725-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+ </span>
+ <span class="x-follow-handle">@suddenlyjon</span>
+ </a>
+ <a class="brand-link" href="/">
+ <img src="/logo.png" alt="Ghost Continuum" width="40" height="40" />
+ <div class="brand-text">
+ <div class="name">Ghost Continuum</div>
+ <div class="ver">Living Digital Immune System</div>
+ </div>
+ </a>
+ </div>
+ <nav class="nav-links" id="primary-nav" aria-label="Primary">
+ <a href="#planes">Planes</a>
+ <a href="#demo">Nexus demo</a>
+ <a href="#home-shield">Home Shield</a>
+ <a href="#install">Install</a>
+ <a href="#faq">FAQ</a>
+ <a href="/hub/">Preview</a>
+ <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum" target="_blank" rel="noopener">GitHub</a>
+ </nav>
+ <a class="nav-cta" href="#install">Quickstart</a>
+ <button type="button" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">
+ <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+ </button>
+ </div>
+ </header>
+
+ <main id="main">
+ <!-- HERO -->
+ <section class="hero" aria-labelledby="hero-title" data-reveal>
+ <div class="hero-copy">
+ <p class="hero-badge"><span class="dot" aria-hidden="true"></span> Defensive only · local-first · zero core npm deps</p>
+ <p class="codename">Crystal Seal · v3.6</p>
+ <h1 id="hero-title">The immune system that watches back.</h1>
+ <p class="lead">
+ Polymorphic defense that evolves, morphs, contains, and seals.
+ Command Nexus now has a command palette, time-window queries, and a keyboard cockpit - still local-first, authorized networks only.
+ </p>
+ <div class="actions">
+ <a class="btn btn-primary" href="#install">Install in ~5 minutes</a>
+ <a class="btn btn-secondary" href="#demo">Watch the Nexus demo</a>
+ </div>
+ <p class="hero-quiet-links">
+ <a href="/hub/">Static Nexus preview</a>
+ <span class="sep" aria-hidden="true">·</span>
+ <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum" target="_blank" rel="noopener">GitHub source</a>
+ </p>
+ </div>
+ <div class="hero-stage" id="hero-stage" aria-label="Command fabric map preview">
+ <div id="hero-holo" style="position:absolute;inset:0"></div>
+ <div class="stage-chrome">
+ <div class="stage-top">
+ <span class="live">Synthetic demo</span>
+ <span>Membrane fabric</span>
+ </div>
+ <div class="stage-bot">
+ <span>Detect · Morph · Contain · Seal</span>
+ <span>Illustrative only</span>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <div class="value-strip" aria-label="Core capabilities" data-reveal>
+ <span class="chip"><strong>Evolve</strong> · NSGA-II genomes</span>
+ <span class="chip"><strong>Morph</strong> · runtime personas</span>
+ <span class="chip"><strong>Contain</strong> · threat response</span>
+ <span class="chip"><strong>Seal</strong> · Merkle forensics</span>
+ <span class="chip"><strong>Authorized only</strong></span>
+ </div>
+
+ <!-- PLANES -->
+ <section class="section" id="planes" aria-labelledby="planes-title" data-reveal>
+ <p class="section-label">Architecture</p>
+ <h2 class="section-title" id="planes-title">Sensor planes of the continuum</h2>
+ <p class="section-lead">
+ Eight defensive planes feed the Command Nexus. Select a plane to inspect capabilities.
+ Nothing here is offensive - every surface is for networks you own or are allowed to defend.
+ </p>
+ <div class="planes-layout">
+ <div class="glass planes-orbit">
+ <div class="orbit-core">
+ Nexus
+ <small>Core</small>
+ </div>
+ <ul class="plane-nodes" id="plane-nodes" role="listbox" aria-label="Sensor planes" aria-orientation="horizontal" aria-activedescendant="plane-btn-ghost-lan"></ul>
+ </div>
+ <div class="glass plane-detail" id="plane-detail" role="region" aria-live="polite" aria-label="Plane details">
+ <!-- filled by planes-explorer.js -->
+ </div>
+ </div>
+ <figure class="glass" style="margin-top:1.5rem;overflow:hidden;padding:0">
+ <img src="/infographic.svg?v=3.6.3" width="1200" height="680" alt="Ghost Continuum architecture diagram: sensor planes feeding Command Nexus and Merkle ledger" loading="lazy" />
+ </figure>
+ </section>
+
+ <!-- NEXUS DEMO -->
+ <section class="section" id="demo" aria-labelledby="demo-title" data-reveal>
+ <p class="section-label">Enter the Nexus</p>
+ <h2 class="section-title" id="demo-title">Threat lifecycle - live client demo</h2>
+ <p class="section-lead">
+ No backend required. Watch a synthetic campaign: detect -> morph -> contain -> seal.
+ Switch Sentinel Morphs and watch the fabric recolor. Real cockpit runs locally on port 30000.
+ </p>
+ <div class="demo-grid">
+ <div class="glass demo-stage" id="demo-stage">
+ <canvas id="demo-canvas" width="640" height="260" aria-label="Synthetic threat map animation"></canvas>
+ <div class="demo-log" id="demo-log" aria-live="polite"></div>
+ </div>
+ <div class="glass demo-controls">
+ <div>
+ <p class="section-label" style="margin-bottom:0.5rem">Sentinel Morph</p>
+ <div class="morph-stack" role="group" aria-label="Morph modes">
+ <button type="button" class="morph-btn" data-morph="stealth" aria-pressed="false">Stealth</button>
+ <button type="button" class="morph-btn" data-morph="research" aria-pressed="true">Research</button>
+ <button type="button" class="morph-btn" data-morph="aggressive" aria-pressed="false">Aggressive</button>
+ <button type="button" class="morph-btn" data-morph="forensic" aria-pressed="false">Forensic</button>
+ </div>
+ </div>
+ <div>
+ <p class="section-label" style="margin-bottom:0.5rem">Lifecycle</p>
+ <div class="lifecycle" id="demo-lifecycle">
+ <span class="step" data-step="detect">Detect</span>
+ <span class="step" data-step="morph">Morph</span>
+ <span class="step" data-step="contain">Contain</span>
+ <span class="step" data-step="seal">Seal</span>
+ </div>
+ </div>
+ <div class="demo-gauges">
+ <div class="mini-gauge">
+ <svg id="demo-contain-svg" viewBox="0 0 72 72" aria-hidden="true"></svg>
+ <div class="val" id="demo-contain-val">-</div>
+ <div class="lbl">Containment</div>
+ </div>
+ <div class="mini-gauge">
+ <svg id="demo-deceive-svg" viewBox="0 0 72 72" aria-hidden="true"></svg>
+ <div class="val" id="demo-deceive-val">-</div>
+ <div class="lbl">Deception</div>
+ </div>
+ </div>
+ <button type="button" class="btn btn-secondary btn-sm" id="demo-replay">Replay campaign</button>
+ <a class="btn btn-primary btn-sm" href="/hub/">Full Nexus preview</a>
+ </div>
+ </div>
+ </section>
+
+ <!-- HOME SHIELD -->
+ <section class="section" id="home-shield" aria-labelledby="shield-title" data-reveal>
+ <p class="section-label">Home Shield</p>
+ <h2 class="section-title" id="shield-title">Defense for the home lab - and the family network</h2>
+ <p class="section-lead">
+ Not only for red-team veterans. Home Shield brings a wizard, plain language, and safety rails
+ so a home operator can arm deception without a SOC.
+ </p>
+ <div class="shield-grid">
+ <article class="glass shield-card">
+ <h3>Setup wizard</h3>
+ <p>Profiles for one PC, UniFi lab, pfSense, Cloudflare site, apartment, IoT-heavy homes, and more.</p>
+ </article>
+ <article class="glass shield-card">
+ <h3>Kid mode &amp; quiet hours</h3>
+ <p>Clamp morph aggression and hush overnight alerts so the immune system stays neighborly.</p>
+ </article>
+ <article class="glass shield-card">
+ <h3>Alerts you choose</h3>
+ <p>Discord, Telegram, webhooks, or Home Assistant - only when you configure them. No forced cloud.</p>
+ </article>
+ <article class="glass shield-card">
+ <h3>PWA + weekly report</h3>
+ <p>Install the Command Nexus like an app. Get a weekly home defense summary you can actually read.</p>
+ </article>
+ </div>
+ <div class="actions" style="margin-top:1.25rem">
+ <a class="btn btn-secondary" href="#install">Start with Home Shield path</a>
+ </div>
+ </section>
+
+ <!-- EFFICACY -->
+ <section class="section" id="efficacy" aria-labelledby="efficacy-title" data-reveal>
+ <p class="section-label">Efficacy cockpit</p>
+ <h2 class="section-title" id="efficacy-title">Metrics that mean something</h2>
+ <p class="section-lead">
+ Illustrative demo gauges - the live Command Nexus computes these from your own engagements and sealed events.
+ </p>
+ <div class="metrics-grid" id="metrics-grid">
+ <div class="glass metric-card" id="m-contain">
+ <svg class="gauge" viewBox="0 0 100 100" aria-hidden="true"></svg>
+ <div class="m-val">-</div>
+ <div class="m-lbl">Containment</div>
+ <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+ </div>
+ <div class="glass metric-card" id="m-response">
+ <svg class="gauge" viewBox="0 0 100 100" aria-hidden="true"></svg>
+ <div class="m-val">-</div>
+ <div class="m-lbl">Response</div>
+ <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+ </div>
+ <div class="glass metric-card" id="m-deception">
+ <svg class="gauge" viewBox="0 0 100 100" aria-hidden="true"></svg>
+ <div class="m-val">-</div>
+ <div class="m-lbl">Deception rate</div>
+ <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+ </div>
+ <div class="glass metric-card" id="m-fp">
+ <svg class="gauge" viewBox="0 0 100 100" aria-hidden="true"></svg>
+ <div class="m-val">-</div>
+ <div class="m-lbl">Low false positives</div>
+ <svg class="spark" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+ </div>
+ </div>
+ <p class="metrics-note">Demo data for presentation only · Live values require local npm start</p>
+ </section>
+
+ <!-- INSTALL -->
+ <section class="section" id="install" aria-labelledby="install-title" data-reveal>
+ <p class="section-label">Quickstart</p>
+ <h2 class="section-title" id="install-title">From zero to Command Nexus</h2>
+ <p class="section-lead">
+ Node.js 18+. Core engine: <strong style="color:var(--ok)">zero npm dependencies</strong>.
+ UI may load Three.js from CDN for WebGL (canvas fallback offline).
+ </p>
+ <div class="glass install-panel">
+ <p class="eta">Estimated time · ~5 minutes on a modern machine</p>
+ <div class="install-tabs" role="tablist" aria-label="Platform">
+ <button type="button" class="tab-btn" role="tab" id="tab-unix" data-install-tab="unix" aria-selected="true" aria-controls="install-pre">macOS / Linux</button>
+ <button type="button" class="tab-btn" role="tab" id="tab-windows" data-install-tab="windows" aria-selected="false" aria-controls="install-pre">Windows</button>
+ </div>
+ <div class="code-block">
+ <button type="button" class="btn btn-ghost btn-sm copy-btn" id="install-copy">Copy</button>
+ <pre id="install-pre" role="tabpanel" aria-labelledby="tab-unix" tabindex="0">git clone https://github.com/Pitchfork-and-Torch/ghost-continuum.git
+cd ghost-continuum
+npm run setup
+npm start
+# -> http://127.0.0.1:30000 COMMAND NEXUS</pre>
+ </div>
+ <p class="section-label">What happens in the first 5 minutes</p>
+ <div class="walkthrough">
+ <div class="glass walk-step">
+ <div class="walk-num">01</div>
+ <div>
+ <strong>Hub boots on loopback</strong>
+ <span>Command Nexus serves at http://127.0.0.1:30000 - nothing is exposed publicly by default.</span>
+ </div>
+ </div>
+ <div class="glass walk-step">
+ <div class="walk-num">02</div>
+ <div>
+ <strong>Click DEMO</strong>
+ <span>Inject a sealed synthetic campaign and watch the holographic map sing without a real attacker.</span>
+ </div>
+ </div>
+ <div class="glass walk-step">
+ <div class="walk-num">03</div>
+ <div>
+ <strong>Home Shield wizard</strong>
+ <span>Pick a home or lab profile, set kid mode / quiet hours if you want, arm planes you understand.</span>
+ </div>
+ </div>
+ <div class="glass walk-step">
+ <div class="walk-num">04</div>
+ <div>
+ <strong>Morph · evolve · seal</strong>
+ <span>Try AGGRESSIVE morph, evolve the genome pool, scrub the Time Machine, export a Merkle-sealed incident.</span>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- ECOSYSTEM -->
+ <section class="section" id="ecosystem" aria-labelledby="eco-title" data-reveal>
+ <p class="section-label">Ecosystem</p>
+ <h2 class="section-title" id="eco-title">Related projects</h2>
+ <p class="section-lead">Sibling tools in the Pitchfork-and-Torch / Jon Bailey network.</p>
+ <div class="eco-grid">
+ <a class="eco-card" href="https://trenchcoat.jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>Trench Coat</strong>
+ <span>Multi-hop privacy cloak - optional Ghost plane</span>
+ </a>
+ <a class="eco-card" href="https://netforge.jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>NetForge</strong>
+ <span>Host DNS/TCP hardening (Win · Linux · macOS)</span>
+ </a>
+ <a class="eco-card" href="https://fl1pp3r69.jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>Fl1pp3r69</strong>
+ <span>Manifest-driven Flipper field ops</span>
+ </a>
+ <a class="eco-card" href="https://axiom.jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>AXIOM</strong>
+ <span>First wardrobe for Tesla Optimus</span>
+ </a>
+ <a class="eco-card" href="https://github.com/Pitchfork-and-Torch/GrokLink-OS" target="_blank" rel="noopener">
+ <strong>GrokLink OS</strong>
+ <span>Native multi-radio research RTOS</span>
+ </a>
+ <a class="eco-card" href="https://jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>Jon Bailey</strong>
+ <span>Music · vault · theater</span>
+ </a>
+ <a class="eco-card" href="https://destroyer.jonbailey.xyz/" target="_blank" rel="noopener">
+ <strong>Socialism Destroyer</strong>
+ <span>Liberty argument engine</span>
+ </a>
+ <a class="eco-card" href="https://github.com/Pitchfork-and-Torch/ghost-continuum" target="_blank" rel="noopener">
+ <strong>Source</strong>
+ <span>github.com/Pitchfork-and-Torch/ghost-continuum</span>
+ </a>
+ </div>
+ </section>
+
+ <!-- LEGAL + FAQ -->
+ <section class="section" id="faq" aria-labelledby="faq-title" data-reveal>
+ <div class="glass legal-banner" role="note">
+ <strong>Defensive only · authorized networks only.</strong>
+ <p>
+ Ghost Continuum is for networks and sites you own or have explicit permission to defend.
+ Do not port-forward honeypots to the public internet. Do not use this stack against third parties.
+ See the repository LEGAL.md and SECURITY.md. Core engine: local-first, loopback hub, MIT license, auditable code, no eval.
+ </p>
+ </div>
+
+ <p class="section-label">FAQ</p>
+ <h2 class="section-title" id="faq-title">Questions operators ask</h2>
+ <div class="faq-list">
+ <details class="faq-item">
+ <summary>What is Ghost Continuum?</summary>
+ <p class="ans">An open-source Living Digital Immune System: polymorphic honeypots, edge tripwires, NSGA-II genome evolution, holographic Command Nexus, and Merkle-sealed forensics - for authorized defensive use.</p>
+ </details>
+ <details class="faq-item">
+ <summary>Is Ghost Continuum offensive?</summary>
+ <p class="ans">No. Defensive only. Scope probes are defensive presets; exploit roles are blocked; hub binds to 127.0.0.1 by default.</p>
+ </details>
+ <details class="faq-item">
+ <summary>How do I install Ghost Continuum?</summary>
+ <p class="ans">Clone the repo, run <code>npm run setup</code>, then <code>npm start</code>. Requires Node.js 18+. Zero npm dependencies in the core engine. Open http://127.0.0.1:30000 for Command Nexus.</p>
+ </details>
+ <details class="faq-item">
+ <summary>Does it require the cloud?</summary>
+ <p class="ans">No. Local-first. Cloudflare Edge is optional for sites you already host there. Core brain and data stay on your machine under ~/.ghost-continuum.</p>
+ </details>
+ <details class="faq-item">
+ <summary>What is Home Shield?</summary>
+ <p class="ans">Home Shield is the family-friendly and home-lab path: setup wizard, kid mode, quiet hours, device trust, alerts, weekly reports, and PWA install - without needing to be a security engineer.</p>
+ </details>
+ <details class="faq-item">
+ <summary>What is new in Command Nexus 3.6?</summary>
+ <p class="ans">Crystal Seal adds sealed HTML forensic replay you can open offline and print to PDF, a local seal/verify CLI, and a hardened hub write path (O(1) Merkle ledger plus per-IP rate limiting on mutating routes). The Command Nexus command palette (Ctrl/Cmd+K), keyboard views 1-5, and time-window NL queries remain. Still loopback, still defensive only.</p>
+ </details>
+ <details class="faq-item">
+ <summary>What is Crystal Seal / Luminous Membrane?</summary>
+ <p class="ans">Luminous Membrane is the product visual language. Crystal Seal (v3.6) is the current product + site layer: sealed HTML forensic replay, local seal/verify CLI, and a hardened hub write path, on top of the Command Nexus command palette (Ctrl/Cmd+K), time-window NL queries, and keyboard views 1-5. Same defensive scope.</p>
+ </details>
+ <details class="faq-item">
+ <summary>Where is the GitHub repository?</summary>
+ <p class="ans"><a href="https://github.com/Pitchfork-and-Torch/ghost-continuum" target="_blank" rel="noopener">GitHub repository</a> · <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest" target="_blank" rel="noopener">Latest release</a> · <a href="/llms.txt">llms.txt</a></p>
+ </details>
+ </div>
+
+ <div class="glass roadmap-teaser">
+ <div>
+ <p class="section-label" style="margin-bottom:0.35rem">Release</p>
+ <p><strong style="color:var(--text)">v3.6.3 Crystal Seal</strong> - no extra Windows cmd window: Ghost LAN is a hidden hub child, browser opens without cmd. Plus evasion-class probes and a portable exe. Local-first, defensive only, zero core deps.</p>
+ </div>
+ <a class="btn btn-secondary" href="https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest" target="_blank" rel="noopener">Release notes</a>
+ </div>
+ </section>
+ </main>
+
+ <footer class="site-footer">
+ <span>Pitchfork-and-Torch</span>
+ <span class="sep">//</span>
+ <span>© <span id="year">2026</span></span>
+ <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum">Source</a>
+ <a href="/hub/">Hub preview</a>
+ <a href="/infographic.svg?v=3.6.3">Infographic</a>
+ <a href="/llms.txt">llms.txt</a>
+ <a href="https://trenchcoat.jonbailey.xyz/">Trench Coat</a>
+ <a href="https://netforge.jonbailey.xyz/">NetForge</a>
+ <a href="https://axiom.jonbailey.xyz/">AXIOM</a>
+ <a href="https://github.com/Pitchfork-and-Torch/GrokLink-OS">GrokLink OS</a>
+ <a href="https://jonbailey.xyz/">jonbailey.xyz</a>
+ <span class="sep">//</span>
+ <span>Defensive only · MIT</span>
+ </footer>
+ </div>
+
+ <aside class="sticky-cta" id="sticky-cta" hidden>
+ <p>Install Ghost Continuum on your LAN</p>
+ <a class="btn btn-primary" href="#install">Quickstart</a>
+ <button type="button" class="sticky-cta-dismiss" id="sticky-cta-dismiss" aria-label="Dismiss install bar">×</button>
+ </aside>
+
+ <div class="mobile-dock" aria-label="Quick actions">
+ <a class="btn btn-secondary" href="#demo">Nexus demo</a>
+ <a class="btn btn-primary" href="#install">Quickstart</a>
+ <button type="button" class="dock-dismiss" id="dock-dismiss" aria-label="Dismiss quick actions">×</button>
+ </div>
+ <button type="button" class="ambient-toggle" id="ambient-toggle" aria-pressed="false" title="Optional ambient membrane hum (off by default)">Ambient off</button>
+ <div id="copy-toast" class="copy-toast" role="status" aria-live="polite">Copied to clipboard</div>
+
+ <script src="/js/main.js?v=3.6.3" defer></script>
+ <script src="/js/hero-holo.js?v=3.6.3" defer></script>
+ <script src="/js/planes-explorer.js?v=3.6.3" defer></script>
+ <script src="/js/nexus-demo.js?v=3.6.3" defer></script>
+ <script src="/js/metrics.js?v=3.6.3" defer></script>
+ <script src="/js/install.js?v=3.6.3" defer></script>
+ <script src="/projects-panel.js?v=11" defer></script>
+ <script defer src="https://hits.jonbailey.xyz/c.js" data-site="ghost"></script>
+</body>
+</html>
