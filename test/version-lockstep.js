@@ -32,6 +32,8 @@ const mustContainVersion = [
   'deploy/jonbailey/site-seo/sitemap.xml',
   'deploy/jonbailey/PRODUCTION-MANIFEST.json',
   'README.md',
+  'LIVE-SITES.md',
+  'live-sites-registry.json',
 ];
 
 for (const rel of mustContainVersion) {
@@ -66,6 +68,33 @@ assert.ok((verOut.stdout || '').includes(CODENAME), 'ghost-continuum version mus
 console.log('  ✓ ghost-continuum version prints', `${VERSION} ${CODENAME}`);
 
 assert.ok(read('README.md').includes(CODENAME), 'README must mention CODENAME');
+assert.ok(read('LIVE-SITES.md').includes(CODENAME), 'LIVE-SITES.md must mention CODENAME');
+assert.ok(read('live-sites-registry.json').includes(CODENAME), 'live-sites-registry.json must mention CODENAME');
+
+const registry = JSON.parse(read('live-sites-registry.json'));
+assert.strictEqual(registry.version, VERSION, 'live-sites-registry.json version');
+assert.strictEqual(registry.codename, CODENAME, 'live-sites-registry.json codename');
+assert.ok(registry.last_known_update, 'live-sites-registry.json last_known_update');
+assert.ok(registry.defensive_only === true, 'registry must stay defensive only');
+assert.strictEqual(registry.hub_bind, '127.0.0.1', 'registry must record loopback hub bind');
+
+const hubPreview = read('deploy/jonbailey/hub-preview/index.html');
+assert.ok(
+  hubPreview.includes(CODENAME) || hubPreview.includes(CODENAME.toUpperCase()),
+  'hub preview badge must advertise current CODENAME',
+);
+assert.ok(!/CRYSTAL SEAL/.test(hubPreview), 'hub preview must not advertise Crystal Seal as current');
+
+const landingHtml = read('landing/index.html');
+assert.ok(landingHtml.includes(`Air-Gap Map · v${VERSION}`) || landingHtml.includes(`${CODENAME} · v${VERSION}`), 'landing hero must cite VERSION with CODENAME');
+assert.ok(landingHtml.includes(`Air-Gap Map (v${VERSION})`) || landingHtml.includes(`${CODENAME} (v${VERSION})`), 'landing FAQ must cite VERSION with CODENAME');
+
+const relWf = read('.github/workflows/release.yml');
+assert.ok(relWf.includes('packages/core/src/version.js'), 'release title must read CODENAME from version.js');
+assert.ok(!relWf.includes('Crystal Seal'), 'release.yml must not hardcode Crystal Seal');
+
+assert.ok(read('landing/llms.txt').includes('Current codename?'), 'llms.txt must answer current codename');
+assert.ok(read('deploy/jonbailey/site-seo/llms.txt').includes('Current codename?'), 'deploy llms.txt must answer current codename');
 
 const appJs = read('packages/hub-ui/public/assets/app.js');
 const appVer = appJs.match(/const VERSION = '(\d+\.\d+\.\d+)'/);

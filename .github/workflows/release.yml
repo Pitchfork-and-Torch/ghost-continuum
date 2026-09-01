@@ -39,7 +39,8 @@ jobs:
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF_NAME}"
-          TITLE="Ghost Continuum ${TAG} Crystal Seal"
+          CODENAME="$(node --input-type=module -e "import { CODENAME } from './packages/core/src/version.js'; process.stdout.write(CODENAME)")"
+          TITLE="Ghost Continuum ${TAG} ${CODENAME}"
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file RELEASE_BODY.md
           else

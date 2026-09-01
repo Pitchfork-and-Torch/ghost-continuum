@@ -2,6 +2,11 @@
 
 ## [Unreleased] - Post-deploy SEO env hardening
 
+### Docs / AEO honesty (no version bump)
+- Hub preview badge and GitHub Release title template now use Air-Gap Map (were still Crystal Seal on 3.6.4).
+- Landing hero / FAQ cite v3.6.4. `llms.txt` states Air-Gap Map is current and Crystal Seal is 3.6.0-3.6.3.
+- Added `LIVE-SITES.md` + `live-sites-registry.json`. Lockstep rejects a hardcoded Crystal Seal release title.
+
 ### Public site ops
 - `SEO_BASE`, `SEO_CONTENT_ALIAS`, and `SEO_CARD_URL` must be https URLs on `ghost.jonbailey.xyz` or `ghost-continuum.pages.dev`. Userinfo, http, loopback, and leading-dash values fail closed.
 - IndexNow `host` / `keyLocation` / `urlList` are built from the sanitized origin so credentials cannot leak to IndexNow or Bing.

@@ -1,5 +1,8 @@
 # Next (Ghost Continuum)
 
+## Done 2026-09-01
+- Advertised-version honesty: 3.6.4 Air-Gap Map stays current. Hub preview badge, release title template, landing hero/FAQ, llms, LIVE-SITES registry aligned. No new plane.
+
 ## Done 2026-08-30
 - Post-deploy SEO env hardening: allowlisted `SEO_BASE` / alias / card URL, IndexNow without userinfo, HEAD 401/429 fail, shared `scripts/lib/seo-safe-url.js`.
 

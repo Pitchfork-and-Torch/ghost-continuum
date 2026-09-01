@@ -31,8 +31,11 @@ Bump the version string in **all** of these, or the UI / API / site will disagre
 - `packages/hub-ui/public/sw.js` (cache name + cached asset `?v=` - this is what forces returning PWA clients to pick up the new shell)
 - `bin/start-stack.js` and `bin/ghost-continuum.js` (banners interpolate `VERSION` / `CODENAME`)
 - `landing/index.html`, `landing/js/main.js` (`dataset.version`), `landing/llms.txt`, `deploy/jonbailey/hub-preview/index.html`, `deploy/jonbailey/site-seo/llms.txt` (site copy + `?v=`)
+- Hub preview badge and landing hero/FAQ must use the current `CODENAME` (not a prior plane name)
+- `.github/workflows/release.yml` title interpolates `CODENAME` from `version.js` (do not hardcode)
 - `landing/sitemap.xml` and `deploy/jonbailey/site-seo/sitemap.xml` (`lastmod` + image title)
 - `deploy/jonbailey/PRODUCTION-MANIFEST.json` (`version`, `codename`)
+- `LIVE-SITES.md` + `live-sites-registry.json` (`version`, `codename`, `last_known_update`)
 
 Add a dated `## [X.Y.Z] - YYYY-MM-DD - <codename>` section to `CHANGELOG.md`.
 
