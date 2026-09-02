@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Ghost Continuum Command Nexus Air-Gap Map preview - tabbed membrane dashboard, hover-expand fabric map, Ghost LAN tab, Home Shield. Local-first." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0b1018" />
+  <meta name="color-scheme" content="dark" />
+  <title>Command Nexus Air-Gap Map | Ghost Continuum Dashboard Preview</title>
+  <link rel="canonical" href="https://ghost.jonbailey.xyz/hub/" />
+  <link rel="icon" href="/hub/logo.png" type="image/png" />
+  <link rel="alternate" type="text/plain" title="LLM site summary" href="https://ghost.jonbailey.xyz/llms.txt" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ghost.jonbailey.xyz/hub/" />
+  <meta property="og:site_name" content="Ghost Continuum" />
+  <meta property="og:title" content="Ghost Continuum Command Nexus - Air-Gap Map" />
+  <meta property="og:description" content="v3.6.4 Air-Gap Map: vendored Three.js r160 holographic map, Command Nexus, Home Shield." />
+  <meta property="og:image" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.4" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Ghost Continuum Command Nexus - Air-Gap Map" />
+  <meta name="twitter:description" content="Operator dashboard preview - tabs, hover map, Ghost LAN, sealed forensics." />
+  <meta name="twitter:site" content="@suddenlyjon" />
+  <meta name="twitter:image" content="https://ghost.jonbailey.xyz/share-card.jpg?v=3.6.4" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Ghost Continuum Command Nexus","softwareVersion":"3.6.4","applicationCategory":"SecurityApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://ghost.jonbailey.xyz/hub/"}</script>
+  <link rel="stylesheet" href="/fonts/fontshare/fonts.css" />
+  <style>
+    :root { --bg:#0b1018; --text:#e8eef4; --muted:#8b9aab; --accent:#5ec8c0; --ok:#6bc4a0; --border:rgba(94,200,192,0.24); --font:"Satoshi",system-ui,sans-serif; --display:"Clash Display","Satoshi",system-ui,sans-serif; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:var(--font); background:radial-gradient(ellipse 70% 40% at 20% 0%,rgba(94,200,192,0.09),transparent 50%),linear-gradient(180deg,#0f1620 0%,var(--bg) 100%); color:var(--text); min-height:100vh; line-height:1.55; -webkit-font-smoothing:antialiased; }
+    .wrap { max-width:1100px; margin:0 auto; padding:1.75rem 1.35rem 4rem; }
+    header { display:flex; align-items:center; gap:.9rem; margin-bottom:1.1rem; }
+    header img { width:48px; height:48px; border-radius:14px; box-shadow:0 0 0 1px var(--border); }
+    h1 { font-family:var(--display); font-size:1.25rem; font-weight:600; letter-spacing:-0.02em; }
+    .tag { font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+    .badge { display:inline-block; margin-left:.4rem; padding:.1rem .45rem; border-radius:999px; border:1px solid rgba(94,200,192,.35); color:var(--accent); font-size:.68rem; }
+    .lead { color:var(--muted); max-width:62ch; margin:0.85rem 0 1.35rem; }
+    .shot { border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.35),0 0 36px rgba(94,200,192,.1); background:#121a24; }
+    .shot img { display:block; width:100%; height:auto; }
+    .caption { font-size:.72rem; color:var(--muted); text-align:center; padding:.8rem; border-top:1px solid rgba(94,200,192,.12); letter-spacing:.04em; }
+    .bento { display:grid; grid-template-columns:repeat(4,1fr); gap:.55rem; margin:1.35rem 0; }
+    .bento span { font-size:.72rem; text-align:center; padding:.5rem; border-radius:10px; border:1px solid rgba(94,200,192,.22); color:var(--accent); background:rgba(94,200,192,.05); }
+    .actions { display:flex; flex-wrap:wrap; gap:.6rem; margin:1.3rem 0; }
+    .actions a { padding:.6rem 1rem; min-height:44px; display:inline-flex; align-items:center; border:1px solid var(--border); color:var(--accent); text-decoration:none; border-radius:10px; font-size:.82rem; }
+    .actions a.primary { background:linear-gradient(135deg,rgba(94,200,192,.22),rgba(106,154,171,.18)); color:#e8eef4; }
+    .note { font-size:.9rem; color:var(--muted); border-left:3px solid rgba(94,200,192,.4); padding-left:.95rem; max-width:72ch; }
+    .note code { color:var(--ok); background:rgba(107,196,160,.1); padding:.05rem .35rem; border-radius:4px; }
+    .back { margin-top:1.6rem; font-size:.85rem; color:var(--muted); }
+    .back a { color:var(--accent); text-decoration:none; }
+    @media (max-width:700px) { .bento { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="/hub/logo.png" alt="Ghost Continuum" width="48" height="48" />
+      <div>
+        <h1>Command Nexus <span class="badge">v3.6.4 AIR-GAP MAP</span></h1>
+        <p class="tag">Static operational preview · live hub is local-first</p>
+      </div>
+    </header>
+    <p class="lead">
+      The live operator dashboard runs on your machine after install. Air-Gap Map keeps tabbed Overview / Ghost LAN / Genome / Forensics / Home Shield,
+      a command palette (Ctrl/Cmd+K), time-window queries, a hover-expand fabric map, and plain-language help tips.
+    </p>
+    <figure class="shot">
+      <img src="/hub/command-nexus.png" alt="Ghost Continuum Command Nexus Air-Gap Map dashboard" width="1200" height="675" loading="eager" />
+      <figcaption class="caption">Command Nexus · tabs · hover map · deck · Ghost LAN · Home Shield</figcaption>
+    </figure>
+    <div class="bento" aria-label="Modules">
+      <span>Overview map</span>
+      <span>Ghost LAN tab</span>
+      <span>Decoy genome</span>
+      <span>Forensics</span>
+      <span>Protection layers</span>
+      <span>OPS seal</span>
+      <span>Household devices</span>
+      <span>Simple help tips</span>
+    </div>
+    <div class="actions">
+      <a class="primary" href="https://github.com/Pitchfork-and-Torch/ghost-continuum">Run it locally (GitHub)</a>
+      <a href="https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest">Latest release</a>
+      <a href="https://ghost.jonbailey.xyz/">Landing</a>
+      <a href="https://ghost.jonbailey.xyz/infographic.svg?v=3.6.4">Architecture</a>
+      <a href="https://x.com/suddenlyjon">@suddenlyjon</a>
+    </div>
+    <p class="note">
+      <strong style="color:var(--accent)">Run it locally:</strong>
+      <code>git clone</code> then <code>npm run setup</code> then <code>npm start</code> then open
+      <strong>http://127.0.0.1:30000</strong>. This page is a static preview only.
+    </p>
+    <p class="back"><a href="/">&larr; Back to landing</a></p>
+  </div>
+  <script src="/projects-panel.js?v=6" defer></script>
+  <script defer src="https://hits.jonbailey.xyz/c.js" data-site="ghost"></script>
+</body>
+</html>

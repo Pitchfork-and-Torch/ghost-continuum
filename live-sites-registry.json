@@ -1,0 +1,40 @@
+{
+  "product": "ghost-continuum",
+  "version": "3.6.4",
+  "codename": "Air-Gap Map",
+  "last_known_update": "2026-09-01",
+  "defensive_only": true,
+  "hub_bind": "127.0.0.1",
+  "sites": [
+    {
+      "name": "public-site",
+      "url": "https://ghost.jonbailey.xyz/",
+      "softwareVersion": "3.6.4",
+      "last_known_update": "2026-08-28"
+    },
+    {
+      "name": "pages-alias",
+      "url": "https://ghost-continuum.pages.dev/",
+      "softwareVersion": "3.6.4",
+      "last_known_update": "2026-08-28"
+    },
+    {
+      "name": "hub-preview",
+      "url": "https://ghost.jonbailey.xyz/hub/",
+      "softwareVersion": "3.6.4",
+      "last_known_update": "2026-09-01"
+    },
+    {
+      "name": "github-latest",
+      "url": "https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest",
+      "tag": "v3.6.4",
+      "last_known_update": "2026-08-28"
+    },
+    {
+      "name": "llms",
+      "url": "https://ghost.jonbailey.xyz/llms.txt",
+      "softwareVersion": "3.6.4",
+      "last_known_update": "2026-09-01"
+    }
+  ]
+}
