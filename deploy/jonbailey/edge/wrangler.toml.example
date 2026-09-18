@@ -1,0 +1,19 @@
+# Ghost Continuum Edge - copy to wrangler.toml locally and fill YOUR ids.
+# Do not commit wrangler.toml with a real KV id.
+
+name = "your-site-sentinel-edge"
+main = "../../../packages/edge/worker.js"
+compatibility_date = "2026-07-01"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[vars]
+SITE_SEED = "example.com"
+UPSTREAM = "example.pages.dev"
+DEPLOY_PAGE = "https://ghost.example.com/"
+
+[[kv_namespaces]]
+binding = "DM_KV"
+id = "REPLACE_ME"
