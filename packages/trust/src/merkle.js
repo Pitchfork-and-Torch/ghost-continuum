@@ -98,7 +98,14 @@ export function verifyLedger(maxEntries = 5000) {
   if (!fs.existsSync(LEDGER_PATH)) return { ok: true, entries: 0, root: null };
 
   const allLines = fs.readFileSync(LEDGER_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  const lines = allLines.slice(-maxEntries);
+  // Array#slice(-0) === slice(0) and returns the whole chain. Callers that
+  // pass maxEntries=0 (or NaN / negative) must get an empty verify window,
+  // not a full-chain verify. Distinct from readLedger/readEvents display limits.
+  const n = Number(maxEntries);
+  if (!Number.isFinite(n) || n <= 0) {
+    return { ok: true, entries: 0, root: null, windowed: allLines.length > 0 };
+  }
+  const lines = allLines.slice(-Math.floor(n));
   const windowed = lines.length < allLines.length;
   let expectedRoot = null;
 
