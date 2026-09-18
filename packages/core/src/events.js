@@ -21,6 +21,12 @@ export function normalizeEvent(raw) {
     ts = Number(ts);
   }
   ts = Number.isFinite(ts) ? ts : Date.now();
+  // Same string-number trap as timestamps: Number.isFinite('5') is false, so
+  // JSON/hub scores arrived as strings and silently fell back to type scores.
+  let score = raw.score;
+  if (typeof score === 'string' && score.trim() !== '') {
+    score = Number(score);
+  }
   return {
     v: 1,
     id: raw.id || crypto.randomUUID(),
@@ -28,7 +34,7 @@ export function normalizeEvent(raw) {
     plane,
     type: raw.type || 'unknown',
     ip: raw.ip || raw.detail?.ip || null,
-    score: Number.isFinite(raw.score) ? raw.score : scoreEventType(raw.type),
+    score: Number.isFinite(score) ? score : scoreEventType(raw.type),
     buildId: raw.buildId || raw.detail?.buildId || null,
     generation: raw.generation ?? raw.detail?.generation ?? null,
     detail: raw.detail || {},
