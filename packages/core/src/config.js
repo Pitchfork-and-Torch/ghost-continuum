@@ -146,7 +146,12 @@ export function loadConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
     return enrichConfig({});
   }
-  return enrichConfig(JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')));
+  try {
+    return enrichConfig(JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')));
+  } catch {
+    // Corrupt / truncated config.json must not crash hub/CLI boot.
+    return enrichConfig({});
+  }
 }
 
 export function saveConfig(config) {

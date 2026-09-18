@@ -1,6 +1,9 @@
 import assert from 'assert';
+import fs from 'fs';
+import path from 'path';
 import { rateLimit, resetRateLimits, clientIp } from '../packages/hub-api/src/safe.js';
 import { appendLedgerEntry, verifyLedger, getLedgerRoot, countEntries } from '../packages/trust/src/index.js';
+import { loadConfig, CONFIG_PATH } from '../packages/core/src/config.js';
 
 // --- Write-side rate limiter -------------------------------------------------
 resetRateLimits();
@@ -40,5 +43,20 @@ console.log('  ✓ ledger entry counter is incremental and accurate');
 const v = verifyLedger();
 assert.ok(v.ok, 'ledger verifies (including windowed long chains)');
 console.log('  ✓ ledger verification passes', { entries: v.entries, windowed: !!v.windowed });
+
+// --- loadConfig: corrupt config.json must not crash boot --------------------
+{
+  const existed = fs.existsSync(CONFIG_PATH);
+  const backup = existed ? fs.readFileSync(CONFIG_PATH) : null;
+  fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
+  fs.writeFileSync(CONFIG_PATH, '{ not-json:::');
+  const cfg = loadConfig();
+  assert.ok(cfg && typeof cfg.hubPort === 'number', 'corrupt config falls back to enriched defaults');
+  console.log('  ✓ loadConfig tolerates corrupt config.json');
+  if (backup !== null) fs.writeFileSync(CONFIG_PATH, backup);
+  else {
+    try { fs.unlinkSync(CONFIG_PATH); } catch { /* */ }
+  }
+}
 
 console.log('\nHardening checks passed.\n');
