@@ -62,8 +62,12 @@ export function appendEvent(event) {
 
 export function readEvents(limit = 100) {
   if (!fs.existsSync(EVENTS_PATH)) return [];
+  // Array#slice(-0) === slice(0) and returns the whole array. Callers that
+  // pass limit=0 (or NaN / negative) must get an empty feed, not everything.
+  const n = Number(limit);
+  if (!Number.isFinite(n) || n <= 0) return [];
   const lines = fs.readFileSync(EVENTS_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l)).reverse();
+  return lines.slice(-Math.floor(n)).map((l) => JSON.parse(l)).reverse();
 }
 
 export function mergeEventStreams(...streams) {
