@@ -1,0 +1,22 @@
+[Unit]
+Description=DM-Sentinel Living Deception Continuum
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ghost-continuum
+Group=ghost-continuum
+WorkingDirectory=/opt/ghost-continuum
+ExecStart=/usr/bin/node bin/start-stack.js
+Environment=GC_NO_BROWSER=1
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ghost-continuum/.ghost-continuum /home/ghost-continuum/.ghost-lan
+
+[Install]
+WantedBy=multi-user.target

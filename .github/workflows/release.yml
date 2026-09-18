@@ -1,0 +1,48 @@
+name: Release
+
+# Publish a GitHub Release whenever a version tag (vX.Y.Z) is pushed, using the
+# matching CHANGELOG section as the release body. Keeps the published Release in
+# lockstep with version bumps so "latest release" never lags behind the site.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release notes from CHANGELOG
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Extract the "## [VERSION] ..." section up to the next "## [" heading.
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { flag=1; print; next }
+            flag && /^## \[/ { exit }
+            flag { print }
+          ' CHANGELOG.md > RELEASE_BODY.md
+          if [ ! -s RELEASE_BODY.md ] && [ -f release-notes.md ]; then
+            cp release-notes.md RELEASE_BODY.md
+          fi
+          echo "----- release body -----"
+          cat RELEASE_BODY.md
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          CODENAME="$(node --input-type=module -e "import { CODENAME } from './packages/core/src/version.js'; process.stdout.write(CODENAME)")"
+          TITLE="Ghost Continuum ${TAG} ${CODENAME}"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file RELEASE_BODY.md
+          else
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TITLE" --notes-file RELEASE_BODY.md --verify-tag
+          fi
