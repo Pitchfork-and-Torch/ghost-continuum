@@ -98,7 +98,18 @@ export function verifyLedger(maxEntries = 5000) {
   let expectedRoot = null;
 
   for (let i = 0; i < lines.length; i++) {
-    const entry = JSON.parse(lines[i]);
+    let entry;
+    try {
+      entry = JSON.parse(lines[i]);
+    } catch {
+      // Corrupt / truncated chain.jsonl must not throw out of verify — sealed
+      // forensics and hub health checks expect { ok:false }, not an exception.
+      // Distinct from readLedger display skip: verify reports the break.
+      return { ok: false, reason: 'corrupt json', index: i, entries: lines.length };
+    }
+    if (!entry || typeof entry !== 'object') {
+      return { ok: false, reason: 'corrupt json', index: i, entries: lines.length };
+    }
     const leaf = hashLeaf(entry.event);
     if (leaf !== entry.leaf) return { ok: false, reason: 'leaf mismatch', entry: entry.ts };
     // A windowed verify starts mid-chain, so we cannot recompute from GENESIS.
