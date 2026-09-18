@@ -60,7 +60,15 @@ export function appendEvent(event) {
 export function readEvents(limit = 100) {
   if (!fs.existsSync(EVENTS_PATH)) return [];
   const lines = fs.readFileSync(EVENTS_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l)).reverse();
+  const out = [];
+  for (const l of lines.slice(-limit)) {
+    try {
+      out.push(JSON.parse(l));
+    } catch {
+      /* skip corrupt jsonl lines so one bad row cannot take down the hub */
+    }
+  }
+  return out.reverse();
 }
 
 export function mergeEventStreams(...streams) {
