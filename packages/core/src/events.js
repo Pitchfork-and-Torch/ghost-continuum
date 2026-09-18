@@ -13,7 +13,14 @@ export function normalizeEvent(raw) {
   const plane = raw.plane || inferPlane(raw);
   // Prefer an explicit finite timestamp. Truthy non-finite values (Infinity)
   // and falsy zero must not leak into hub sort / merge keys.
-  const ts = Number.isFinite(raw.ts) ? raw.ts : Date.now();
+  // JSON/hub callers often pass numeric timestamps as strings ("1700…");
+  // Number.isFinite("1700…") is false, so coerce numeric strings before fallback.
+  // Distinct from rejecting NaN/Infinity on already-numeric ts.
+  let ts = raw.ts;
+  if (typeof ts === 'string' && ts.trim() !== '') {
+    ts = Number(ts);
+  }
+  ts = Number.isFinite(ts) ? ts : Date.now();
   return {
     v: 1,
     id: raw.id || crypto.randomUUID(),
