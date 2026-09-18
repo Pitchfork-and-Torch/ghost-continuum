@@ -1,6 +1,8 @@
 import assert from 'assert';
 import { rateLimit, resetRateLimits, clientIp } from '../packages/hub-api/src/safe.js';
-import { appendLedgerEntry, verifyLedger, getLedgerRoot, countEntries } from '../packages/trust/src/index.js';
+import { appendLedgerEntry, verifyLedger, getLedgerRoot, countEntries, readLedger, LEDGER_DIR } from '../packages/trust/src/index.js';
+import fs from 'fs';
+import path from 'path';
 
 // --- Write-side rate limiter -------------------------------------------------
 resetRateLimits();
@@ -41,4 +43,20 @@ const v = verifyLedger();
 assert.ok(v.ok, 'ledger verifies (including windowed long chains)');
 console.log('  ✓ ledger verification passes', { entries: v.entries, windowed: !!v.windowed });
 
+
+// --- Merkle ledger: skip corrupt JSONL on read (hub-style) -------------------
+{
+  const ledgerPath = path.join(LEDGER_DIR, 'chain.jsonl');
+  fs.appendFileSync(ledgerPath, 'NOT_JSON_CORRUPT\n');
+  const before = countEntries(); // counts raw lines including corrupt
+  const rows = readLedger(5000);
+  assert.ok(rows.every((r) => r && typeof r === 'object'), 'readLedger returns only parsed objects');
+  assert.ok(rows.length < before || before === 0, 'corrupt line is skipped on read');
+  // clean trailing corrupt line so later verifies stay green
+  const cleaned = fs.readFileSync(ledgerPath, 'utf8').split('\n').filter((l) => l && l !== 'NOT_JSON_CORRUPT').join('\n') + '\n';
+  fs.writeFileSync(ledgerPath, cleaned);
+  console.log('  ✓ readLedger skips corrupt jsonl lines');
+}
+
 console.log('\nHardening checks passed.\n');
+
