@@ -18,7 +18,7 @@ export function normalizeEvent(raw) {
     plane,
     type: raw.type || 'unknown',
     ip: raw.ip || raw.detail?.ip || null,
-    score: typeof raw.score === 'number' ? raw.score : scoreEventType(raw.type),
+    score: Number.isFinite(raw.score) ? raw.score : scoreEventType(raw.type),
     buildId: raw.buildId || raw.detail?.buildId || null,
     generation: raw.generation ?? raw.detail?.generation ?? null,
     detail: raw.detail || {},
