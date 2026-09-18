@@ -76,8 +76,13 @@ export function countEntries() {
 
 export function readLedger(limit = 100) {
   if (!fs.existsSync(LEDGER_PATH)) return [];
+  // Array#slice(-0) === slice(0) and returns the whole chain. Callers that
+  // pass limit=0 (or NaN / negative) must get an empty window, not everything.
+  // Distinct from readEvents: same trap lived here on the ledger path.
+  const n = Number(limit);
+  if (!Number.isFinite(n) || n <= 0) return [];
   const lines = fs.readFileSync(LEDGER_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l));
+  return lines.slice(-Math.floor(n)).map((l) => JSON.parse(l));
 }
 
 export function getLedgerRoot() {
