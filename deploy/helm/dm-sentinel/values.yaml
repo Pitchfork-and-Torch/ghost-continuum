@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/pitchfork-and-torch/ghost-continuum
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  hubPort: 30000
+  ghostLanPort: 29999
+  edgePort: 30001
+
+continuum:
+  morph: research
+  evolution:
+    enabled: true
+  narrative:
+    enabled: false
+  planes:
+    phantomMesh: false
+    deepVeil: false
+    mirageCore: false
+
+persistence:
+  enabled: true
+  size: 1Gi
+  mountPath: /data/.ghost-continuum
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
