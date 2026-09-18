@@ -1,0 +1,16 @@
+{
+  "name": "Ghost Continuum",
+  "install": "npm ci && npm run setup",
+  "terminals": [
+    {
+      "name": "hub",
+      "command": "GC_NO_BROWSER=1 npm start"
+    }
+  ],
+  "ports": [
+    {
+      "name": "Command Nexus hub",
+      "port": 30000
+    }
+  ]
+}
