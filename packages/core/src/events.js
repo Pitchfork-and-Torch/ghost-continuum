@@ -11,10 +11,13 @@ import { appendLedgerEntry } from '../../trust/src/merkle.js';
  */
 export function normalizeEvent(raw) {
   const plane = raw.plane || inferPlane(raw);
+  // Prefer an explicit finite timestamp. Truthy non-finite values (Infinity)
+  // and falsy zero must not leak into hub sort / merge keys.
+  const ts = Number.isFinite(raw.ts) ? raw.ts : Date.now();
   return {
     v: 1,
     id: raw.id || crypto.randomUUID(),
-    ts: raw.ts || Date.now(),
+    ts,
     plane,
     type: raw.type || 'unknown',
     ip: raw.ip || raw.detail?.ip || null,
