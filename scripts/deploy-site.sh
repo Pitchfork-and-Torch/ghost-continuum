@@ -70,6 +70,11 @@ for icon in apple-touch-icon.png icon-192.png icon-512.png; do
   [ -f "$L/$icon" ] && cp "$L/$icon" "$SITE/$icon"
 done
 
+# Extensionless /VERSION must be a real file. Pages would otherwise SPA-fallback to HTML.
+if [ -f "$L/VERSION" ]; then
+  cp "$L/VERSION" "$SITE/VERSION"
+fi
+
 # JPEG magic ffd8ff (HTML-as-image would fail this).
 if [ -f "$L/share-card.jpg" ]; then
   sig="$(node -e "const fs=require('fs'); const b=fs.readFileSync(process.argv[1]); process.stdout.write(b.slice(0,3).toString('hex'));" "$L/share-card.jpg")"

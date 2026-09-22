@@ -112,6 +112,11 @@ foreach ($icon in @("apple-touch-icon.png", "icon-192.png", "icon-512.png")) {
     Copy-Item $iconPath (Join-Path $Site $icon) -Force
   }
 }
+# Extensionless /VERSION must be a real file. Pages would otherwise SPA-fallback to HTML.
+$versionFile = Join-Path $LandingDir "VERSION"
+if (Test-Path $versionFile) {
+  Copy-Item $versionFile (Join-Path $Site "VERSION") -Force
+}
 $panel = Join-Path $LandingDir "projects-panel.js"
 if (Test-Path $panel) {
   Copy-Item $panel (Join-Path $Site "projects-panel.js") -Force
