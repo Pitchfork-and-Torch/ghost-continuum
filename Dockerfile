@@ -1,17 +1,17 @@
 # Optional convenience image for Ghost Continuum.
-# Core engine remains zero npm runtime dependencies — this only packages Node + source.
+# Core engine remains zero npm runtime dependencies - this only packages Node + source.
 # Defensive / local-first: bind hub to loopback in production; do not expose honeypots publicly.
 
 FROM node:20-alpine
 
 LABEL org.opencontainers.image.title="Ghost Continuum" \
-      org.opencontainers.image.description="Living Digital Immune System — v3.0 OMEGA ASCENDANT" \
+      org.opencontainers.image.description="Living Digital Immune System - v3.0 OMEGA ASCENDANT" \
       org.opencontainers.image.source="https://github.com/Pitchfork-and-Torch/ghost-continuum" \
       org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app
 
-# Copy monorepo (no install required for core — zero runtime deps)
+# Copy monorepo (no install required for core - zero runtime deps)
 COPY package.json ./
 COPY bin ./bin
 COPY packages ./packages
