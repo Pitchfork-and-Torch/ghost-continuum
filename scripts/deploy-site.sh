@@ -64,6 +64,12 @@ for og in og-card.png og-card.jpg og-card-v3.png og-card-v3.jpg share-card.png s
   [ -f "$L/$og" ] && cp "$L/$og" "$SITE/$og"
 done
 
+# Apple touch + PWA icons. A Pages deploy of this tree must keep the files
+# index.html links, or /apple-touch-icon.png 404s on the next ship.
+for icon in apple-touch-icon.png icon-192.png icon-512.png; do
+  [ -f "$L/$icon" ] && cp "$L/$icon" "$SITE/$icon"
+done
+
 # JPEG magic ffd8ff (HTML-as-image would fail this).
 if [ -f "$L/share-card.jpg" ]; then
   sig="$(node -e "const fs=require('fs'); const b=fs.readFileSync(process.argv[1]); process.stdout.write(b.slice(0,3).toString('hex'));" "$L/share-card.jpg")"

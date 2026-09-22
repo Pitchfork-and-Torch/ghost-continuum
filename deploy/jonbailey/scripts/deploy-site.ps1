@@ -104,6 +104,14 @@ foreach ($og in @("og-card.png", "og-card.jpg", "og-card-v3.png", "og-card-v3.jp
     Copy-Item $ogPath (Join-Path $Site $og) -Force
   }
 }
+# Apple touch + PWA icons live in landing/. Without this copy, the next Pages
+# deploy drops /apple-touch-icon.png (and 192/512) that index.html links.
+foreach ($icon in @("apple-touch-icon.png", "icon-192.png", "icon-512.png")) {
+  $iconPath = Join-Path $LandingDir $icon
+  if (Test-Path $iconPath) {
+    Copy-Item $iconPath (Join-Path $Site $icon) -Force
+  }
+}
 $panel = Join-Path $LandingDir "projects-panel.js"
 if (Test-Path $panel) {
   Copy-Item $panel (Join-Path $Site "projects-panel.js") -Force
