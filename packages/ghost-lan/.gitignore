@@ -1,0 +1,15 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+
+# Runtime data lives in ~/.ghost-lan, not the repo
+state.json
+events.jsonl
+sentinel.pid
+sentinel.log
+config.json
+dossiers.json
+!config.example.json

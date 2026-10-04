@@ -1,0 +1,25 @@
+{
+  "siteSeed": "my-home-lan",
+  "lanIp": "192.168.1.100",
+  "tripwireUrl": "",
+  "beaconEnabled": false,
+  "dashboardPort": 29999,
+  "obviousPorts": [8080, 8443, 5901],
+  "rotatingPortCount": 5,
+  "rotateOnHits": 3,
+  "gradualMorph": true,
+  "stalePersonaOnMismatch": true,
+  "stagedRedirect": true,
+  "hideGhostHeaders": true,
+  "scannerDelayMs": 1500,
+  "trapSilenceMs": 90000,
+  "timePersonas": [
+    { "from": 8, "to": 18, "persona": "router-admin" },
+    { "from": 18, "to": 8, "persona": "ip-camera" }
+  ],
+  "rules": [
+    { "id": "camera-path", "match": { "url": "/camera|/stream|h264" }, "persona": "ip-camera" },
+    { "id": "scanner", "match": { "ua": "nikto|masscan|zgrab" }, "mode": "minimal", "rotate": true }
+  ],
+  "trapPaths": ["/.env", "/.git/config", "/wp-admin", "/admin/config.bak"]
+}
