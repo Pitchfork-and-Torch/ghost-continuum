@@ -173,6 +173,11 @@ try {
   assert.notStrictEqual(ok.body && ok.body.error, 'invalid JSON');
   assert.ok(ok.body && typeof ok.body === 'object');
   console.log('  ✓ hub answers 400 for a bad JSON body');
+
+  const oversized = await postRaw(hub.port, 'x'.repeat(2 * 1024 * 1024));
+  assert.strictEqual(oversized.status, 413);
+  assert.strictEqual(oversized.body.error, 'payload too large');
+  console.log('  ✓ hub answers 413 before closing an oversized body');
 } finally {
   await new Promise((resolve) => hub.server.close(resolve));
 }

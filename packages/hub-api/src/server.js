@@ -217,10 +217,25 @@ export function startHub(config = loadConfig()) {
         res.destroy();
         return;
       }
-      const message = err && (err.message === 'payload too large' || err.message === 'invalid JSON')
-        ? err.message
-        : 'internal error';
-      json(res, message === 'internal error' ? 500 : 400, { ok: false, error: message });
+      const tooLarge = err && err.message === 'payload too large';
+      const badJson = err && err.message === 'invalid JSON';
+      const message = tooLarge || badJson ? err.message : 'internal error';
+      const status = tooLarge ? 413 : badJson ? 400 : 500;
+      if (!tooLarge) {
+        json(res, status, { ok: false, error: message });
+        return;
+      }
+      const payload = JSON.stringify({ ok: false, error: message });
+      res.writeHead(413, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'Content-Length': Buffer.byteLength(payload),
+        Connection: 'close',
+      });
+      res.end(payload);
+      // Drop the rest of the body after the status is queued. Destroying here
+      // resets the socket before the client can read the 413.
+      if (typeof req.resume === 'function') req.resume();
     });
   });
 
@@ -891,7 +906,8 @@ export function startHub(config = loadConfig()) {
  let body;
  try {
  body = await readBody(req);
- } catch {
+ } catch (err) {
+ if (err && err.message === 'payload too large') throw err;
  return json(res, 400, { ok: false, error: 'Invalid backup' });
  }
  const result = restoreBackup(body);

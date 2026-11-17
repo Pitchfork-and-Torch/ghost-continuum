@@ -6,6 +6,12 @@ const SAFE_LABEL = /^[a-zA-Z0-9._-]{1,64}$/;
 const SAFE_ID = /^[a-zA-Z0-9._-]{1,128}$/;
 const SAFE_BUNDLE_KEY = /^[a-zA-Z0-9._-]+(\.(json|jsonl|txt|md))?$/;
 
+function tooLargeError() {
+  const err = new Error('payload too large');
+  err.statusCode = 413;
+  return err;
+}
+
 export function readBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -21,13 +27,18 @@ export function readBody(req) {
       settled = true;
       resolve(value);
     };
+    const declared = Number(req.headers?.['content-length']);
+    if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) {
+      fail(tooLargeError());
+      return;
+    }
     req.on('data', (c) => {
       if (settled) return;
       const buf = Buffer.isBuffer(c) ? c : Buffer.from(c);
       size += buf.length;
       if (size > MAX_BODY_BYTES) {
-        fail(new Error('payload too large'));
-        req.destroy();
+        fail(tooLargeError());
+        if (typeof req.pause === 'function') req.pause();
         return;
       }
       chunks.push(buf);
