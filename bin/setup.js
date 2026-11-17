@@ -57,6 +57,8 @@ function main() {
   console.log(`  Edge mode      → ${config.edgeMode}`);
   console.log(`  Edge status    → ${config.edgeStatusUrl}`);
   console.log(`  Hub UI         → http://127.0.0.1:${config.hubPort}`);
+  console.log('  Ghost LAN decoy listens on 0.0.0.0 by default, so it is reachable from the LAN.');
+  console.log('  The Ghost LAN dashboard stays on 127.0.0.1.');
   console.log('\n  Run: npm start\n');
 }
 

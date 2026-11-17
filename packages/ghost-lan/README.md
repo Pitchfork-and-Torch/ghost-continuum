@@ -96,7 +96,9 @@ ghost-lan install / uninstall    Register autostart hooks
 
 ## Config
 
-`~/.ghost-lan/config.json` (see `config.example.json`):
+`~/.ghost-lan/config.json` (see `config.example.json`).
+
+`bindHost` defaults to `0.0.0.0`. Decoy ports listen on that address, so other machines on the LAN can reach them. The dashboard stays on `127.0.0.1`.
 
 ```json
 {

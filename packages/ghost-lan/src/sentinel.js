@@ -361,6 +361,7 @@ export async function startSentinel(options = {}) {
     `  Persona     ${meta.icon} ${meta.label} (gen ${state.generation}, phase ${state.morphPhase ?? 0})`,
     `  Build ID    ${state.buildId}`,
     `  Honeypots   ${state.ports.join(', ')}`,
+    `  Bind        ${config.bindHost || '0.0.0.0'} (decoy ports are reachable from the LAN)`,
     `  Dashboard   http://127.0.0.1:${config.dashboardPort}`,
     `  DNS chaff   ${hostsPath}`,
     `  Ops         rules · traps · survey · morph · masquerade`,
