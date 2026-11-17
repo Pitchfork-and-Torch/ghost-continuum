@@ -6,6 +6,8 @@
  * compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
  * GET /taxii2/ is the only read forwarded
  * without that bearer. Backup paths and any download path are never in that set.
+ * GET /api/events/stream needs the same bearer. Its upstream body is returned
+ * unread so the event stream is not buffered here.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
@@ -26,7 +28,7 @@ function corsHeaders(origin, env) {
   return {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Last-Event-ID',
   };
 }
 
@@ -76,6 +78,24 @@ function forwardHeaders(request) {
   return headers;
 }
 
+function isEventStream(pathname) {
+  return pathname === '/api/events/stream';
+}
+
+function eventStreamResponse(upstream, origin, env) {
+  const headers = new Headers(upstream.headers);
+  applyHeaderMap(headers, corsHeaders(origin, env));
+  const type = headers.get('Content-Type') || '';
+  if (!type.toLowerCase().includes('text/event-stream')) {
+    headers.set('Content-Type', 'text/event-stream');
+  }
+  headers.set('Cache-Control', 'no-cache, no-transform');
+  headers.set('X-Accel-Buffering', 'no');
+  headers.delete('Content-Length');
+  headers.delete('Content-Encoding');
+  return new Response(upstream.body, { status: upstream.status, headers });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -116,6 +136,10 @@ export default {
       headers,
       body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
     });
+
+    if (request.method === 'GET' && isEventStream(url.pathname) && upstream.ok && upstream.body) {
+      return eventStreamResponse(upstream, origin, env);
+    }
 
     const resHeaders = new Headers(upstream.headers);
     applyHeaderMap(resHeaders, corsHeaders(origin, env));
