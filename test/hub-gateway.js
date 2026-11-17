@@ -80,6 +80,23 @@ try {
 
   {
     resetCalls();
+    for (const authorization of [`bearer ${TOKEN}`, `BEARER ${TOKEN}`, `Bearer  ${TOKEN}`]) {
+      const res = await worker.fetch(
+        new Request(`${ORIGIN}/api/home/restore`, {
+          method: 'POST',
+          headers: { Authorization: authorization, Origin: ORIGIN },
+          body: '{}',
+        }),
+        env,
+      );
+      assert.strictEqual(res.status, 401, authorization);
+      assert.strictEqual(calls.length, 0, authorization);
+    }
+    console.log('  bearer prefix must be exactly Bearer');
+  }
+
+  {
+    resetCalls();
     const res = await worker.fetch(
       new Request(`${ORIGIN}/api/home/restore`, {
         method: 'POST',

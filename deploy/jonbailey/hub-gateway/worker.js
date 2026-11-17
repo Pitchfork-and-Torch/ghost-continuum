@@ -47,8 +47,11 @@ function jsonResponse(status, body, origin, env) {
 
 function presentedBearer(request) {
   const raw = request.headers.get('Authorization') || '';
-  const match = /^Bearer\s+(\S+)\s*$/i.exec(raw);
-  return match ? match[1] : '';
+  const prefix = 'Bearer ';
+  if (!raw.startsWith(prefix)) return '';
+  const token = raw.slice(prefix.length);
+  if (!token || /\s/.test(token)) return '';
+  return token;
 }
 
 /** Byte-wise compare. Runtime tracks the longer input, not the shared prefix. */
