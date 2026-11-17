@@ -8,26 +8,45 @@ const SAFE_BUNDLE_KEY = /^[a-zA-Z0-9._-]+(\.(json|jsonl|txt|md))?$/;
 
 export function readBody(req) {
   return new Promise((resolve, reject) => {
-    let data = '';
+    const chunks = [];
     let size = 0;
+    let settled = false;
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
+    const ok = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
     req.on('data', (c) => {
-      size += c.length;
+      if (settled) return;
+      const buf = Buffer.isBuffer(c) ? c : Buffer.from(c);
+      size += buf.length;
       if (size > MAX_BODY_BYTES) {
-        reject(new Error('payload too large'));
+        fail(new Error('payload too large'));
         req.destroy();
         return;
       }
-      data += c;
+      chunks.push(buf);
     });
     req.on('end', () => {
-      if (!data) return resolve({});
+      if (settled) return;
+      if (size === 0) return ok({});
       try {
-        resolve(JSON.parse(data));
+        const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          fail(new Error('invalid JSON'));
+          return;
+        }
+        ok(parsed);
       } catch {
-        reject(new Error('invalid JSON'));
+        fail(new Error('invalid JSON'));
       }
     });
-    req.on('error', reject);
+    req.on('error', (err) => fail(err));
   });
 }
 
