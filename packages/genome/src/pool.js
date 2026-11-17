@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
+import { dataHome } from '../../core/src/home.js';
 import { createGenome, ARCHETYPES, validateGenome } from './schema.js';
 import { applyFitness, engagementSignal, rankGenomes } from './fitness.js';
 import { evolveGeneration } from './evolution.js';
 import { evolveNsga2 } from './nsga2.js';
 
-export const GENOME_DIR = path.join(os.homedir(), '.ghost-continuum', 'genomes');
+export const GENOME_DIR = path.join(dataHome(), '.ghost-continuum', 'genomes');
 export const POOL_PATH = path.join(GENOME_DIR, 'pool.json');
 
 export function seedPool(personas = ARCHETYPES, count = 6) {

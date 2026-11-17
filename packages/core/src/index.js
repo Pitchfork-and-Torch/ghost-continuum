@@ -1,3 +1,4 @@
+export { dataHome } from './home.js';
 export * from './version.js';
 export * from './config.js';
 export * from './paths.js';

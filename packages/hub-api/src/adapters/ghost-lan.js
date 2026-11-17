@@ -1,10 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { spawnHidden } from '../../../core/src/silent-spawn.js';
 import { normalizeEvent } from '../../../core/src/events.js';
-
-const GHOST_DIR = path.join(os.homedir(), '.ghost-lan');
+import { GHOST_DIR } from '../../../ghost-lan/src/config.js';
 
 export function isGhostLanEnabled(config) {
   return config?.continuum?.corePlanes?.ghostLan !== false;

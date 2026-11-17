@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
+import { dataHome } from '../../core/src/home.js';
 
-export const PHANTOM_DIR = path.join(os.homedir(), '.ghost-continuum', 'phantom');
+export const PHANTOM_DIR = path.join(dataHome(), '.ghost-continuum', 'phantom');
 
 export function loadPhantom(ip) {
   const safe = ip.replace(/[^a-zA-Z0-9._-]/g, '_');

@@ -122,10 +122,11 @@ const hub = await startHub(enrichConfig({
   primaryDomain: 'example.com',
   demoMode: true,
   useBuiltinValidator: true,
-  hubPort: 30119,
+  hubPort: 0,
   hubWatchIntervalMs: 0,
 }));
 try {
+  assert.ok(hub.port > 0 && hub.port !== 30119, 'hub test binds an ephemeral port');
   const bad = await postRaw(hub.port, '{');
   assert.strictEqual(bad.status, 400);
   assert.strictEqual(bad.body.error, 'invalid JSON');

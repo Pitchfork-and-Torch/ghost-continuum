@@ -1,9 +1,10 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { dataHome } from '../../core/src/home.js';
 
-export const GHOST_DIR = path.join(os.homedir(), '.ghost-lan');
-const LEGACY_DIR = path.join(os.homedir(), '.dm-home');
+export const GHOST_DIR = path.join(dataHome(), '.ghost-lan');
+const LEGACY_DIR = path.join(dataHome(), '.dm-home');
 
 export const DEFAULT_CONFIG = {
   siteSeed: 'ghost-lan',

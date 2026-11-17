@@ -1,9 +1,9 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
+import { dataHome } from './home.js';
 import { BUNDLED_GHOST_LAN, GC_ROOT } from './paths.js';
 
-export const GC_DIR = path.join(os.homedir(), '.ghost-continuum');
+export const GC_DIR = path.join(dataHome(), '.ghost-continuum');
 export const CONFIG_PATH = path.join(GC_DIR, 'config.json');
 export const EVENTS_PATH = path.join(GC_DIR, 'events.jsonl');
 export const MANIFEST_PATH = path.join(GC_DIR, 'MANIFEST.json');
@@ -127,7 +127,7 @@ export function enrichConfig(raw = {}) {
   return config;
 }
 
-const LEGACY_DIR = path.join(os.homedir(), '.dm-sentinel');
+const LEGACY_DIR = path.join(dataHome(), '.dm-sentinel');
 
 function migrateLegacyDir() {
   if (fs.existsSync(CONFIG_PATH) || !fs.existsSync(LEGACY_DIR)) return;

@@ -10,7 +10,7 @@
     "start": "node src/sentinel.js",
     "install:win": "powershell -ExecutionPolicy Bypass -File install/install.ps1",
     "uninstall:win": "powershell -ExecutionPolicy Bypass -File install/uninstall.ps1",
-    "test": "node test/verify.js && node test/ops-verify.js",
+    "test": "node ../../test/run-with-temp-home.js packages/ghost-lan/test/verify.js packages/ghost-lan/test/ops-verify.js",
     "test:integration": "node test/integration.js",
     "test:all": "node test/verify.js && node test/ops-verify.js && node test/integration.js"
   },

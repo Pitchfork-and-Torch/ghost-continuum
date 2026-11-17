@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import crypto from 'crypto';
+import { dataHome } from '../../core/src/home.js';
 import { readJsonlTail } from '../../core/src/jsonl-tail.js';
 
-export const LEDGER_DIR = path.join(os.homedir(), '.ghost-continuum', 'ledger');
+export const LEDGER_DIR = path.join(dataHome(), '.ghost-continuum', 'ledger');
 export const LEDGER_PATH = path.join(LEDGER_DIR, 'chain.jsonl');
 export const ROOT_PATH = path.join(LEDGER_DIR, 'root.json');
 

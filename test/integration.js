@@ -1,10 +1,9 @@
 import assert from 'assert';
 import fs from 'fs';
 import http from 'http';
-import os from 'os';
 import path from 'path';
 import { startHub } from '../packages/hub-api/src/server.js';
-import { enrichConfig } from '../packages/core/src/config.js';
+import { enrichConfig, GC_DIR } from '../packages/core/src/config.js';
 import { invalidatePrefix } from '../packages/hub-api/src/cache.js';
 
 const config = enrichConfig({
@@ -153,8 +152,8 @@ try {
   assert.ok(['CLEAR', 'ELEVATED', 'REAL_THREAT'].includes(watchCsrf.body.verdict));
 
   const fileMtime = (p) => (fs.existsSync(p) ? fs.statSync(p).mtimeMs : 0);
-  const cfgPath = path.join(os.homedir(), '.ghost-continuum', 'config.json');
-  const notifyPath = path.join(os.homedir(), '.ghost-continuum', 'notifications.json');
+  const cfgPath = path.join(GC_DIR, 'config.json');
+  const notifyPath = path.join(GC_DIR, 'notifications.json');
   const cfgBefore = fileMtime(cfgPath);
   const notifyBefore = fileMtime(notifyPath);
   const watchGet = await get('/api/threat/watch');

@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import crypto from 'crypto';
+import { dataHome } from '../../core/src/home.js';
 
-export const DOCS_DIR = path.join(os.homedir(), '.ghost-continuum', 'echo', 'artifacts');
+export const DOCS_DIR = path.join(dataHome(), '.ghost-continuum', 'echo', 'artifacts');
 
 function rng(seed) {
   let h = crypto.createHash('sha256').update(seed).digest();

@@ -15,11 +15,12 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { spawn, execFileSync } from 'child_process';
+import { dataHome } from '../../core/src/home.js';
 
 export const PLANE_ID = 'trench-cloak';
 export const PLANE_LABEL = 'Trench Coat';
 
-const STATE_DIR = path.join(os.homedir(), '.ghost-continuum', 'trench-cloak');
+const STATE_DIR = path.join(dataHome(), '.ghost-continuum', 'trench-cloak');
 const STATE_FILE = path.join(STATE_DIR, 'status.json');
 const PID_FILE = path.join(STATE_DIR, 'managed-trench.pid');
 

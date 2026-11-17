@@ -2,10 +2,10 @@ import http from 'http';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
+import { dataHome } from '../../core/src/home.js';
 
 export const PLANE_ID = 'mirage-core';
-const MIRAGE_DIR = path.join(os.homedir(), '.ghost-continuum', 'mirage');
+const MIRAGE_DIR = path.join(dataHome(), '.ghost-continuum', 'mirage');
 const ACTIVE_PATH = path.join(MIRAGE_DIR, 'active.json');
 const nativeServers = new Map();
 

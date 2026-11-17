@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
+import { dataHome } from '../../core/src/home.js';
 
-export const REPLAY_DIR = path.join(os.homedir(), '.ghost-continuum', 'replay');
+export const REPLAY_DIR = path.join(dataHome(), '.ghost-continuum', 'replay');
 
 export function buildSessionTimeline(events = [], ip = null) {
   const filtered = ip ? events.filter((e) => e.ip === ip) : events;

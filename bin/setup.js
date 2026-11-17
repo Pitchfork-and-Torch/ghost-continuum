@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import { enrichConfig, saveConfig, CONFIG_PATH, GC_DIR } from '../packages/core/src/config.js';
+import { dataHome } from '../packages/core/src/home.js';
 import { BUNDLED_GHOST_LAN } from '../packages/core/src/paths.js';
 
-const GHOST_DIR = path.join(os.homedir(), '.ghost-lan');
+const GHOST_DIR = path.join(dataHome(), '.ghost-lan');
 const GHOST_CONFIG = path.join(GHOST_DIR, 'config.json');
 const GHOST_EXAMPLE = path.join(BUNDLED_GHOST_LAN, 'config.example.json');
 

@@ -201,7 +201,7 @@ export async function buildStatus(config) {
 }
 
 export function startHub(config = loadConfig()) {
-  const port = config.hubPort || 30000;
+  const port = config.hubPort == null || config.hubPort === '' ? 30000 : Number(config.hubPort);
   // Write-side rate limit for mutating /api routes. Set writeRateLimitMax to 0 to disable.
   const writeRlMax = Number.isFinite(config.writeRateLimitMax) ? config.writeRateLimitMax : 120;
   const writeRlWindowMs = Number.isFinite(config.writeRateLimitWindowMs) ? config.writeRateLimitWindowMs : 10_000;
@@ -1216,6 +1216,10 @@ export function startHub(config = loadConfig()) {
   });
 
  return new Promise((resolve) => {
- server.listen(port, '127.0.0.1', () => resolve({ server, port, url: `http://127.0.0.1:${port}` }));
+ server.listen(port, '127.0.0.1', () => {
+ const bound = server.address();
+ const actualPort = bound && typeof bound === 'object' ? bound.port : port;
+ resolve({ server, port: actualPort, url: `http://127.0.0.1:${actualPort}` });
+ });
  });
 }

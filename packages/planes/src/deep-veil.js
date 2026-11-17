@@ -2,11 +2,12 @@ import os from 'os';
 import fs from 'fs';
 import { execSync, spawn } from 'child_process';
 import path from 'path';
+import { dataHome } from '../../core/src/home.js';
 
 export const PLANE_ID = 'deep-veil';
 
 let probeProcess = null;
-const VEIL_DIR = path.join(os.homedir(), '.ghost-continuum', 'deep-veil');
+const VEIL_DIR = path.join(dataHome(), '.ghost-continuum', 'deep-veil');
 
 export function detectEbpfSupport() {
   if (os.platform() !== 'linux') return { supported: false, reason: 'non-linux' };

@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
+import { dataHome } from '../../core/src/home.js';
 
 export const PLANE_ID = 'phantom-mesh';
-export const MESH_DIR = path.join(os.homedir(), '.ghost-continuum', 'mesh');
+export const MESH_DIR = path.join(dataHome(), '.ghost-continuum', 'mesh');
 
 /**
  * Privacy-preserving file-based gossip - shares sanitized genome fitness summaries only.

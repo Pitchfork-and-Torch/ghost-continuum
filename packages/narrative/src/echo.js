@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import os from 'os';
 import crypto from 'crypto';
+import { dataHome } from '../../core/src/home.js';
 
-export const ECHO_DIR = path.join(os.homedir(), '.ghost-continuum', 'echo');
+export const ECHO_DIR = path.join(dataHome(), '.ghost-continuum', 'echo');
 
 const FAKE_USERS = ['jchen', 'ops-bot', 'legacy-admin', 'contractor-m', 'backup-svc'];
 const FAKE_EVENTS = [
