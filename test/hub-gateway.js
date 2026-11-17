@@ -96,7 +96,7 @@ try {
   {
     resetCalls();
     const res = await worker.fetch(
-      new Request(`${ORIGIN}/api/status`, {
+      new Request(`${ORIGIN}/taxii2/`, {
         method: 'GET',
         headers: {
           Origin: ORIGIN,
@@ -112,17 +112,17 @@ try {
     assert.strictEqual(calls[0].authorization, null);
     assert.strictEqual(calls[0].cookie, null);
     assert.strictEqual(calls[0].xff, '203.0.113.10');
-    assert.strictEqual(calls[0].url, `${HUB}/api/status`);
+    assert.strictEqual(calls[0].url, `${HUB}/taxii2/`);
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
     assert.strictEqual(res.headers.get('Cache-Control'), 'no-store');
     assert.strictEqual(res.headers.get('X-Upstream'), 'yes');
-    console.log('  GET forwards without a token, strips Cookie, sets X-Forwarded-For');
+    console.log('  GET /taxii2/ forwards without a token, strips Cookie, sets X-Forwarded-For');
   }
 
   {
     resetCalls();
     const res = await worker.fetch(
-      new Request(`${ORIGIN}/api/status`, {
+      new Request(`${ORIGIN}/taxii2/`, {
         method: 'GET',
         headers: { Authorization: 'Bearer caller-supplied', Origin: ORIGIN },
       }),
@@ -179,7 +179,7 @@ try {
   {
     resetCalls();
     const res = await worker.fetch(
-      new Request(`${ORIGIN}/api/status`, {
+      new Request(`${ORIGIN}/taxii2/`, {
         method: 'GET',
         headers: { Origin: 'https://evil.example' },
       }),
@@ -196,11 +196,45 @@ try {
       new Request(`${ORIGIN}/api/feed?limit=30`, { method: 'GET' }),
       env,
     );
-    assert.strictEqual(res.status, 200);
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  GET /api/feed requires a bearer');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(new Request(`${ORIGIN}/api/status`, { method: 'GET' }), env);
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  GET /api/status requires a bearer');
+  }
+
+  {
+    resetCalls();
+    const feed = await worker.fetch(
+      new Request(`${ORIGIN}/api/feed?limit=30`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      }),
+      env,
+    );
+    assert.strictEqual(feed.status, 200);
     assert.strictEqual(calls.length, 1);
     assert.strictEqual(calls[0].url, `${HUB}/api/feed?limit=30`);
-    assert.strictEqual(calls[0].authorization, null);
-    console.log('  GET /api/feed is forwarded without a bearer');
+    assert.strictEqual(calls[0].authorization, `Bearer ${TOKEN}`);
+    resetCalls();
+    const status = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      }),
+      env,
+    );
+    assert.strictEqual(status.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].url, `${HUB}/api/status`);
+    assert.strictEqual(calls[0].authorization, `Bearer ${TOKEN}`);
+    console.log('  GET /api/status and GET /api/feed forward with a bearer');
   }
 
   {

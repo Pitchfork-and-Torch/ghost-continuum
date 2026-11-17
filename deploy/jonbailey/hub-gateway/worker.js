@@ -4,12 +4,12 @@
  *
  * OPTIONS is answered here. Every other method needs the caller's own bearer,
  * compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
- * GET /api/status, GET /api/feed, and GET /taxii2/ are the only reads forwarded
+ * GET /taxii2/ is the only read forwarded
  * without that bearer. Backup paths and any download path are never in that set.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
-const PUBLIC_GET_PATHS = new Set(['/api/status', '/api/feed', '/taxii2/']);
+const PUBLIC_GET_PATHS = new Set(['/taxii2/']);
 
 function isPublicGet(method, pathname) {
   if (method !== 'GET') return false;
