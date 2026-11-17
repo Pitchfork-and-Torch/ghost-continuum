@@ -381,8 +381,16 @@ export default {
       method,
       headers: upstreamHeaders(request),
       body: method === 'GET' || method === 'HEAD' ? undefined : request.body,
-      redirect: 'follow',
+      redirect: 'manual',
     });
+
+    if (isOriginRedirect(upstream.status)) {
+      const headers = passThroughResponseHeaders(upstream.headers);
+      const location = publicRedirectLocation(headers.get('Location'), upstreamHost);
+      if (location) headers.set('Location', location);
+      else headers.delete('Location');
+      return new Response(upstream.body, { status: upstream.status, headers });
+    }
 
     const ct = upstream.headers.get('content-type') || '';
     if (ct.includes('text/html') && request.method === 'GET') {
@@ -409,6 +417,26 @@ export default {
   },
 };
 
+function isOriginRedirect(status) {
+  return status === 301 || status === 302 || status === 303 || status === 307 || status === 308;
+}
+
+/** Keep a same-host origin redirect on the public host. Leave every other Location unchanged. */
+function publicRedirectLocation(raw, upstreamHost) {
+  const value = String(raw || '').trim();
+  if (!value || value.startsWith('/')) return value;
+  const host = String(upstreamHost || '').trim().toLowerCase();
+  try {
+    const loc = value.startsWith('//') ? new URL(`https:${value}`) : new URL(value);
+    if (host && loc.host.toLowerCase() === host) {
+      return `${loc.pathname}${loc.search}${loc.hash}`;
+    }
+  } catch {
+    return value;
+  }
+  return value;
+}
+
 /** Headers safe to copy from Pages/origin through the edge proxy. */
 function passThroughResponseHeaders(src) {
   const headers = new Headers();
@@ -420,6 +448,7 @@ function passThroughResponseHeaders(src) {
     'content-type',
     'etag',
     'last-modified',
+    'location',
     'permissions-policy',
     'referrer-policy',
     'strict-transport-security',

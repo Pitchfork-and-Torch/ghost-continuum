@@ -163,4 +163,91 @@ assert.strictEqual(secondTrap.status, 404);
 assert.strictEqual(observerPuts.length, 1, 'a recent address does not write the observer again');
 console.log('  repeat trap hits skip another observer write');
 
+const realFetch = globalThis.fetch;
+try {
+  const seen = [];
+  globalThis.fetch = async (url, init = {}) => {
+    seen.push({ url: String(url), redirect: init.redirect });
+    const target = String(url);
+    if (target.endsWith('/jp')) {
+      return new Response('<html><body>moved</body></html>', {
+        status: 301,
+        headers: {
+          Location: '/?lang=ja',
+          'Content-Type': 'text/html; charset=utf-8',
+          'Strict-Transport-Security': 'max-age=31536000',
+          'Content-Security-Policy': "default-src 'self'",
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Permissions-Policy': 'camera=()',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        },
+      });
+    }
+    if (target.endsWith('/away')) {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: 'https://example.pages.dev/next?x=1',
+          'Strict-Transport-Security': 'max-age=9',
+        },
+      });
+    }
+    if (target.endsWith('/external')) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: 'https://other.example/out' },
+      });
+    }
+    return new Response('<html><head></head><body>home</body></html>', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Strict-Transport-Security': 'max-age=31536000',
+        'Content-Security-Policy': "default-src 'self'",
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'Permissions-Policy': 'camera=()',
+      },
+    });
+  };
+  const redirectEnv = { SITE_SEED: 'example.test', UPSTREAM: 'example.pages.dev' };
+  const jp = await worker.fetch(new Request('https://example.test/jp'), redirectEnv);
+  assert.strictEqual(seen.length, 1);
+  assert.strictEqual(seen[0].redirect, 'manual');
+  assert.strictEqual(jp.status, 301);
+  assert.strictEqual(jp.headers.get('Location'), '/?lang=ja');
+  assert.strictEqual(jp.headers.get('Strict-Transport-Security'), 'max-age=31536000');
+  assert.strictEqual(jp.headers.get('Content-Security-Policy'), "default-src 'self'");
+  assert.strictEqual(jp.headers.get('X-Content-Type-Options'), 'nosniff');
+  assert.strictEqual(jp.headers.get('X-Frame-Options'), 'SAMEORIGIN');
+  assert.strictEqual(jp.headers.get('Permissions-Policy'), 'camera=()');
+  const jpBody = await jp.text();
+  assert.strictEqual(jpBody, '<html><body>moved</body></html>');
+  assert.ok(!jpBody.includes('/.__dm/sentinel.js'));
+
+  const home = await worker.fetch(new Request('https://example.test/'), redirectEnv);
+  assert.strictEqual(home.status, 200);
+  assert.strictEqual(home.headers.get('Strict-Transport-Security'), 'max-age=31536000');
+  assert.strictEqual(home.headers.get('Content-Security-Policy'), "default-src 'self'");
+  assert.strictEqual(home.headers.get('X-Content-Type-Options'), 'nosniff');
+  assert.strictEqual(home.headers.get('X-Frame-Options'), 'SAMEORIGIN');
+  assert.strictEqual(home.headers.get('Permissions-Policy'), 'camera=()');
+  const homeBody = await home.text();
+  assert.ok(homeBody.includes('/.__dm/sentinel.js'));
+
+  const away = await worker.fetch(new Request('https://example.test/away'), redirectEnv);
+  assert.strictEqual(away.status, 302);
+  assert.strictEqual(away.headers.get('Location'), '/next?x=1');
+  assert.strictEqual(away.headers.get('Strict-Transport-Security'), 'max-age=9');
+
+  const external = await worker.fetch(new Request('https://example.test/external'), redirectEnv);
+  assert.strictEqual(external.status, 302);
+  assert.strictEqual(external.headers.get('Location'), 'https://other.example/out');
+  assert.strictEqual(seen.length, 4);
+  console.log('  origin redirects pass through with security headers');
+} finally {
+  globalThis.fetch = realFetch;
+}
+
 console.log('\nEdge bound checks passed.\n');
