@@ -5,11 +5,11 @@ No secrets. The operator hub binds loopback (`127.0.0.1`). Exploit roles stay bl
 
 | Surface | URL | Advertised version | Last known update |
 |---------|-----|--------------------|-------------------|
-| Public site | https://ghost.jonbailey.xyz/ | 3.7.2 Air-Gap Map | 2026-09-22 |
-| Pages alias | https://ghost-continuum.pages.dev/ | 3.7.2 Air-Gap Map | 2026-09-22 |
-| Hub preview | https://ghost.jonbailey.xyz/hub/ | 3.7.2 Air-Gap Map | 2026-09-22 |
+| Public site | https://ghost.jonbailey.xyz/ | 3.7.2 Air-Gap Map | 2026-11-17 |
+| Pages alias | https://ghost-continuum.pages.dev/ | 3.7.2 Air-Gap Map | 2026-11-17 |
+| Hub preview | https://ghost.jonbailey.xyz/hub/ | 3.7.2 Air-Gap Map | 2026-11-17 |
 | GitHub latest | https://github.com/Pitchfork-and-Torch/ghost-continuum/releases/latest | v3.7.2 | 2026-09-22 |
-| LLM summary | https://ghost.jonbailey.xyz/llms.txt | 3.7.2 Air-Gap Map | 2026-09-22 |
+| LLM summary | https://ghost.jonbailey.xyz/llms.txt | 3.7.2 Air-Gap Map | 2026-11-17 |
 
 `softwareVersion` on the live HTML must equal `VERSION`. Crystal Seal was 3.6.0-3.6.3; it is not current.
 
