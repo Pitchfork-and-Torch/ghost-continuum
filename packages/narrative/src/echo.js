@@ -22,7 +22,18 @@ function rng(seed) {
   };
 }
 
+const WORLD_ID_RE = /^[a-zA-Z0-9._-]{1,64}$/;
+
+/** File-name id. Dots are allowed. A ".." segment is not. */
+export function isSafeWorldId(worldId) {
+  if (typeof worldId !== 'string') return false;
+  if (worldId.split(/[/\\]/).includes('..')) return false;
+  if (worldId.includes('..')) return false;
+  return WORLD_ID_RE.test(worldId);
+}
+
 export function loadEchoWorld(worldId = 'default') {
+  if (!isSafeWorldId(worldId)) throw new Error('Invalid world id');
   const file = path.join(ECHO_DIR, `${worldId}.json`);
   if (!fs.existsSync(file)) return createEchoWorld(worldId);
   try {
@@ -56,8 +67,10 @@ export function createEchoWorld(worldId = 'default', loreSeed = worldId) {
 }
 
 export function saveEchoWorld(world) {
+  const worldId = world && world.id;
+  if (!isSafeWorldId(worldId)) throw new Error('Invalid world id');
   fs.mkdirSync(ECHO_DIR, { recursive: true });
-  const file = path.join(ECHO_DIR, `${world.id}.json`);
+  const file = path.join(ECHO_DIR, `${worldId}.json`);
   fs.writeFileSync(file, JSON.stringify(world, null, 2) + '\n');
   return world;
 }

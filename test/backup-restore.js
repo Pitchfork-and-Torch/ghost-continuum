@@ -216,6 +216,27 @@ try {
   console.log('  restore copies listed keys and keeps endpoints, plugins, and credentials');
 
   writeConfig(current);
+  for (const worldId of ['../etc/passwd', '..', 'lab..alpha', 'a/b', 'has space', 'x'.repeat(65), '']) {
+    const hostile = structuredClone(uploaded);
+    hostile.continuum.narrative.worldId = worldId;
+    hostile.demoMode = true;
+    const kept = restoreBackup({ bundle: bundle(hostile) });
+    assert.strictEqual(kept.ok, true, worldId || 'empty');
+    const after = readConfig();
+    assert.strictEqual(after.continuum.narrative.worldId, 'keep-world', worldId || 'empty');
+    assert.strictEqual(after.demoMode, true, worldId || 'empty');
+    if (worldId) {
+      assert.ok(!fs.readFileSync(CONFIG_PATH, 'utf8').includes(worldId), worldId);
+    }
+  }
+  const accepted = structuredClone(uploaded);
+  accepted.continuum.narrative.worldId = 'lab.alpha_1';
+  const took = restoreBackup({ bundle: bundle(accepted) });
+  assert.strictEqual(took.ok, true);
+  assert.strictEqual(readConfig().continuum.narrative.worldId, 'lab.alpha_1');
+  console.log('  restore keeps the current world id when the upload is not a safe id');
+
+  writeConfig(current);
   const made = createBackup({ includeEvents: false });
   backupPath = made.path;
   assert.strictEqual(made.ok, true);
