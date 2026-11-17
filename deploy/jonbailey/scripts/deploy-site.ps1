@@ -1,4 +1,5 @@
-# Build and deploy ghost.jonbailey.xyz  -  landing (v3 Luminous Membrane) + Command Nexus hub UI
+# Build and deploy the public landing to Pages project ghost-continuum, including a static hub preview.
+# The live dashboard is served by the local hub behind the gateway, not by this Pages project.
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 $Site = Join-Path $Root "deploy\jonbailey\site-public"

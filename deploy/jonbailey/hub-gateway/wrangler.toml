@@ -1,5 +1,6 @@
 # Ghost Continuum Hub API gateway - ghost.jonbailey.xyz/api/*
-# Pair with Cloudflare Pages (hub UI) + Tunnel to local Node hub.
+# The dashboard is served by the local hub behind this gateway.
+# HUB_ORIGIN is the existing tunnel to that hub. Do not create a Pages project for the hub UI.
 
 name = "jonbailey-ghost-hub-api"
 main = "worker.js"

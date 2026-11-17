@@ -1,6 +1,6 @@
 /**
  * Ghost Continuum Hub API gateway - proxies /api and /taxii2 to the local hub via Cloudflare Tunnel.
- * Static UI is served by Cloudflare Pages on ghost.jonbailey.xyz.
+ * The dashboard is served by that hub behind this gateway. This worker does not serve the hub UI.
  *
  * OPTIONS is answered here. Every other method needs the caller's own bearer,
  * compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.

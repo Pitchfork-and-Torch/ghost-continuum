@@ -1,6 +1,6 @@
 # Deploy Ghost Continuum (self-host)
 
-Public landing is a static site. The optional Command Hub is local Node. Do not publish a personal host, tunnel, or KV id.
+Public landing is a static site. The dashboard is served by the local hub behind the gateway, not by a separate Pages project. Do not publish a personal host, tunnel, or KV id.
 
 ## Public landing
 
@@ -32,16 +32,23 @@ Landing sources:
 3. Set `SITE_SEED` and `UPSTREAM` to **your** origin hostname (the Pages `*.pages.dev` host, not the custom domain, so the Worker does not loop).
 4. Deploy the Worker and attach routes on **your** zone.
 
-## Optional local hub
+## Command dashboard
 
-The Command Hub needs Node on a machine you control (filesystem, Ghost LAN). Typical pattern:
+The dashboard is served by the local hub behind the gateway. The hub process serves `packages/hub-ui/public` and `/api`. The gateway worker proxies `/api` and `/taxii2` to that hub. Do not deploy the dashboard as its own Pages project.
 
-- Run `npm start` locally
-- Put a tunnel or other private ingress in front if you want a hostname
-- Set `hubToken` / `GC_HUB_TOKEN` as a secret, never in git
-- Cloudflare Access on that hostname is recommended
+```powershell
+npm start
+```
 
-Do not commit tunnel ids, home paths, or operator emails.
+On a checkout that already has the production config and tunnel token, the same stack is:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy/jonbailey/scripts/start-production.ps1
+```
+
+`npm run deploy:hub:pages` runs `deploy/jonbailey/scripts/deploy-hub-pages.ps1`. That script deploys static files only when Pages project `ghost-continuum-hub` already exists. If the project is missing, the script stops. It does not create one.
+
+Set `hubToken` / `GC_HUB_TOKEN` as a secret, never in git. Do not commit tunnel ids, home paths, or operator emails.
 
 ## Local stack
 
