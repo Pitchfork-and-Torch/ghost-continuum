@@ -109,8 +109,6 @@ function isPlainObject(value) {
 const RESTORE_SPEC = {
   demoMode: true,
   useBuiltinValidator: true,
-  blockExploitOperators: true,
-  defensiveOperators: true,
   cloudflareWorkerName: true,
   continuum: {
     morph: true,
@@ -128,7 +126,6 @@ const RESTORE_SPEC = {
       deepVeil: true,
       mirageCore: true,
       trenchCloak: true,
-      trenchAutoStart: true,
       trenchRouteTools: true,
       trenchPollMs: true,
     },

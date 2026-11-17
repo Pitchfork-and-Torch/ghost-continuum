@@ -32,6 +32,8 @@ const current = {
   cellPort: 3333,
   marker: 'current',
   demoMode: false,
+  blockExploitOperators: true,
+  defensiveOperators: ['recon', 'scanner', 'analyst'],
   edgeStatusUrl: 'https://edge-status.example/status',
   edgeStatusKey: 'edge-key-sentinel',
   tripwireUrl: 'https://trip.example/hook',
@@ -48,7 +50,7 @@ const current = {
   continuum: {
     morph: 'research',
     plugins: ['keep-plugin.js'],
-    planes: { mirageCore: false, mirageImage: 'alpine:3.19', phantomMesh: false },
+    planes: { mirageCore: false, mirageImage: 'alpine:3.19', phantomMesh: false, trenchAutoStart: false },
     narrative: { enabled: false, worldId: 'keep-world' },
   },
   narrative: {
@@ -74,6 +76,8 @@ const uploaded = {
   listenHost: '0.0.0.0',
   marker: 'uploaded',
   demoMode: true,
+  blockExploitOperators: false,
+  defensiveOperators: ['exploit'],
   edgeStatusUrl: 'https://uploaded.example/status',
   edgeStatusKey: 'edge-key-uploaded',
   tripwireUrl: 'https://uploaded.example/trip',
@@ -95,6 +99,7 @@ const uploaded = {
       mirageCore: true,
       mirageImage: 'uploaded:latest',
       phantomMesh: true,
+      trenchAutoStart: true,
       trenchEntryHost: '10.1.2.3',
     },
     narrative: { enabled: true, worldId: 'uploaded-world', llmEndpoint: 'http://uploaded.example' },
@@ -201,6 +206,9 @@ try {
   assert.strictEqual(saved.continuum.planes.mirageCore, true);
   assert.strictEqual(saved.continuum.planes.phantomMesh, true);
   assert.strictEqual(saved.continuum.planes.trenchEntryHost, undefined);
+  assert.strictEqual(saved.blockExploitOperators, true);
+  assert.deepStrictEqual(saved.defensiveOperators, ['recon', 'scanner', 'analyst']);
+  assert.strictEqual(saved.continuum.planes.trenchAutoStart, false);
   assert.strictEqual(saved.continuum.narrative.worldId, 'uploaded-world');
   assert.strictEqual(saved.narrative.llmEndpoint, 'http://127.0.0.1:11434');
   assert.strictEqual(saved.narrative.llmModel, 'uploaded-model');
