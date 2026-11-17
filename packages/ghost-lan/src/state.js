@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { readJsonlTail } from '../../core/src/jsonl-tail.js';
 import { GHOST_DIR } from './config.js';
 import { derivePorts, buildGenerationId } from './topology.js';
 import { hiddenMarker } from './ops/masquerade.js';
@@ -54,8 +55,8 @@ export function appendEvent(event) {
 
 export function readRecentEvents(limit = 50) {
   if (!fs.existsSync(LOG_PATH)) return [];
-  const lines = fs.readFileSync(LOG_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l)).reverse();
+  const { lines } = readJsonlTail(LOG_PATH, limit);
+  return lines.map((l) => JSON.parse(l)).reverse();
 }
 
 export function writePid(pid) {

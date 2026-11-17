@@ -2,6 +2,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { GC_DIR, EVENTS_PATH } from './config.js';
 import { appendLedgerEntry } from '../../trust/src/merkle.js';
+import { readJsonlTail } from './jsonl-tail.js';
 
 /** @typedef {'lan'|'edge'|'audit'|'hub'|'ops'} Plane */
 
@@ -43,10 +44,13 @@ export function scoreEventType(type = '') {
   return 1;
 }
 
+let eventMemo = null;
+
 export function appendEvent(event) {
   fs.mkdirSync(GC_DIR, { recursive: true });
   const normalized = normalizeEvent(event);
   fs.appendFileSync(EVENTS_PATH, JSON.stringify(normalized) + '\n');
+  eventMemo = null;
   if (process.env.DM_NO_LEDGER !== '1') {
     try {
       appendLedgerEntry(normalized);
@@ -74,9 +78,37 @@ export function parseEventJsonl(text, limit = 100) {
   return parsed.reverse();
 }
 
+/**
+ * Read the newest `limit` lines of a JSONL file. A same-process repeat with a
+ * limit at or below the cached window reuses the tail instead of hitting disk.
+ */
+export function readEventsFromFile(filePath, limit = 100) {
+  const cap = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
+  if (cap === 0) return [];
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch (err) {
+    if (err && err.code === 'ENOENT') return [];
+    throw err;
+  }
+  const stamp = `${stat.mtimeNs}:${stat.size}`;
+  if (
+    eventMemo
+    && eventMemo.filePath === filePath
+    && eventMemo.stamp === stamp
+    && eventMemo.limit >= cap
+  ) {
+    const window = cap === eventMemo.limit ? eventMemo.lines : eventMemo.lines.slice(-cap);
+    return parseEventJsonl(window.join('\n'), cap);
+  }
+  const { lines } = readJsonlTail(filePath, cap);
+  eventMemo = { filePath, stamp, limit: cap, lines };
+  return parseEventJsonl(lines.join('\n'), cap);
+}
+
 export function readEvents(limit = 100) {
-  if (!fs.existsSync(EVENTS_PATH)) return [];
-  return parseEventJsonl(fs.readFileSync(EVENTS_PATH, 'utf8'), limit);
+  return readEventsFromFile(EVENTS_PATH, limit);
 }
 
 export function mergeEventStreams(...streams) {

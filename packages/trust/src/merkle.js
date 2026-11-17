@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
+import { readJsonlTail } from '../../core/src/jsonl-tail.js';
 
 export const LEDGER_DIR = path.join(os.homedir(), '.ghost-continuum', 'ledger');
 export const LEDGER_PATH = path.join(LEDGER_DIR, 'chain.jsonl');
@@ -76,8 +77,8 @@ export function countEntries() {
 
 export function readLedger(limit = 100) {
   if (!fs.existsSync(LEDGER_PATH)) return [];
-  const lines = fs.readFileSync(LEDGER_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l));
+  const { lines } = readJsonlTail(LEDGER_PATH, limit);
+  return lines.map((l) => JSON.parse(l));
 }
 
 export function getLedgerRoot() {
@@ -92,9 +93,9 @@ export function getLedgerRoot() {
 export function verifyLedger(maxEntries = 5000) {
   if (!fs.existsSync(LEDGER_PATH)) return { ok: true, entries: 0, root: null };
 
-  const allLines = fs.readFileSync(LEDGER_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  const lines = allLines.slice(-maxEntries);
-  const windowed = lines.length < allLines.length;
+  const tailed = readJsonlTail(LEDGER_PATH, maxEntries);
+  const lines = tailed.lines;
+  const windowed = tailed.truncated;
   let expectedRoot = null;
 
   for (let i = 0; i < lines.length; i++) {
