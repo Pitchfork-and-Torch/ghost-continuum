@@ -210,7 +210,20 @@ export function startHub(config = loadConfig()) {
     ? Number(config.hubWatchIntervalMs)
     : 15_000;
 
-  const server = http.createServer(async (req, res) => {
+  const server = http.createServer((req, res) => {
+    onHubRequest(req, res).catch((err) => {
+      if (res.headersSent || res.writableEnded) {
+        res.destroy();
+        return;
+      }
+      const message = err && (err.message === 'payload too large' || err.message === 'invalid JSON')
+        ? err.message
+        : 'internal error';
+      json(res, message === 'internal error' ? 500 : 400, { ok: false, error: message });
+    });
+  });
+
+  async function onHubRequest(req, res) {
  const url = new URL(req.url, `http://127.0.0.1:${port}`);
 
     if (!hubHostOk(req, config)) {
@@ -1184,7 +1197,7 @@ export function startHub(config = loadConfig()) {
 
  res.writeHead(404);
  res.end('Not found');
- });
+  }
 
   let watchTimer = null;
   if (watchMs > 0) {
