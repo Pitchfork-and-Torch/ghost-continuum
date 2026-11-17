@@ -888,11 +888,17 @@ export function startHub(config = loadConfig()) {
  }
 
  if (url.pathname === '/api/home/restore' && req.method === 'POST') {
- const body = await readBody(req);
+ let body;
+ try {
+ body = await readBody(req);
+ } catch {
+ return json(res, 400, { ok: false, error: 'Invalid backup' });
+ }
  const result = restoreBackup(body);
+ if (!result.ok) return json(res, 400, result);
  invalidatePrefix('status');
  Object.assign(config, enrichConfig(loadConfig()));
- return json(res, result.ok ? 200 : 400, result);
+ return json(res, 200, result);
  }
 
  if (url.pathname === '/api/home/notify' && req.method === 'GET') {

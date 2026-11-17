@@ -33,6 +33,8 @@ const DEFAULT_FILES = [
   'test/home-suite.js',
   'test/seal-bundle.js',
   'test/hardening.js',
+  'test/hub-gateway.js',
+  'test/backup-restore.js',
   'test/seo-safe-url.js',
   'test/holo-canvas.js',
   'test/air-gap-map.js',

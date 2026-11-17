@@ -97,23 +97,119 @@ export function getBackupPath(id) {
   return p;
 }
 
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** Access and bind settings stay with the running hub. Uploads cannot replace them. */
+const PRESERVED_CONFIG_KEYS = [
+  'hubToken',
+  'hubAllowedHosts',
+  'bind',
+  'host',
+  'port',
+  'bindHost',
+  'hubBind',
+  'hubHost',
+  'listenHost',
+  'hubPort',
+  'ghostLanPort',
+  'edgeLocalPort',
+  'cellPort',
+];
+
+const JSON_OBJECT_FILES = new Set(['config', 'home', 'devices', 'progression']);
+const JSON_VALUE_FILES = new Set(['genomePool']);
+
+function invalidBackup() {
+  return { ok: false, error: 'Invalid backup' };
+}
+
+function parseJsonValue(text) {
+  if (typeof text !== 'string') return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
+function fileShapeOk(key, value) {
+  if (value == null || value === '') return true;
+  if (typeof value !== 'string') return false;
+  if (key === 'eventsTail') return true;
+  if (JSON_OBJECT_FILES.has(key)) return isPlainObject(parseJsonValue(value));
+  if (JSON_VALUE_FILES.has(key)) {
+    const parsed = parseJsonValue(value);
+    return isPlainObject(parsed) || Array.isArray(parsed);
+  }
+  return false;
+}
+
+function bundleShapeOk(bundle) {
+  if (!isPlainObject(bundle) || !isPlainObject(bundle.files)) return false;
+  if (bundle.v != null && bundle.v !== 1) return false;
+  if (bundle.kind != null && bundle.kind !== 'ghost-continuum-home-backup') return false;
+  return Object.entries(bundle.files).every(([key, value]) => fileShapeOk(key, value));
+}
+
+function readRawConfig() {
+  try {
+    if (!fs.existsSync(CONFIG_PATH)) return {};
+    const parsed = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    return isPlainObject(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function configTextPreservingAccess(uploadedText) {
+  const uploaded = JSON.parse(uploadedText);
+  const current = readRawConfig();
+  const next = { ...uploaded };
+  for (const key of PRESERVED_CONFIG_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(current, key)) next[key] = current[key];
+    else delete next[key];
+  }
+  if (JSON.stringify(next) === JSON.stringify(uploaded)) {
+    return uploadedText.endsWith('\n') ? uploadedText : `${uploadedText}\n`;
+  }
+  return JSON.stringify(next, null, 2) + '\n';
+}
+
 /**
  * Restore from backup object or file id. Overwrites config/home/devices/genomes carefully.
+ * hubToken, hubAllowedHosts, and bind/host/port settings are kept from the current config.
  */
 export function restoreBackup(input = {}) {
-  let bundle = input.bundle;
-  if (!bundle && input.id) {
+  if (!isPlainObject(input)) return invalidBackup();
+
+  let bundle = null;
+  if (Object.prototype.hasOwnProperty.call(input, 'bundle')) {
+    if (!isPlainObject(input.bundle)) return invalidBackup();
+    bundle = input.bundle;
+  } else if (input.id != null && input.id !== '') {
+    if (typeof input.id !== 'string') return invalidBackup();
     const p = getBackupPath(input.id);
     if (!p) return { ok: false, error: 'Backup not found' };
-    bundle = JSON.parse(fs.readFileSync(p, 'utf8'));
+    try {
+      bundle = JSON.parse(fs.readFileSync(p, 'utf8'));
+    } catch {
+      return invalidBackup();
+    }
+  } else if (isPlainObject(input.files)) {
+    bundle = input;
+  } else {
+    return invalidBackup();
   }
-  if (!bundle?.files) return { ok: false, error: 'Invalid backup' };
+
+  if (!bundleShapeOk(bundle)) return invalidBackup();
 
   const restored = [];
   fs.mkdirSync(GC_DIR, { recursive: true });
 
   if (bundle.files.config) {
-    fs.writeFileSync(CONFIG_PATH, bundle.files.config);
+    fs.writeFileSync(CONFIG_PATH, configTextPreservingAccess(bundle.files.config));
     restored.push('config');
   }
   if (bundle.files.home) {

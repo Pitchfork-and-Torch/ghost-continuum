@@ -1,9 +1,13 @@
 /**
  * Ghost Continuum Hub API gateway - proxies /api and /taxii2 to the local hub via Cloudflare Tunnel.
  * Static UI is served by Cloudflare Pages on ghost.jonbailey.xyz.
+ *
+ * Safe methods are forwarded as sent. Other methods require the caller's own
+ * bearer, compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 function corsHeaders(origin, env) {
   const allowed = env.ALLOWED_ORIGIN || 'https://ghost.jonbailey.xyz';
@@ -15,13 +19,58 @@ function corsHeaders(origin, env) {
   };
 }
 
+function applyHeaderMap(headers, map) {
+  for (const [key, value] of Object.entries(map)) {
+    if (value != null && value !== '') headers.set(key, value);
+  }
+}
+
+function jsonResponse(status, body, origin, env) {
+  const headers = new Headers({
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store',
+  });
+  applyHeaderMap(headers, corsHeaders(origin, env));
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function presentedBearer(request) {
+  const raw = request.headers.get('Authorization') || '';
+  const match = /^Bearer\s+(\S+)\s*$/i.exec(raw);
+  return match ? match[1] : '';
+}
+
+/** Byte-wise compare. Runtime tracks the longer input, not the shared prefix. */
+function constantTimeEqual(a, b) {
+  const enc = new TextEncoder();
+  const left = enc.encode(String(a));
+  const right = enc.encode(String(b));
+  const len = Math.max(left.length, right.length);
+  let diff = left.length ^ right.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (left[i] || 0) ^ (right[i] || 0);
+  }
+  return diff === 0;
+}
+
+function forwardHeaders(request) {
+  const headers = new Headers(request.headers);
+  headers.delete('Cookie');
+  headers.delete('X-Forwarded-For');
+  const ip = (request.headers.get('CF-Connecting-IP') || '').trim();
+  if (ip) headers.set('X-Forwarded-For', ip);
+  return headers;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const origin = request.headers.get('Origin') || '';
 
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders(origin, env) });
+      const headers = new Headers();
+      applyHeaderMap(headers, corsHeaders(origin, env));
+      return new Response(null, { status: 204, headers });
     }
 
     if (!ALLOWED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
@@ -36,9 +85,17 @@ export default {
       });
     }
 
+    if (!SAFE_METHODS.has(request.method)) {
+      if (!env.HUB_TOKEN) {
+        return jsonResponse(503, { ok: false, error: 'HUB_TOKEN not configured' }, origin, env);
+      }
+      if (!constantTimeEqual(presentedBearer(request), env.HUB_TOKEN)) {
+        return jsonResponse(401, { ok: false, error: 'unauthorized' }, origin, env);
+      }
+    }
+
     const target = new URL(url.pathname + url.search, hubOrigin.replace(/\/$/, ''));
-    const headers = new Headers(request.headers);
-    if (env.HUB_TOKEN) headers.set('Authorization', `Bearer ${env.HUB_TOKEN}`);
+    const headers = forwardHeaders(request);
 
     const upstream = await fetch(target.toString(), {
       method: request.method,
@@ -47,7 +104,7 @@ export default {
     });
 
     const resHeaders = new Headers(upstream.headers);
-    Object.assign(resHeaders, corsHeaders(origin, env));
+    applyHeaderMap(resHeaders, corsHeaders(origin, env));
     resHeaders.set('Cache-Control', 'no-store');
     return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
   },
