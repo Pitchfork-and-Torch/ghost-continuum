@@ -183,10 +183,25 @@ export function hubOriginOk(req, config = {}) {
   }
 }
 
+function loopbackPeer(addr) {
+  const raw = String(addr || '').trim().toLowerCase();
+  if (!raw) return false;
+  const host = raw.replace(/^\[|\]$/g, '').split('%')[0];
+  if (host === 'localhost' || host === '::1' || host === '127.0.0.1') return true;
+  if (host.startsWith('127.')) return true;
+  if (host.startsWith('::ffff:127.')) return true;
+  return false;
+}
+
 export function clientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (xff) return String(xff).split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
+  const peer = req.socket?.remoteAddress || '';
+  const headers = req.headers || {};
+  const xff = headers['x-forwarded-for'] || headers['X-Forwarded-For'];
+  if (xff && loopbackPeer(peer)) {
+    const first = String(xff).split(',')[0].trim();
+    if (first) return first;
+  }
+  return peer || 'unknown';
 }
 
 // Fixed-window, per-IP rate limiter for mutating control-plane routes. Keeps a
@@ -194,18 +209,35 @@ export function clientIp(req) {
 const rlBuckets = new Map();
 const RL_MAX_BUCKETS = 10_000;
 
+function evictOldestBucket() {
+  let oldestKey = null;
+  let oldestSeen = Infinity;
+  for (const [key, bucket] of rlBuckets) {
+    const seen = Number.isFinite(bucket.seen) ? bucket.seen : bucket.start;
+    if (seen < oldestSeen) {
+      oldestSeen = seen;
+      oldestKey = key;
+    }
+  }
+  if (oldestKey == null) return false;
+  rlBuckets.delete(oldestKey);
+  return true;
+}
+
 export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() } = {}) {
   if (max <= 0) return { ok: true, remaining: Infinity, retryAfterMs: 0 };
   const ip = clientIp(req);
   const bucket = rlBuckets.get(ip);
 
   if (!bucket || now - bucket.start >= windowMs) {
-    if (rlBuckets.size > RL_MAX_BUCKETS) {
-      for (const [key, b] of rlBuckets) {
-        if (now - b.start >= windowMs) rlBuckets.delete(key);
+    if (!rlBuckets.has(ip)) {
+      while (rlBuckets.size >= RL_MAX_BUCKETS) {
+        if (!evictOldestBucket()) {
+          return { ok: false, remaining: 0, retryAfterMs: windowMs };
+        }
       }
     }
-    rlBuckets.set(ip, { start: now, count: 1 });
+    rlBuckets.set(ip, { start: now, count: 1, seen: now });
     return { ok: true, remaining: max - 1, retryAfterMs: 0 };
   }
 

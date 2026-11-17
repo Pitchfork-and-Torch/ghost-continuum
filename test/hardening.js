@@ -22,10 +22,37 @@ console.log('  ✓ rate limit is per-IP');
 assert.ok(rateLimit(req('9.9.9.9'), { windowMs: 1000, max: 5, now: t0 + 1001 }).ok, 'window resets');
 console.log('  ✓ rate limit window resets over time');
 
+resetRateLimits();
+const capNow = 7_000_000;
+for (let i = 0; i < 5; i++) {
+  assert.ok(rateLimit(req('1.2.3.4'), { windowMs: 60_000, max: 5, now: capNow }).ok);
+}
+assert.ok(!rateLimit(req('1.2.3.4'), { windowMs: 60_000, max: 5, now: capNow }).ok, 'first ip is limited');
+for (let i = 0; i < 10000; i++) {
+  rateLimit(req('cap-' + i), { windowMs: 60_000, max: 5, now: capNow });
+}
+assert.ok(
+  rateLimit(req('1.2.3.4'), { windowMs: 60_000, max: 5, now: capNow }).ok,
+  'full map evicts the oldest bucket instead of growing without a cap',
+);
+resetRateLimits();
+console.log('  ✓ rate limit bucket map stays capped');
+
 assert.strictEqual(
-  clientIp({ headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' }, socket: {} }),
+  clientIp({
+    headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' },
+    socket: { remoteAddress: '198.51.100.8' },
+  }),
+  '198.51.100.8',
+  'clientIp ignores x-forwarded-for from a non-loopback peer',
+);
+assert.strictEqual(
+  clientIp({
+    headers: { 'x-forwarded-for': '203.0.113.5, 10.0.0.1' },
+    socket: { remoteAddress: '127.0.0.1' },
+  }),
   '203.0.113.5',
-  'clientIp honours x-forwarded-for',
+  'clientIp honours x-forwarded-for only from loopback',
 );
 assert.ok(rateLimit(req('9.9.9.9'), { max: 0 }).ok, 'max<=0 disables limiting');
 console.log('  ✓ clientIp + disable path');
