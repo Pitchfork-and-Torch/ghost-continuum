@@ -32,7 +32,7 @@ export function createBackup(options = {}) {
     hostname: os.hostname(),
     platform: process.platform,
     files: {
-      config: safeRead(CONFIG_PATH),
+      config: storedConfigText(safeRead(CONFIG_PATH)),
       home: safeRead(HOME_PATH),
       devices: safeRead(DEVICES_PATH),
       progression: safeRead(PROGRESS_PATH),
@@ -101,9 +101,53 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Access and bind settings stay with the running hub. Uploads cannot replace them. */
-const PRESERVED_CONFIG_KEYS = [
+/**
+ * A backup may copy only these keys onto the current config.
+ * Access settings, credentials, plugins, and endpoint fields stay as they are.
+ */
+const RESTORE_SPEC = {
+  demoMode: true,
+  useBuiltinValidator: true,
+  blockExploitOperators: true,
+  defensiveOperators: true,
+  cloudflareWorkerName: true,
+  continuum: {
+    morph: true,
+    evolution: {
+      enabled: true,
+      cycleEvery: true,
+      populationSize: true,
+      algorithm: true,
+    },
+    trust: { ledger: true },
+    narrative: { enabled: true, worldId: true },
+    corePlanes: { ghostLan: true, edge: true, audit: true },
+    planes: {
+      phantomMesh: true,
+      deepVeil: true,
+      mirageCore: true,
+      trenchCloak: true,
+      trenchAutoStart: true,
+      trenchRouteTools: true,
+      trenchPollMs: true,
+    },
+    triggers: { mirageFitnessThreshold: true },
+  },
+  narrative: {
+    llmModel: true,
+    llmTimeoutMs: true,
+  },
+};
+
+const NEVER_RESTORE_KEYS = new Set([
   'hubToken',
+  'edgeStatusKey',
+  'plugins',
+  'mirageImage',
+  'llmEndpoint',
+  'edgeStatusUrl',
+  'tripwireUrl',
+  'allowedPrivateCidrs',
   'hubAllowedHosts',
   'bind',
   'host',
@@ -116,7 +160,62 @@ const PRESERVED_CONFIG_KEYS = [
   'ghostLanPort',
   'edgeLocalPort',
   'cellPort',
-];
+]);
+
+const SECRET_CONFIG_KEY = /webhook|token|secret|password|api[-_]?key/i;
+
+function neverRestoreKey(key) {
+  if (NEVER_RESTORE_KEYS.has(key)) return true;
+  if (/url|endpoint|uri|webhook|cidr/i.test(key)) return true;
+  if (/host$/i.test(key)) return true;
+  if (/port$/i.test(key)) return true;
+  return false;
+}
+
+function isSecretConfigKey(key) {
+  if (key === 'hubToken' || key === 'edgeStatusKey') return true;
+  if (key === 'notifyOn') return false;
+  return SECRET_CONFIG_KEY.test(String(key));
+}
+
+function stripConfigSecrets(value) {
+  if (Array.isArray(value)) return value.map((item) => stripConfigSecrets(item));
+  if (!isPlainObject(value)) return value;
+  const out = {};
+  for (const [key, child] of Object.entries(value)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    if (isSecretConfigKey(key)) continue;
+    out[key] = stripConfigSecrets(child);
+  }
+  return out;
+}
+
+function storedConfigText(text) {
+  if (typeof text !== 'string' || text === '') return text;
+  const parsed = parseJsonValue(text);
+  if (!isPlainObject(parsed)) return text;
+  return JSON.stringify(stripConfigSecrets(parsed), null, 2) + '\n';
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function applyRestoreSpec(spec, uploaded, current) {
+  const next = isPlainObject(current) ? cloneJson(current) : {};
+  if (!isPlainObject(uploaded)) return next;
+  for (const [key, child] of Object.entries(spec)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    if (neverRestoreKey(key)) continue;
+    if (!Object.prototype.hasOwnProperty.call(uploaded, key)) continue;
+    if (child === true) {
+      next[key] = uploaded[key];
+    } else if (isPlainObject(child) && isPlainObject(uploaded[key])) {
+      next[key] = applyRestoreSpec(child, uploaded[key], next[key]);
+    }
+  }
+  return next;
+}
 
 const JSON_OBJECT_FILES = new Set(['config', 'home', 'devices', 'progression']);
 const JSON_VALUE_FILES = new Set(['genomePool']);
@@ -163,23 +262,26 @@ function readRawConfig() {
   }
 }
 
-function configTextPreservingAccess(uploadedText) {
+function configTextFromAllowlist(uploadedText) {
   const uploaded = JSON.parse(uploadedText);
   const current = readRawConfig();
-  const next = { ...uploaded };
-  for (const key of PRESERVED_CONFIG_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(current, key)) next[key] = current[key];
-    else delete next[key];
-  }
-  if (JSON.stringify(next) === JSON.stringify(uploaded)) {
-    return uploadedText.endsWith('\n') ? uploadedText : `${uploadedText}\n`;
+  const next = applyRestoreSpec(RESTORE_SPEC, uploaded, current);
+  if (JSON.stringify(next) === JSON.stringify(current)) {
+    try {
+      if (fs.existsSync(CONFIG_PATH)) {
+        const raw = fs.readFileSync(CONFIG_PATH, 'utf8');
+        return raw.endsWith('\n') ? raw : `${raw}\n`;
+      }
+    } catch {
+      /* */
+    }
   }
   return JSON.stringify(next, null, 2) + '\n';
 }
 
 /**
  * Restore from backup object or file id. Overwrites config/home/devices/genomes carefully.
- * hubToken, hubAllowedHosts, and bind/host/port settings are kept from the current config.
+ * Only listed config keys are copied. Credentials, plugins, and endpoint settings stay.
  */
 export function restoreBackup(input = {}) {
   if (!isPlainObject(input)) return invalidBackup();
@@ -209,7 +311,7 @@ export function restoreBackup(input = {}) {
   fs.mkdirSync(GC_DIR, { recursive: true });
 
   if (bundle.files.config) {
-    fs.writeFileSync(CONFIG_PATH, configTextPreservingAccess(bundle.files.config));
+    fs.writeFileSync(CONFIG_PATH, configTextFromAllowlist(bundle.files.config));
     restored.push('config');
   }
   if (bundle.files.home) {
