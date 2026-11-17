@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased] - Hub gateway, live stream, and restore
+
+No version bump. Map behavior stays 3.7.2 Air-Gap Map.
+
+### Public gateway
+- The hub gateway requires the caller's `Authorization` bearer on forwarded requests. It compares that value with the configured gateway token and does not add a token of its own.
+- `OPTIONS` is answered on the gateway. `GET /taxii2/` is the only read forwarded without a bearer. Backup paths and download paths are not in that set.
+- Cookies are removed before a request is forwarded.
+- `GET /api/events/stream` uses the same bearer. The upstream body is returned unread so the stream is not buffered in the gateway.
+
+### Command Nexus live stream
+- The dashboard reads `/api/events/stream` with `fetch`. The caller sends `Authorization`. The token is not placed in the URL.
+- The last event id is stored and sent as `Last-Event-ID` on the next connect.
+
+### Token rotation
+- Rotate by choosing a new hub token, storing it only in local config or the environment, and setting that same value on the gateway. Then replace the browser copy and reload.
+- Keep the token out of git, URLs, and tickets.
+
+### Restore
+- Restore copies only listed operator settings from a well-formed backup.
+- Credentials, plugins, endpoints, hosts, and ports stay as they are on the current install.
+- A narrative world id is copied only when it matches the accepted id form. Otherwise the current id stays.
+- Input that is not the expected backup object is rejected and does not write.
+
 ## [3.7.2] - 2026-10-11 - Card refresh
 
 Architecture infographic and public stamps print 3.7.2.
@@ -81,9 +105,9 @@ Behavior is unchanged from 3.7.1 Air-Gap Map.
 ## [Unreleased] - Hub read-path lock
 
 ### Control-plane hygiene
-- Every `/api/*` method (GET included) requires the hub bearer when `hubToken` / `GC_HUB_TOKEN` is set - header or `gc-hub-token` cookie (EventSource cannot send `Authorization`).
+- Every `/api/*` method (GET included) requires the hub bearer when `hubToken` / `GC_HUB_TOKEN` is set. The local hub accepts an `Authorization` bearer or the HttpOnly `gc-hub-token` cookie.
 - Extra (tunneled) hosts always require a configured token; `/api/*` returns `401` without it.
-- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie. The bearer is never injected into JavaScript, so a tunneled `GET /` cannot leak write access.
+- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie. The bearer is never injected into JavaScript.
 
 ## [Unreleased] - Hub Host / Origin lock
 

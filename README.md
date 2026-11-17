@@ -159,6 +159,7 @@ Architecture diagram: [landing/infographic.svg](landing/infographic.svg)
 
 - **Defensive only** - authorized networks you own or may defend
 - **Local-first** - brain and data under `~/.ghost-continuum` by default; hub Host/Origin lock keeps the Command Nexus on loopback (see [SECURITY.md](SECURITY.md))
+- **Hub access** - the public gateway checks the caller's bearer. The live stream uses `fetch` and sends `Authorization`. The token is not placed in the URL. Rotate by replacing the local value and the gateway value together, then update the browser copy and reload. A restore copies listed operator settings and leaves credentials, plugins, and endpoints in place
 - **Zero core npm dependencies** for the engine (Node 18+ only)
 - **Open source MIT** - auditable; no `eval`
 - **No offensive capabilities**

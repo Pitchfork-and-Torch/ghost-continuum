@@ -29,8 +29,11 @@ Ghost Continuum is a **local defensive command center**. The hub and local edge 
 - Optional hub bearer token compared with constant-time equality when set
 - Hub **Host** allowlist (loopback by default) blocks DNS rebinding
 - Hub **Origin** allowlist on mutating `/api/*` blocks localhost CSRF
-- Hub **read-path lock**: every `/api/*` method requires the bearer (header or `gc-hub-token` cookie) when a token is set; extra (tunneled) hosts always require a token
-- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie - the bearer is never injected into JavaScript
+- Hub **read-path lock**: every `/api/*` method requires the bearer when a token is set. The local hub accepts an `Authorization` header or the HttpOnly `gc-hub-token` cookie. Extra (tunneled) hosts always require a token
+- Loopback HTML may set an HttpOnly `SameSite=Strict` cookie. The bearer is never injected into JavaScript
+- Public **hub gateway** is bearer-only. It checks the caller's `Authorization` bearer, does not add a token, and does not forward cookies
+- Command Nexus **live stream** uses `fetch` with that bearer. The token is not placed in the URL
+- **Restore** copies only listed operator settings. Credentials, plugins, endpoints, hosts, and ports stay on the current install. A malformed backup is rejected and does not write
 - Hub **safe GET watch**: `GET /api/threat/watch` is side-effect free (no morph switch, no outbound notify). Quiet-hours + alerts run on a hub timer. Missing-`Origin` GETs (img/navigation) cannot CSRF those jobs.
 - Incident exports redact local paths from config snapshots
 - Ghost LAN beacons disabled by default
@@ -53,14 +56,17 @@ If you front the hub with a Cloudflare Tunnel (or similar) on a public hostname,
 }
 ```
 
-Or set `GC_HUB_ALLOWED_HOSTS=ghost.jonbailey.xyz` (comma-separated). Extra hosts **require** `hubToken` / `GC_HUB_TOKEN` - `/api/*` returns `401` without it (including GET). Pair with Cloudflare Access. After Access login, set the token once in the browser:
+Or set `GC_HUB_ALLOWED_HOSTS=ghost.jonbailey.xyz` (comma-separated). Extra hosts **require** `hubToken` / `GC_HUB_TOKEN` - `/api/*` returns `401` without it (including GET). Pair with Cloudflare Access.
 
-```javascript
-localStorage.setItem('dm-hub-token', 'YOUR_LONG_RANDOM_TOKEN');
-location.reload();
-```
+The public gateway accepts only an `Authorization` bearer from the caller. The Command Nexus live stream sends that header with `fetch`. Put the operator token in the browser under the key `dm-hub-token`, then reload. The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the extra-host token check when it is missing.
 
-The hub will not put the bearer in tunneled HTML. `npm run doctor` fails the extra-host token check when it is missing.
+## Token rotation
+
+Rotate the hub token by replacing the local value (`hubToken` or `GC_HUB_TOKEN`) and the gateway value together. Then replace the browser copy under `dm-hub-token` and reload. Use a new long random value. Keep it out of git, URLs, and tickets. Do not leave the old value stored in the browser.
+
+## Restore
+
+A home restore copies only listed operator settings from a well-formed backup. Credentials, plugins, endpoints, hosts, and ports stay as they are on the current install. A narrative world id is copied only when it matches the accepted id form. Input that is not the expected backup object is rejected and does not write.
 
 ## Deployment rules
 
