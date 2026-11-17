@@ -7,6 +7,7 @@ import {
   clientScript,
   coerceTripwireBody,
   createEdgeState,
+  noteObserved,
   publicStatus,
   recordTripwire,
 } from './engine.js';
@@ -19,7 +20,7 @@ const DEMO_HTML = `<!DOCTYPE html>
 const VAULT_HTML = `<!DOCTYPE html><html><body><h1>vault</h1><p>Ghost Continuum vault demo</p></body></html>`;
 
 export function startLocalEdgeServer(options = {}) {
-  const port = options.port || 30001;
+  const port = options.port == null || options.port === '' ? 30001 : Number(options.port);
   const siteSeed = options.siteSeed || 'ghost-continuum-local';
   const state = createEdgeState(siteSeed);
 
@@ -83,6 +84,7 @@ export function startLocalEdgeServer(options = {}) {
     }
 
     if (state.paths.includes(url.pathname)) {
+      noteObserved(state, ip);
       res.writeHead(404, { 'X-DM-Trap': '1' });
       return res.end('trap');
     }
@@ -106,7 +108,9 @@ export function startLocalEdgeServer(options = {}) {
 
   return new Promise((resolve) => {
     server.listen(port, '127.0.0.1', () => {
-      resolve({ server, port, url: `http://127.0.0.1:${port}`, state });
+      const bound = server.address();
+      const actualPort = bound && typeof bound === 'object' ? bound.port : port;
+      resolve({ server, port: actualPort, url: `http://127.0.0.1:${actualPort}`, state });
     });
   });
 }

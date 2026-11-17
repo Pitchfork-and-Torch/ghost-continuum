@@ -26,6 +26,7 @@ const DEFAULT_FILES = [
   'test/integration.js',
   'test/stack.js',
   'test/edge-worker.js',
+  'test/edge-bounds.js',
   'test/plane-toggles.js',
   'test/trench-cloak.js',
   'test/omega-v2.js',

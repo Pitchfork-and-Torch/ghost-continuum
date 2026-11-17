@@ -4,11 +4,109 @@ export const TRIPWIRE = '/.__dm/tripwire';
 export const SENTINEL = '/.__dm/sentinel.js';
 export const STATUS = '/.__dm/status';
 export const TRIPWIRE_MAX_BYTES = 64 * 1024;
+export const TRIPWIRE_DETAIL_MAX = 256;
+export const TRIPWIRE_TYPES = new Set([
+  'honeypot-click',
+  'honeypot-hit',
+  'script-tamper',
+  'sentinel-alive',
+  'sentinel-fallback',
+]);
+export const RATE_WINDOW_MS = 60_000;
+export const RATE_MAX = 60;
+export const EDGE_MAP_CAP = 2000;
+export const ROTATE_WINDOW_MS = 60_000;
+export const ROTATE_MAX = 2;
 
 /** Tripwire JSON must be a plain object. null, arrays, and scalars become {}. */
 export function coerceTripwireBody(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   return value;
+}
+
+/** Keep a known type and a short detail string. */
+export function normalizeTripwire(body) {
+  const raw = coerceTripwireBody(body);
+  const t = TRIPWIRE_TYPES.has(raw.t) ? raw.t : 'tripwire';
+  let detail = raw.d;
+  if (detail && typeof detail === 'object') {
+    try {
+      detail = JSON.stringify(detail);
+    } catch {
+      detail = '';
+    }
+  }
+  return { t, d: String(detail ?? '').slice(0, TRIPWIRE_DETAIL_MAX) };
+}
+
+export function canRotate({
+  observedAt = 0,
+  rotations = [],
+  score = 0,
+  now = Date.now(),
+  observedWindowMs = RATE_WINDOW_MS,
+  rotateWindowMs = ROTATE_WINDOW_MS,
+  rotateMax = ROTATE_MAX,
+  scoreRotate = SCORE_ROTATE,
+} = {}) {
+  const recent = (Array.isArray(rotations) ? rotations : []).filter((ts) => now - Number(ts) < rotateWindowMs);
+  const observed = Number(observedAt) > 0 && now - Number(observedAt) <= observedWindowMs;
+  return {
+    rotate: Boolean(observed && score >= scoreRotate && recent.length < rotateMax),
+    rotations: recent,
+  };
+}
+
+const localRates = new Map();
+
+function touchMap(map, key, value, cap) {
+  if (map.has(key)) map.delete(key);
+  map.set(key, value);
+  while (map.size > cap) {
+    const oldest = map.keys().next().value;
+    if (oldest == null) break;
+    map.delete(oldest);
+  }
+}
+
+/** Same-process counter. A missing address is not a shared bucket. */
+export function localRateAllow(ip, now = Date.now(), { windowMs = RATE_WINDOW_MS, max = RATE_MAX, cap = EDGE_MAP_CAP } = {}) {
+  if (!ip) return false;
+  let bucket = localRates.get(ip);
+  if (!bucket || now - bucket.start >= windowMs) bucket = { start: now, count: 0 };
+  bucket.count += 1;
+  touchMap(localRates, ip, bucket, cap);
+  return bucket.count <= max;
+}
+
+export function resetLocalRates() {
+  localRates.clear();
+}
+
+export async function readBodyLimited(request, maxBytes = TRIPWIRE_MAX_BYTES) {
+  const declared = Number(request.headers.get('content-length'));
+  if (Number.isFinite(declared) && declared > maxBytes) return { ok: false, status: 413 };
+  if (!request.body) return { ok: true, bytes: new Uint8Array(0) };
+  const reader = request.body.getReader();
+  const chunks = [];
+  let received = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    received += value.byteLength;
+    if (received > maxBytes) {
+      try { await reader.cancel(); } catch { /* already closed */ }
+      return { ok: false, status: 413 };
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { ok: true, bytes };
 }
 
 const SCORE_ROTATE = 8;
@@ -77,29 +175,57 @@ export function createEdgeState(siteSeed = 'ghost-continuum-local') {
     totalHits: 0,
     scores: new Map(),
     rates: new Map(),
+    observed: new Map(),
+    rotationTs: [],
   };
 }
 
-export function recordTripwire(state, ip, type, detail) {
-  const count = (state.rates.get(ip) || 0) + 1;
-  if (count > 60) return { allowed: false, score: 0 };
-  state.rates.set(ip, count);
+export function noteObserved(state, ip, now = Date.now()) {
+  if (!ip) return;
+  if (!state.observed) state.observed = new Map();
+  touchMap(state.observed, ip, now, EDGE_MAP_CAP);
+}
+
+export function recordTripwire(state, ip, type, detail, options = {}) {
+  const now = options.now ?? Date.now();
+  const fields = normalizeTripwire({ t: type, d: detail });
+  if (!state.rates) state.rates = new Map();
+  if (!state.scores) state.scores = new Map();
+  if (!state.observed) state.observed = new Map();
+  if (!Array.isArray(state.rotationTs)) state.rotationTs = [];
+
+  let bucket = state.rates.get(ip);
+  if (!bucket || typeof bucket !== 'object' || now - bucket.start >= RATE_WINDOW_MS) {
+    bucket = { start: now, count: 0 };
+  }
+  bucket.count += 1;
+  touchMap(state.rates, ip, bucket, EDGE_MAP_CAP);
+  if (bucket.count > RATE_MAX) return { allowed: false, score: 0, type: fields.t, detail: fields.d };
 
   const record = state.scores.get(ip) || { score: 0, hits: [] };
-  record.score = Math.max(0, record.score - SCORE_DECAY) + eventScore(type);
-  record.hits.push({ type, detail, ts: Date.now() });
+  record.score = Math.max(0, record.score - SCORE_DECAY) + eventScore(fields.t);
+  record.hits.push({ type: fields.t, detail: fields.d, ts: now });
   record.hits = record.hits.slice(-30);
-  state.scores.set(ip, record);
+  touchMap(state.scores, ip, record, EDGE_MAP_CAP);
 
   state.totalHits += 1;
-  if (record.score >= SCORE_ROTATE) {
+  const decision = canRotate({
+    observedAt: state.observed.get(ip) || 0,
+    rotations: state.rotationTs,
+    score: record.score,
+    now,
+  });
+  state.rotationTs = decision.rotations;
+  if (decision.rotate) {
     state.generation += 1;
     state.paths = derivePaths(dailySeed(state.siteSeed), 8, state.generation);
     state.buildId = buildId(state.siteSeed, state.generation);
-    state.rotatedAt = Date.now();
+    state.rotatedAt = now;
+    state.rotationTs.push(now);
+    state.observed.delete(ip);
   }
 
-  return { allowed: true, score: record.score };
+  return { allowed: true, score: record.score, type: fields.t, detail: fields.d };
 }
 
 export function publicStatus(state) {

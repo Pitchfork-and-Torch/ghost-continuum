@@ -4,15 +4,18 @@
  * UPSTREAM must be the origin hostname (e.g. *.pages.dev), NOT the Worker route hostname.
  */
 
+import {
+  canRotate,
+  coerceTripwireBody,
+  localRateAllow,
+  normalizeTripwire,
+  readBodyLimited,
+  TRIPWIRE_MAX_BYTES,
+} from './engine.js';
+
 const TRIPWIRE = '/.__dm/tripwire';
 const SENTINEL = '/.__dm/sentinel.js';
 const STATUS = '/.__dm/status';
-const TRIPWIRE_MAX_BYTES = 64 * 1024;
-
-function coerceTripwireBody(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
-  return value;
-}
 const SCORE_ROTATE = 8;
 const SCORE_DECAY = 1;
 
@@ -90,7 +93,9 @@ async function saveObserver(kv, siteSeed, state) {
 }
 
 async function tripwireAllowed(kv, ip) {
-  if (!kv || !ip) return true;
+  if (!ip) return false;
+  if (!localRateAllow(ip)) return false;
+  if (!kv) return true;
   const key = `dm:rate:${ip}`;
   const raw = await kv.get(key);
   const count = raw ? parseInt(raw, 10) : 0;
@@ -276,7 +281,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const kv = env.DM_KV;
-    const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const ip = (request.headers.get('cf-connecting-ip') || '').trim();
     const siteSeed = env.SITE_SEED || 'example.com';
     const upstreamHost = env.UPSTREAM || 'example.pages.dev';
     const deployPath = env.DEPLOY_PAGE || 'https://ghost.jonbailey.xyz/';
@@ -311,6 +316,15 @@ export default {
       ...derivePaths(dailySeed(siteSeed), 8, state.generation || 0),
     ]);
     if (trapPaths.has(url.pathname)) {
+      if (ip) {
+        state.observedIps = state.observedIps && typeof state.observedIps === 'object' ? state.observedIps : {};
+        state.observedIps[ip] = Date.now();
+        const keys = Object.keys(state.observedIps);
+        while (keys.length > 2000) {
+          delete state.observedIps[keys.shift()];
+        }
+        await saveObserver(kv, siteSeed, state);
+      }
       return new Response('trap', { status: 404, headers: { 'X-DM-Trap': '1', 'Cache-Control': 'no-store' } });
     }
 
@@ -318,25 +332,36 @@ export default {
       if (!(await tripwireAllowed(kv, ip))) {
         return new Response('rate limited', { status: 429 });
       }
+      const capped = await readBodyLimited(request, TRIPWIRE_MAX_BYTES);
+      if (!capped.ok) {
+        return new Response('payload too large', { status: 413, headers: { 'Cache-Control': 'no-store' } });
+      }
       let body = {};
       try {
-        const raw = await request.text();
-        if (raw.length > TRIPWIRE_MAX_BYTES) {
-          return new Response('payload too large', { status: 413, headers: { 'Cache-Control': 'no-store' } });
-        }
+        const raw = new TextDecoder().decode(capped.bytes);
         body = coerceTripwireBody(raw ? JSON.parse(raw) : {});
       } catch {
         body = {};
       }
-      const type = body.t || 'tripwire';
-      const { score } = await recordEvent(kv, ip, type, body.d);
-      console.log(JSON.stringify({ kind: `dm-${type}`, ip, score, ts: Date.now() }));
+      const fields = normalizeTripwire(body);
+      const { score } = await recordEvent(kv, ip, fields.t, fields.d);
+      console.log(JSON.stringify({ kind: `dm-${fields.t}`, ip, score, ts: Date.now() }));
       state.totalHits = (state.totalHits || 0) + 1;
-      if (score >= SCORE_ROTATE) {
+      const now = Date.now();
+      const decision = canRotate({
+        observedAt: state.observedIps?.[ip] || 0,
+        rotations: state.rotationTs || [],
+        score,
+        now,
+      });
+      state.rotationTs = decision.rotations;
+      if (decision.rotate) {
         state.generation = (state.generation || 0) + 1;
         state.paths = derivePaths(dailySeed(siteSeed), 8, state.generation);
         state.buildId = buildId(siteSeed, state.generation);
-        state.rotatedAt = Date.now();
+        state.rotatedAt = now;
+        state.rotationTs.push(now);
+        if (state.observedIps) delete state.observedIps[ip];
       }
       await saveObserver(kv, siteSeed, state);
       return new Response(JSON.stringify({ ok: true, score }), {
