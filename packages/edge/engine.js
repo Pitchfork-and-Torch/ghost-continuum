@@ -3,6 +3,13 @@
 export const TRIPWIRE = '/.__dm/tripwire';
 export const SENTINEL = '/.__dm/sentinel.js';
 export const STATUS = '/.__dm/status';
+export const TRIPWIRE_MAX_BYTES = 64 * 1024;
+
+/** Tripwire JSON must be a plain object. null, arrays, and scalars become {}. */
+export function coerceTripwireBody(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return value;
+}
 
 const SCORE_ROTATE = 8;
 const SCORE_DECAY = 1;
