@@ -39,7 +39,9 @@ function readJsonlWindow(filePath, limit = 100, options = {}) {
 
     let pos = size;
     let bytesRead = 0;
-    const parts = [];
+    // Unfinished line at the start of the bytes already read. The next earlier chunk completes it.
+    let carry = Buffer.alloc(0);
+    let collected = [];
     while (pos > 0 && bytesRead < maxBytes) {
       const n = Math.min(chunkSize, pos, maxBytes - bytesRead);
       pos -= n;
@@ -47,27 +49,43 @@ function readJsonlWindow(filePath, limit = 100, options = {}) {
       fs.readSync(fd, buf, 0, n, pos);
       bytesRead += n;
       tailBytes += n;
-      parts.unshift(buf);
 
       const startedAtZero = pos === 0;
       const startsAtLine = startedAtZero || byteAt(fd, pos - 1) === 10;
-      const text = Buffer.concat(parts).toString('utf8');
-      const lines = linesFromBuffer(text, {
-        dropPartial: !startsAtLine,
-        trimStart: startedAtZero,
-        limit: cap,
-      });
-      if (startedAtZero || bytesRead >= maxBytes || lines.length >= cap) {
-        return {
-          lines,
-          bytesRead,
-          fileSize: size,
-          truncated: !startedAtZero,
-        };
+      const merged = carry.length === 0 ? buf : Buffer.concat([buf, carry]);
+
+      let start = 0;
+      if (!startsAtLine) {
+        const nl = merged.indexOf(0x0a);
+        if (nl === -1) {
+          carry = merged;
+          if (bytesRead >= maxBytes) break;
+          continue;
+        }
+        carry = Buffer.from(merged.subarray(0, nl));
+        start = nl + 1;
+      } else {
+        carry = Buffer.alloc(0);
       }
+
+      let body = merged.subarray(start).toString('utf8');
+      body = startedAtZero ? body.trim() : body.replace(/\s+$/, '');
+      if (body) {
+        const extracted = body.split('\n').filter(Boolean);
+        const need = cap - collected.length;
+        const take = extracted.length > need ? extracted.slice(-need) : extracted;
+        if (take.length) collected = take.concat(collected);
+      }
+
+      if (startedAtZero || bytesRead >= maxBytes || collected.length >= cap) break;
     }
 
-    return { lines: [], bytesRead, fileSize: size, truncated: pos > 0 };
+    return {
+      lines: collected.slice(-cap),
+      bytesRead,
+      fileSize: size,
+      truncated: pos > 0,
+    };
   } finally {
     fs.closeSync(fd);
   }
@@ -140,18 +158,4 @@ function byteAt(fd, offset) {
   const probe = Buffer.alloc(1);
   fs.readSync(fd, probe, 0, 1, offset);
   return probe[0];
-}
-
-function linesFromBuffer(text, { dropPartial, trimStart, limit }) {
-  let body = text;
-  if (dropPartial) {
-    const cut = body.indexOf('\n');
-    if (cut === -1) return [];
-    body = body.slice(cut + 1);
-  }
-  body = trimStart ? body.trim() : body.replace(/\s+$/, '');
-  if (!body) return [];
-  const lines = body.split('\n').filter(Boolean);
-  if (lines.length <= limit) return lines;
-  return lines.slice(-limit);
 }
