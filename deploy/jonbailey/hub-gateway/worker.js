@@ -2,12 +2,23 @@
  * Ghost Continuum Hub API gateway - proxies /api and /taxii2 to the local hub via Cloudflare Tunnel.
  * Static UI is served by Cloudflare Pages on ghost.jonbailey.xyz.
  *
- * Safe methods are forwarded as sent. Other methods require the caller's own
- * bearer, compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
+ * OPTIONS is answered here. Every other method needs the caller's own bearer,
+ * compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
+ * GET /api/status, GET /api/feed, and GET /taxii2/ are the only reads forwarded
+ * without that bearer. Backup paths and any download path are never in that set.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
-const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const PUBLIC_GET_PATHS = new Set(['/api/status', '/api/feed', '/taxii2/']);
+
+function isPublicGet(method, pathname) {
+  if (method !== 'GET') return false;
+  const path = String(pathname || '');
+  const folded = path.toLowerCase();
+  if (folded.includes('/download/')) return false;
+  if (folded.startsWith('/api/home/backup')) return false;
+  return PUBLIC_GET_PATHS.has(path);
+}
 
 function corsHeaders(origin, env) {
   const allowed = env.ALLOWED_ORIGIN || 'https://ghost.jonbailey.xyz';
@@ -85,7 +96,7 @@ export default {
       });
     }
 
-    if (!SAFE_METHODS.has(request.method)) {
+    if (!isPublicGet(request.method, url.pathname)) {
       if (!env.HUB_TOKEN) {
         return jsonResponse(503, { ok: false, error: 'HUB_TOKEN not configured' }, origin, env);
       }

@@ -192,6 +192,96 @@ try {
 
   {
     resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/feed?limit=30`, { method: 'GET' }),
+      env,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].url, `${HUB}/api/feed?limit=30`);
+    assert.strictEqual(calls[0].authorization, null);
+    console.log('  GET /api/feed is forwarded without a bearer');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(new Request(`${ORIGIN}/taxii2/`, { method: 'GET' }), env);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].url, `${HUB}/taxii2/`);
+    console.log('  GET /taxii2/ is forwarded without a bearer');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, { method: 'HEAD' }),
+      env,
+    );
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  HEAD still requires a bearer');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/genome/pool`, { method: 'GET' }),
+      env,
+    );
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  GET outside the read list requires a bearer');
+  }
+
+  {
+    resetCalls();
+    const paths = [
+      '/api/home/backup',
+      '/api/home/backup?includeEvents=1',
+      '/api/home/Backup',
+      '/api/home/backup/download/backup-1',
+      '/api/incident/download/seal-1',
+      '/api/status/../home/backup',
+    ];
+    for (const path of paths) {
+      resetCalls();
+      const res = await worker.fetch(new Request(`${ORIGIN}${path}`, { method: 'GET' }), env);
+      assert.strictEqual(res.status, 401, path);
+      assert.strictEqual(calls.length, 0, path);
+    }
+    console.log('  backup and download GETs require a bearer');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/home/backup/download/backup-1`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      }),
+      env,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].authorization, `Bearer ${TOKEN}`);
+    assert.strictEqual(calls[0].url, `${HUB}/api/home/backup/download/backup-1`);
+    console.log('  an allowed bearer can read a backup download');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/taxii2/collections`, { method: 'GET' }),
+      env,
+    );
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  GET under /taxii2/ still requires a bearer');
+  }
+
+  {
+    resetCalls();
     const res = await worker.fetch(new Request(`${ORIGIN}/nope`), env);
     assert.strictEqual(res.status, 404);
     assert.strictEqual(calls.length, 0);

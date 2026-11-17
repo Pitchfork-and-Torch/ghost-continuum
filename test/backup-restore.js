@@ -5,7 +5,7 @@ import assert from 'assert';
 import fs from 'fs';
 import http from 'http';
 import { CONFIG_PATH, GC_DIR } from '../packages/core/src/config.js';
-import { restoreBackup } from '../packages/hub-api/src/backup-restore.js';
+import { createBackup, restoreBackup } from '../packages/hub-api/src/backup-restore.js';
 import { startHub } from '../packages/hub-api/src/server.js';
 
 fs.mkdirSync(GC_DIR, { recursive: true });
@@ -31,6 +31,31 @@ const current = {
   edgeLocalPort: 30001,
   cellPort: 3333,
   marker: 'current',
+  demoMode: false,
+  edgeStatusUrl: 'https://edge-status.example/status',
+  edgeStatusKey: 'edge-key-sentinel',
+  tripwireUrl: 'https://trip.example/hook',
+  allowedPrivateCidrs: ['10.0.0.0/8'],
+  cloudflareWorkerName: 'keep-worker',
+  notify: {
+    discordWebhookUrl: 'https://discord.example/api/webhooks/keep',
+    telegramBotToken: 'tg-keep',
+    genericWebhookUrl: 'https://hooks.example/keep',
+    homeAssistantToken: 'ha-keep',
+    homeAssistantUrl: 'https://ha.example/keep',
+    notifyOn: { realThreat: true },
+  },
+  continuum: {
+    morph: 'research',
+    plugins: ['keep-plugin.js'],
+    planes: { mirageCore: false, mirageImage: 'alpine:3.19', phantomMesh: false },
+    narrative: { enabled: false, worldId: 'keep-world' },
+  },
+  narrative: {
+    llmEndpoint: 'http://127.0.0.1:11434',
+    llmModel: 'llama3.2',
+    llmTimeoutMs: 8000,
+  },
 };
 
 const uploaded = {
@@ -49,6 +74,36 @@ const uploaded = {
   listenHost: '0.0.0.0',
   marker: 'uploaded',
   demoMode: true,
+  edgeStatusUrl: 'https://uploaded.example/status',
+  edgeStatusKey: 'edge-key-uploaded',
+  tripwireUrl: 'https://uploaded.example/trip',
+  allowedPrivateCidrs: ['0.0.0.0/0'],
+  cloudflareWorkerName: 'uploaded-worker',
+  callbackUrl: 'https://uploaded.example/callback',
+  notify: {
+    discordWebhookUrl: 'https://discord.example/api/webhooks/uploaded',
+    telegramBotToken: 'tg-uploaded',
+    genericWebhookUrl: 'https://hooks.example/uploaded',
+    homeAssistantToken: 'ha-uploaded',
+    homeAssistantUrl: 'https://ha.example/uploaded',
+    notifyOn: { realThreat: false },
+  },
+  continuum: {
+    morph: 'stealth',
+    plugins: ['uploaded-plugin.js'],
+    planes: {
+      mirageCore: true,
+      mirageImage: 'uploaded:latest',
+      phantomMesh: true,
+      trenchEntryHost: '10.1.2.3',
+    },
+    narrative: { enabled: true, worldId: 'uploaded-world', llmEndpoint: 'http://uploaded.example' },
+  },
+  narrative: {
+    llmEndpoint: 'http://uploaded.example:11434',
+    llmModel: 'uploaded-model',
+    llmTimeoutMs: 1000,
+  },
 };
 
 function bundle(config) {
@@ -98,6 +153,7 @@ function post(port, path, payload, extraHeaders = {}) {
 }
 
 let server;
+let backupPath = null;
 try {
   writeConfig(current);
   const before = fs.readFileSync(CONFIG_PATH);
@@ -132,13 +188,56 @@ try {
   assert.strictEqual(saved.ghostLanPort, 29999);
   assert.strictEqual(saved.edgeLocalPort, 30001);
   assert.strictEqual(saved.cellPort, 3333);
-  assert.strictEqual(saved.marker, 'uploaded');
+  assert.strictEqual(saved.marker, 'current');
   assert.strictEqual(saved.demoMode, true);
+  assert.strictEqual(saved.edgeStatusUrl, 'https://edge-status.example/status');
+  assert.strictEqual(saved.edgeStatusKey, 'edge-key-sentinel');
+  assert.strictEqual(saved.tripwireUrl, 'https://trip.example/hook');
+  assert.deepStrictEqual(saved.allowedPrivateCidrs, ['10.0.0.0/8']);
+  assert.strictEqual(saved.cloudflareWorkerName, 'uploaded-worker');
+  assert.strictEqual(saved.continuum.morph, 'stealth');
+  assert.deepStrictEqual(saved.continuum.plugins, ['keep-plugin.js']);
+  assert.strictEqual(saved.continuum.planes.mirageImage, 'alpine:3.19');
+  assert.strictEqual(saved.continuum.planes.mirageCore, true);
+  assert.strictEqual(saved.continuum.planes.phantomMesh, true);
+  assert.strictEqual(saved.continuum.planes.trenchEntryHost, undefined);
+  assert.strictEqual(saved.continuum.narrative.worldId, 'uploaded-world');
+  assert.strictEqual(saved.narrative.llmEndpoint, 'http://127.0.0.1:11434');
+  assert.strictEqual(saved.narrative.llmModel, 'uploaded-model');
+  assert.strictEqual(saved.narrative.llmTimeoutMs, 1000);
+  assert.strictEqual(saved.notify.discordWebhookUrl, 'https://discord.example/api/webhooks/keep');
+  assert.strictEqual(saved.notify.telegramBotToken, 'tg-keep');
+  assert.strictEqual(saved.notify.notifyOn.realThreat, true);
+  assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'callbackUrl'));
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'hubBind'));
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'hubHost'));
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'bindHost'));
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'listenHost'));
-  console.log('  restore keeps hubToken, hubAllowedHosts, and bind/host/port');
+  console.log('  restore copies listed keys and keeps endpoints, plugins, and credentials');
+
+  writeConfig(current);
+  const made = createBackup({ includeEvents: false });
+  backupPath = made.path;
+  assert.strictEqual(made.ok, true);
+  const stored = fs.readFileSync(made.path, 'utf8');
+  const storedConfig = JSON.parse(JSON.parse(stored).files.config);
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig, 'hubToken'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig, 'edgeStatusKey'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig.notify, 'discordWebhookUrl'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig.notify, 'telegramBotToken'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig.notify, 'genericWebhookUrl'));
+  assert.ok(!Object.prototype.hasOwnProperty.call(storedConfig.notify, 'homeAssistantToken'));
+  assert.strictEqual(storedConfig.notify.notifyOn.realThreat, true);
+  assert.strictEqual(storedConfig.edgeStatusUrl, current.edgeStatusUrl);
+  assert.ok(!stored.includes('edge-key-sentinel'));
+  assert.ok(!stored.includes('tg-keep'));
+  assert.ok(!stored.includes('ha-keep'));
+  const roundTrip = restoreBackup({ id: made.id });
+  assert.strictEqual(roundTrip.ok, true);
+  assert.strictEqual(readConfig().hubToken, 'keep-token');
+  assert.strictEqual(readConfig().edgeStatusKey, 'edge-key-sentinel');
+  assert.strictEqual(readConfig().notify.discordWebhookUrl, current.notify.discordWebhookUrl);
+  console.log('  backup file omits hub, edge, and notify credentials');
 
   writeConfig(current);
   const started = await startHub({
@@ -167,7 +266,10 @@ try {
   assert.deepStrictEqual(viaRoute.hubAllowedHosts, ['ghost.jonbailey.xyz']);
   assert.strictEqual(viaRoute.bind, '127.0.0.1');
   assert.strictEqual(viaRoute.port, 30000);
-  assert.strictEqual(viaRoute.marker, 'uploaded');
+  assert.strictEqual(viaRoute.marker, 'current');
+  assert.strictEqual(viaRoute.narrative.llmEndpoint, 'http://127.0.0.1:11434');
+  assert.deepStrictEqual(viaRoute.continuum.plugins, ['keep-plugin.js']);
+  assert.strictEqual(viaRoute.continuum.planes.mirageImage, 'alpine:3.19');
   console.log('  restore route returns 400 for invalid input and keeps access settings');
 
   console.log('backup-restore: OK');
@@ -175,6 +277,7 @@ try {
   if (server) {
     await new Promise((resolve) => server.close(resolve));
   }
+  if (backupPath && fs.existsSync(backupPath)) fs.unlinkSync(backupPath);
   if (hadConfig) fs.writeFileSync(CONFIG_PATH, originalConfig);
   else if (fs.existsSync(CONFIG_PATH)) fs.unlinkSync(CONFIG_PATH);
 }
