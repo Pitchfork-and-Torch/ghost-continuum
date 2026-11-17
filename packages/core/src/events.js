@@ -2,7 +2,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { GC_DIR, EVENTS_PATH } from './config.js';
 import { appendLedgerEntry } from '../../trust/src/merkle.js';
-import { readJsonlTail } from './jsonl-tail.js';
+import { appendJsonlLine, parseJsonlObjects, readJsonlTail } from './jsonl-tail.js';
 
 /** @typedef {'lan'|'edge'|'audit'|'hub'|'ops'} Plane */
 
@@ -47,9 +47,11 @@ export function scoreEventType(type = '') {
 let eventMemo = null;
 
 export function appendEvent(event) {
-  fs.mkdirSync(GC_DIR, { recursive: true });
   const normalized = normalizeEvent(event);
-  fs.appendFileSync(EVENTS_PATH, JSON.stringify(normalized) + '\n');
+  const maxBytes = Number(process.env.GC_JSONL_ROTATE_BYTES);
+  appendJsonlLine(EVENTS_PATH, JSON.stringify(normalized), {
+    maxBytes: Number.isFinite(maxBytes) && maxBytes > 0 ? maxBytes : undefined,
+  });
   eventMemo = null;
   if (process.env.DM_NO_LEDGER !== '1') {
     try {
@@ -63,19 +65,7 @@ export function appendEvent(event) {
 
 /** Parse an events.jsonl blob. Torn or non-object lines are skipped so one bad write cannot blank the feed. */
 export function parseEventJsonl(text, limit = 100) {
-  const lines = String(text || '').trim().split('\n').filter(Boolean);
-  const window = lines.slice(-limit);
-  const parsed = [];
-  for (const line of window) {
-    try {
-      const value = JSON.parse(line);
-      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
-      parsed.push(value);
-    } catch {
-      /* torn write or corrupt line */
-    }
-  }
-  return parsed.reverse();
+  return parseJsonlObjects(text, limit).reverse();
 }
 
 /**

@@ -38,6 +38,7 @@ const DEFAULT_FILES = [
   'test/backup-restore.js',
   'test/ghost-lan-hits.js',
   'test/ghost-lan-bind.js',
+  'test/ghost-lan-events.js',
   'test/seo-safe-url.js',
   'test/holo-canvas.js',
   'test/air-gap-map.js',

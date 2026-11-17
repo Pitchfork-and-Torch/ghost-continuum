@@ -2,8 +2,9 @@ import assert from 'assert';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { readJsonlTail, resetJsonlTailStats, jsonlTailStats } from '../packages/core/src/jsonl-tail.js';
-import { parseEventJsonl, readEventsFromFile } from '../packages/core/src/events.js';
+import { appendJsonlLine, readJsonlTail, resetJsonlTailStats, jsonlTailStats } from '../packages/core/src/jsonl-tail.js';
+import { EVENTS_PATH } from '../packages/core/src/config.js';
+import { appendEvent, parseEventJsonl, readEvents, readEventsFromFile } from '../packages/core/src/events.js';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gc-jsonl-'));
 
@@ -98,6 +99,25 @@ assert.deepStrictEqual(readEventsFromFile(memoFile, 10).map((e) => e.id), ['m3',
 assert.strictEqual(jsonlTailStats().reads, 1, 'cold read tails the file once');
 assert.deepStrictEqual(readEventsFromFile(memoFile, 2).map((e) => e.id), ['m3', 'm2']);
 assert.strictEqual(jsonlTailStats().reads, 1, 'repeat read uses the memo, not another tail read');
+
+const rot = path.join(dir, 'rot.jsonl');
+const line1 = JSON.stringify({ id: 1, pad: 'a'.repeat(80) });
+const line2 = JSON.stringify({ id: 2, pad: 'b'.repeat(80) });
+appendJsonlLine(rot, line1, { maxBytes: 40 });
+const second = appendJsonlLine(rot, line2, { maxBytes: 40 });
+assert.strictEqual(second.rotated, true);
+assert.ok(fs.existsSync(`${rot}.1`));
+assert.deepStrictEqual(readJsonlTail(rot, 2).lines, [line1, line2]);
+assert.deepStrictEqual(readJsonlTail(rot, 1).lines, [line2]);
+console.log('  rotation boundary keeps the previous line');
+
+process.env.DM_NO_LEDGER = '1';
+process.env.GC_JSONL_ROTATE_BYTES = '120';
+appendEvent({ type: 'note', detail: { id: 'one', pad: 'a'.repeat(80) } });
+appendEvent({ type: 'note', detail: { id: 'two', pad: 'b'.repeat(80) } });
+assert.ok(fs.existsSync(`${EVENTS_PATH}.1`));
+assert.deepStrictEqual(readEvents(10).map((e) => e.detail.id), ['two', 'one']);
+console.log('  event log rotation stays readable');
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('jsonl tail: OK');

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { readJsonlTail } from '../../core/src/jsonl-tail.js';
+import { appendJsonlLine, parseJsonlObjects, readJsonlTail } from '../../core/src/jsonl-tail.js';
 import { GHOST_DIR } from './config.js';
 import { derivePorts, buildGenerationId } from './topology.js';
 import { hiddenMarker } from './ops/masquerade.js';
@@ -49,14 +49,16 @@ export function saveState(state) {
 }
 
 export function appendEvent(event) {
-  fs.mkdirSync(GHOST_DIR, { recursive: true });
-  fs.appendFileSync(LOG_PATH, JSON.stringify({ ...event, ts: Date.now() }) + '\n');
+  const maxBytes = Number(process.env.GC_JSONL_ROTATE_BYTES);
+  appendJsonlLine(LOG_PATH, JSON.stringify({ ...event, ts: Date.now() }), {
+    maxBytes: Number.isFinite(maxBytes) && maxBytes > 0 ? maxBytes : undefined,
+  });
 }
 
 export function readRecentEvents(limit = 50) {
   if (!fs.existsSync(LOG_PATH)) return [];
   const { lines } = readJsonlTail(LOG_PATH, limit);
-  return lines.map((l) => JSON.parse(l)).reverse();
+  return parseJsonlObjects(lines, limit).reverse();
 }
 
 export function writePid(pid) {
