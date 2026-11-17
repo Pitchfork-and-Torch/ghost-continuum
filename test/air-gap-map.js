@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import { startHub } from '../packages/hub-api/src/server.js';
 import { enrichConfig } from '../packages/core/src/config.js';
 import { isPublicUiAssetPath, PUBLIC_UI_PREFIXES } from '../packages/hub-api/src/safe.js';
+import { fileCacheStats, resetFileCache } from '../packages/hub-api/src/file-cache.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
@@ -140,10 +141,15 @@ const hub = await startHub(
 );
 
 try {
+  resetFileCache();
   const vendor = await getRaw(hub.port, '/vendor/three.module.js');
   assert.strictEqual(vendor.status, 200, 'hub must serve /vendor/three.module.js');
   assert.ok(vendor.type.includes('javascript'), `vendor Content-Type should be JS, got ${vendor.type}`);
   assert.ok(vendor.body.includes("const REVISION = '160'"), 'served vendor must be r160');
+  const vendorAgain = await getRaw(hub.port, '/vendor/three.module.js');
+  assert.ok(vendorAgain.body.equals(vendor.body), 'second vendor read must match');
+  assert.strictEqual(fileCacheStats().hits, 1, 'second vendor read must come from the file cache');
+  assert.strictEqual(fileCacheStats().misses, 1, 'first vendor read fills the cache');
 
   const fonts = await getRaw(hub.port, '/fonts/fontshare/fonts.css');
   assert.strictEqual(fonts.status, 200, 'hub must serve Fontshare CSS');

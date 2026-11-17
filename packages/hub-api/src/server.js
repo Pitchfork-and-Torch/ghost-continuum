@@ -71,6 +71,7 @@ import {
   hubTokenCookieHeader,
   rateLimit,
 } from './safe.js';
+import { readCachedFile } from './file-cache.js';
 import { sseHandler, publishEvent, clientCount } from './sse.js';
 import {
  injectDemoCampaign,
@@ -258,7 +259,7 @@ export function startHub(config = loadConfig()) {
 
  if (url.pathname === '/' || url.pathname === '/index.html') {
  const file = path.join(UI_ROOT, 'index.html');
- const html = fs.readFileSync(file, 'utf8');
+ const html = readCachedFile(file);
  const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
  const hubToken = configuredHubToken(config);
  // Loopback only: HttpOnly cookie so EventSource/fetch work without
@@ -274,7 +275,7 @@ export function startHub(config = loadConfig()) {
  const file = path.join(ASSETS_ROOT, 'ghost-continuum-logo.png');
  if (fs.existsSync(file)) {
  res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
- return res.end(fs.readFileSync(file));
+ return res.end(readCachedFile(file));
  }
  }
 
@@ -287,7 +288,7 @@ export function startHub(config = loadConfig()) {
  'Cache-Control': 'no-store',
  'Service-Worker-Allowed': '/',
  });
- return res.end(fs.readFileSync(file));
+ return res.end(readCachedFile(file));
  }
  }
 
@@ -295,7 +296,7 @@ export function startHub(config = loadConfig()) {
  const file = path.join(__dirname, '../../continuum/src/map-layouts.js');
  if (fs.existsSync(file)) {
  res.writeHead(200, { 'Content-Type': 'application/javascript', 'Cache-Control': 'no-store' });
- return res.end(fs.readFileSync(file, 'utf8'));
+ return res.end(readCachedFile(file));
  }
  }
 
@@ -303,7 +304,7 @@ export function startHub(config = loadConfig()) {
  const file = safeUiPath(UI_ROOT, url.pathname.slice(1));
  if (file && fs.existsSync(file) && fs.statSync(file).isFile()) {
  res.writeHead(200, { 'Content-Type': contentType(file), 'Cache-Control': 'no-store' });
- return res.end(fs.readFileSync(file));
+ return res.end(readCachedFile(file));
  }
  }
 
