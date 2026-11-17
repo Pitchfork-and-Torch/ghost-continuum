@@ -1,6 +1,8 @@
 /**
  * Server-Sent Events bus for Command Nexus live push.
- * Zero deps - native Node http. Clients: EventSource('/api/events/stream').
+ * Zero deps - native Node http.
+ * The hub UI reads GET /api/events/stream with fetch and Authorization.
+ * This bus does not assign event ids and does not replay Last-Event-ID.
  */
 
 import { EventEmitter } from 'events';

@@ -14,6 +14,7 @@ const SHELL = [
   '/vendor/three.module.js',
   '/assets/ghost-voice.js',
   '/assets/home.js',
+  '/assets/sse-client.js',
   '/assets/node-meta.js',
   '/assets/command-palette.js',
   '/assets/operator-sentinel.js',

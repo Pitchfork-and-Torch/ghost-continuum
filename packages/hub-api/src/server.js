@@ -305,8 +305,8 @@ export function startHub(config = loadConfig()) {
  const html = readCachedFile(file);
  const headers = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' };
  const hubToken = configuredHubToken(config);
- // Loopback only: HttpOnly cookie so EventSource/fetch work without
- // putting the bearer in JavaScript (tunneled HTML must not leak it).
+ // Loopback only: HttpOnly cookie so a same-origin browser can call the hub
+ // without the bearer being written into the HTML. Tunneled HTML does not set it.
  if (hubToken && hubHostIsLoopback(req)) {
  headers['Set-Cookie'] = hubTokenCookieHeader(hubToken);
  }

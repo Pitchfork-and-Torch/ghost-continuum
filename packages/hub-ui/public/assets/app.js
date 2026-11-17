@@ -19,6 +19,7 @@ import {
  NODE_SHAPES,
 } from './node-meta.js';
 import { createCommandPalette } from './command-palette.js';
+import { openHubEventStream } from './sse-client.js';
 
 const $ = (id) => document.getElementById(id);
 const VERSION = '3.7.2';
@@ -41,13 +42,6 @@ function hubAuthHeaders(extra = {}) {
  const headers = { ...extra };
  if (token) headers.Authorization = `Bearer ${token}`;
  return headers;
-}
-
-/** Same-origin cookie so EventSource (no custom headers) can pass the read-path lock. */
-function syncHubTokenCookie() {
- const token = localStorage.getItem('dm-hub-token') || window.__GC_HUB_TOKEN;
- if (!token) return;
- document.cookie = `gc-hub-token=${encodeURIComponent(token)}; Path=/; SameSite=Strict`;
 }
 
 async function apiFetch(url, opts = {}) {
@@ -1087,36 +1081,36 @@ async function injectDemo() {
 }
 
 // ── SSE ────────────────────────────────────────────────────
-function connectSse() {
- if (typeof EventSource === 'undefined') {
- $('stSse') && ($('stSse').textContent = 'SSE n/a');
+function handleSseFrame(ev) {
+ if (ev.type === 'connected') {
+ $('stSse') && ($('stSse').textContent = 'SSE LIVE');
  return;
  }
- try {
- sse?.close?.();
- sse = new EventSource('/api/events/stream');
- sse.addEventListener('connected', () => {
- $('stSse') && ($('stSse').textContent = 'SSE LIVE');
- });
- sse.addEventListener('morph-switch', (ev) => {
+ if (ev.type === 'morph-switch') {
  try {
  const d = JSON.parse(ev.data);
  setMorphUi(d.payload?.morph);
  operatorSentinel?.pulse?.('morph', 2000);
  refreshHolo({ bust: true });
  } catch { /* */ }
- });
- sse.addEventListener('genome-evolved', () => {
+ return;
+ }
+ if (ev.type === 'genome-evolved') {
  operatorSentinel?.pulse?.('evolve', 3000);
  refreshLeaderboard();
  refreshHolo({ bust: true });
- });
- sse.addEventListener('map-invalidate', () => refreshHolo({ bust: true }));
- sse.addEventListener('demo-campaign', () => {
+ return;
+ }
+ if (ev.type === 'map-invalidate') {
+ refreshHolo({ bust: true });
+ return;
+ }
+ if (ev.type === 'demo-campaign') {
  refreshMarkers();
  refreshHolo({ bust: true });
- });
- sse.addEventListener('threat-response', (ev) => {
+ return;
+ }
+ if (ev.type === 'threat-response') {
  try {
  const d = JSON.parse(ev.data);
  if (d.payload?.phase === 'complete') refreshThreatWatch();
@@ -1124,10 +1118,24 @@ function connectSse() {
  toast(`Threat bus: ${d.payload.verdict}`);
  }
  } catch { /* */ }
- });
- sse.onerror = () => {
+ }
+}
+
+function connectSse() {
+ if (typeof fetch !== 'function') {
+ $('stSse') && ($('stSse').textContent = 'SSE n/a');
+ return;
+ }
+ try {
+ sse?.close?.();
+ sse = openHubEventStream({
+ url: '/api/events/stream',
+ headers: () => hubAuthHeaders({ Accept: 'text/event-stream' }),
+ onEvent: handleSseFrame,
+ onError() {
  $('stSse') && ($('stSse').textContent = 'SSE ...');
- };
+ },
+ });
  } catch {
  $('stSse') && ($('stSse').textContent = 'SSE off');
  }
@@ -1525,7 +1533,6 @@ async function boot() {
  syncOperatorMood({ mapMode });
 
  bindUi();
- syncHubTokenCookie();
  connectSse();
 
  syncMapModeButtons();

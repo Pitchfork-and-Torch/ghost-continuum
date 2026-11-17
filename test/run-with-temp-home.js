@@ -35,6 +35,7 @@ const DEFAULT_FILES = [
   'test/seal-bundle.js',
   'test/hardening.js',
   'test/hub-gateway.js',
+  'test/sse-client.js',
   'test/backup-restore.js',
   'test/echo-world.js',
   'test/mirage-core.js',
