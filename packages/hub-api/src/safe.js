@@ -237,6 +237,7 @@ function headerValue(headers, name) {
 export function clientIp(req) {
   const peer = req.socket?.remoteAddress || '';
   const headers = req.headers || {};
+  // Loopback peers are trusted to set CF-Connecting-IP because the hub is reached only through the tunnel.
   if (loopbackPeer(peer)) {
     const cf = headerValue(headers, 'cf-connecting-ip').split(',')[0].trim();
     if (cf) return cf;
