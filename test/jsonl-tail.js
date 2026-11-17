@@ -100,6 +100,17 @@ assert.strictEqual(jsonlTailStats().reads, 1, 'cold read tails the file once');
 assert.deepStrictEqual(readEventsFromFile(memoFile, 2).map((e) => e.id), ['m3', 'm2']);
 assert.strictEqual(jsonlTailStats().reads, 1, 'repeat read uses the memo, not another tail read');
 
+const sameFirst = JSON.stringify({ id: 'old', pad: 'aaaa' });
+const sameNext = JSON.stringify({ id: 'new', pad: 'bbbb' });
+assert.strictEqual(Buffer.byteLength(sameFirst), Buffer.byteLength(sameNext));
+const sameSize = writeLines('same-size.jsonl', [sameFirst]);
+assert.deepStrictEqual(readEventsFromFile(sameSize, 5).map((e) => e.id), ['old']);
+fs.writeFileSync(sameSize, `${sameNext}\n`);
+assert.strictEqual(fs.statSync(sameSize).size, Buffer.byteLength(`${sameFirst}\n`));
+const later = new Date(fs.statSync(sameSize).mtimeMs + 5000);
+fs.utimesSync(sameSize, later, later);
+assert.deepStrictEqual(readEventsFromFile(sameSize, 5).map((e) => e.id), ['new']);
+
 const rot = path.join(dir, 'rot.jsonl');
 const line1 = JSON.stringify({ id: 1, pad: 'a'.repeat(80) });
 const line2 = JSON.stringify({ id: 2, pad: 'b'.repeat(80) });

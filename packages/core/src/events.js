@@ -82,7 +82,7 @@ export function readEventsFromFile(filePath, limit = 100) {
     if (err && err.code === 'ENOENT') return [];
     throw err;
   }
-  const stamp = `${stat.mtimeNs}:${stat.size}`;
+  const stamp = `${stat.mtimeMs}:${stat.size}`;
   if (
     eventMemo
     && eventMemo.filePath === filePath
