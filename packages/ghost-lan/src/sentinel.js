@@ -26,6 +26,7 @@ import { getDossier, recordDossier } from './ops/dossier.js';
 import { recordEngagement, savePool, loadPool, getChampion } from '../../genome/src/pool.js';
 import { morphDelayMs } from '../../genome/src/morph.js';
 import { analyzeRequest } from '../../continuum/src/anti-analysis.js';
+import { allowIpHit } from './ip-hits.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONTROL_PATH = path.join(GHOST_DIR, 'control.json');
@@ -47,9 +48,7 @@ function resolveClientIp(req) {
 }
 
 function allowConnection(ip) {
-  const count = (ipHits.get(ip) || 0) + 1;
-  ipHits.set(ip, count);
-  return count <= config.maxConnectionsPerIp;
+  return allowIpHit(ipHits, ip, { max: config.maxConnectionsPerIp || 30 });
 }
 
 function getState() {

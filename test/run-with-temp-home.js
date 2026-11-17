@@ -36,6 +36,7 @@ const DEFAULT_FILES = [
   'test/hardening.js',
   'test/hub-gateway.js',
   'test/backup-restore.js',
+  'test/ghost-lan-hits.js',
   'test/seo-safe-url.js',
   'test/holo-canvas.js',
   'test/air-gap-map.js',
