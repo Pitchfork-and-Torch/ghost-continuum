@@ -7,6 +7,12 @@
 const TRIPWIRE = '/.__dm/tripwire';
 const SENTINEL = '/.__dm/sentinel.js';
 const STATUS = '/.__dm/status';
+const TRIPWIRE_MAX_BYTES = 64 * 1024;
+
+function coerceTripwireBody(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return value;
+}
 const SCORE_ROTATE = 8;
 const SCORE_DECAY = 1;
 
@@ -314,9 +320,13 @@ export default {
       }
       let body = {};
       try {
-        body = await request.json();
+        const raw = await request.text();
+        if (raw.length > TRIPWIRE_MAX_BYTES) {
+          return new Response('payload too large', { status: 413, headers: { 'Cache-Control': 'no-store' } });
+        }
+        body = coerceTripwireBody(raw ? JSON.parse(raw) : {});
       } catch {
-        /* empty */
+        body = {};
       }
       const type = body.t || 'tripwire';
       const { score } = await recordEvent(kv, ip, type, body.d);

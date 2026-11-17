@@ -3,7 +3,9 @@ import {
   TRIPWIRE,
   SENTINEL,
   STATUS,
+  TRIPWIRE_MAX_BYTES,
   clientScript,
+  coerceTripwireBody,
   createEdgeState,
   publicStatus,
   recordTripwire,
@@ -41,13 +43,34 @@ export function startLocalEdgeServer(options = {}) {
     }
 
     if (url.pathname === TRIPWIRE && req.method === 'POST') {
+      const chunks = [];
+      let size = 0;
+      let tooLarge = false;
+      try {
+        for await (const c of req) {
+          const buf = Buffer.isBuffer(c) ? c : Buffer.from(c);
+          size += buf.length;
+          if (size > TRIPWIRE_MAX_BYTES) {
+            tooLarge = true;
+            break;
+          }
+          chunks.push(buf);
+        }
+      } catch {
+        /* aborted body */
+      }
+      if (tooLarge) {
+        res.writeHead(413, { 'Cache-Control': 'no-store' });
+        res.end('payload too large');
+        req.destroy();
+        return;
+      }
       let body = {};
       try {
-        const chunks = [];
-        for await (const c of req) chunks.push(c);
-        body = JSON.parse(Buffer.concat(chunks).toString() || '{}');
+        const raw = Buffer.concat(chunks).toString('utf8');
+        body = coerceTripwireBody(raw ? JSON.parse(raw) : {});
       } catch {
-        /* empty */
+        body = {};
       }
       const type = body.t || 'tripwire';
       const result = recordTripwire(state, ip, type, body.d);
