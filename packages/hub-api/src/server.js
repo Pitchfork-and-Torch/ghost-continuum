@@ -131,6 +131,21 @@ function json(res, code, body) {
  res.end(JSON.stringify(body));
 }
 
+function pipeFile(res, status, headers, filePath) {
+  const stream = fs.createReadStream(filePath);
+  stream.on('error', () => {
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-store' });
+    }
+    if (!res.writableEnded) res.end();
+  });
+  res.on('close', () => {
+    if (!stream.closed) stream.destroy();
+  });
+  res.writeHead(status, headers);
+  stream.pipe(res);
+}
+
 function contentType(file) {
  if (file.endsWith('.png')) return 'image/png';
  if (file.endsWith('.jpg') || file.endsWith('.jpeg')) return 'image/jpeg';
@@ -461,8 +476,7 @@ export function startHub(config = loadConfig()) {
  res.writeHead(404);
  return res.end('Not found');
  }
- res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
- return res.end(fs.readFileSync(htmlPath));
+ return pipeFile(res, 200, { 'Content-Type': 'text/html; charset=utf-8' }, htmlPath);
  }
 
  if (url.pathname.startsWith('/api/incident/verify/') && req.method === 'GET') {
@@ -479,17 +493,16 @@ export function startHub(config = loadConfig()) {
  res.writeHead(404);
  return res.end('Not found');
  }
- res.writeHead(200, {
+ return pipeFile(res, 200, {
  'Content-Type': 'application/gzip',
  'Content-Disposition': `attachment; filename="${id}.tgz"`,
- });
- return res.end(fs.readFileSync(archivePath));
+ }, archivePath);
  }
 
  if (url.pathname === '/api/legal' && req.method === 'GET') {
  const legalPath = path.join(__dirname, '../../../LEGAL.md');
  if (!fs.existsSync(legalPath)) return json(res, 404, { ok: false, error: 'LEGAL.md not found' });
- return json(res, 200, { ok: true, text: fs.readFileSync(legalPath, 'utf8') });
+ return json(res, 200, { ok: true, text: readCachedFile(legalPath).toString('utf8') });
  }
 
  if (url.pathname === '/api/continuum/status' && req.method === 'GET') {
@@ -895,11 +908,10 @@ export function startHub(config = loadConfig()) {
  res.writeHead(404);
  return res.end('Not found');
  }
- res.writeHead(200, {
+ return pipeFile(res, 200, {
  'Content-Type': 'application/json',
  'Content-Disposition': `attachment; filename="${id}.json"`,
- });
- return res.end(fs.readFileSync(p));
+ }, p);
  }
 
  if (url.pathname === '/api/home/restore' && req.method === 'POST') {
