@@ -57,10 +57,26 @@ export function appendEvent(event) {
   return normalized;
 }
 
+/** Parse an events.jsonl blob. Torn or non-object lines are skipped so one bad write cannot blank the feed. */
+export function parseEventJsonl(text, limit = 100) {
+  const lines = String(text || '').trim().split('\n').filter(Boolean);
+  const window = lines.slice(-limit);
+  const parsed = [];
+  for (const line of window) {
+    try {
+      const value = JSON.parse(line);
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      parsed.push(value);
+    } catch {
+      /* torn write or corrupt line */
+    }
+  }
+  return parsed.reverse();
+}
+
 export function readEvents(limit = 100) {
   if (!fs.existsSync(EVENTS_PATH)) return [];
-  const lines = fs.readFileSync(EVENTS_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  return lines.slice(-limit).map((l) => JSON.parse(l)).reverse();
+  return parseEventJsonl(fs.readFileSync(EVENTS_PATH, 'utf8'), limit);
 }
 
 export function mergeEventStreams(...streams) {

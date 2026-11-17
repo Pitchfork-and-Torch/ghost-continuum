@@ -3,6 +3,7 @@ import { buildContinuumStatus } from '../packages/continuum/src/nexus.js';
 import { analyzeRequest } from '../packages/continuum/src/anti-analysis.js';
 import { appendLedgerEntry, verifyLedger } from '../packages/trust/src/index.js';
 import { enrichConfig } from '../packages/core/src/config.js';
+import { parseEventJsonl } from '../packages/core/src/events.js';
 
 const config = enrichConfig({ continuum: { morph: 'research' } });
 const status = await buildContinuumStatus(config, { events: [] });
@@ -27,6 +28,18 @@ assert.ok(blob.recommendBare);
 
 const emu = analyzeRequest({ url: '/vmware/tools', headers: { 'user-agent': 'Mozilla/5.0' } }, '10.0.0.4');
 assert.ok(emu.signals.some((s) => s.kind === 'anti-emu-path'));
+
+const eventLog = [
+  JSON.stringify({ id: 'a', type: 'ok' }),
+  '{torn',
+  'null',
+  '[]',
+  JSON.stringify({ id: 'b', type: 'also' }),
+].join('\n');
+const parsedEvents = parseEventJsonl(eventLog, 10);
+assert.deepStrictEqual(parsedEvents.map((e) => e.id), ['b', 'a']);
+assert.deepStrictEqual(parseEventJsonl(eventLog, 1).map((e) => e.id), ['b']);
+console.log('  ✓ event log skips torn lines');
 
 appendLedgerEntry({ type: 'test-ledger', plane: 'hub', score: 1 });
 const verify = verifyLedger();
