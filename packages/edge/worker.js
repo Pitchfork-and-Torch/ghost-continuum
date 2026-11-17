@@ -10,6 +10,7 @@ import {
   localRateAllow,
   normalizeTripwire,
   readBodyLimited,
+  RATE_WINDOW_MS,
   TRIPWIRE_MAX_BYTES,
 } from './engine.js';
 
@@ -317,13 +318,18 @@ export default {
     ]);
     if (trapPaths.has(url.pathname)) {
       if (ip) {
-        state.observedIps = state.observedIps && typeof state.observedIps === 'object' ? state.observedIps : {};
-        state.observedIps[ip] = Date.now();
-        const keys = Object.keys(state.observedIps);
-        while (keys.length > 2000) {
-          delete state.observedIps[keys.shift()];
+        const now = Date.now();
+        const seenAt = Number(state.observedIps?.[ip]) || 0;
+        const seenRecently = seenAt > 0 && now - seenAt < RATE_WINDOW_MS;
+        if (!seenRecently) {
+          state.observedIps = state.observedIps && typeof state.observedIps === 'object' ? state.observedIps : {};
+          state.observedIps[ip] = now;
+          const keys = Object.keys(state.observedIps);
+          while (keys.length > 2000) {
+            delete state.observedIps[keys.shift()];
+          }
+          await saveObserver(kv, siteSeed, state);
         }
-        await saveObserver(kv, siteSeed, state);
       }
       return new Response('trap', { status: 404, headers: { 'X-DM-Trap': '1', 'Cache-Control': 'no-store' } });
     }

@@ -141,4 +141,26 @@ assert.ok(allowed <= RATE_MAX, `allowed ${allowed}`);
 assert.strictEqual(localRateAllow(''), false);
 console.log('  missing client address is not a shared bucket');
 
+const observerPuts = [];
+let observerRaw = null;
+const observerKv = {
+  async get(key) {
+    return String(key).startsWith('dm:observer:') ? observerRaw : null;
+  },
+  async put(key, value) {
+    observerPuts.push(String(key));
+    if (String(key).startsWith('dm:observer:')) observerRaw = value;
+  },
+};
+const trapEnv = { SITE_SEED: 'example.test', UPSTREAM: 'example.pages.dev', DM_KV: observerKv };
+const trapPath = drillHoneypotPath('example.test', 0);
+const trapHeaders = { 'cf-connecting-ip': '203.0.113.77' };
+const firstTrap = await worker.fetch(new Request(`https://example.test${trapPath}`, { headers: trapHeaders }), trapEnv);
+const secondTrap = await worker.fetch(new Request(`https://example.test${trapPath}`, { headers: trapHeaders }), trapEnv);
+assert.strictEqual(firstTrap.status, 404);
+assert.strictEqual(firstTrap.headers.get('X-DM-Trap'), '1');
+assert.strictEqual(secondTrap.status, 404);
+assert.strictEqual(observerPuts.length, 1, 'a recent address does not write the observer again');
+console.log('  repeat trap hits skip another observer write');
+
 console.log('\nEdge bound checks passed.\n');
