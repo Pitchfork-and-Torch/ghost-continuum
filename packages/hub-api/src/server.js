@@ -163,19 +163,33 @@ function contentType(file) {
  return 'application/octet-stream';
 }
 
+export function clampFeedLimit(value, fallback = 100) {
+  const n = Number.parseInt(value, 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(150, Math.max(1, n));
+}
+
+async function loadFeedBundle(config) {
+  return cached('status-feed', STATUS_TTL, async () => {
+    const [lan, edge, audit, cfLogs] = await Promise.all([
+      fetchGhostLan(config),
+      fetchEdge(config),
+      fetchAudit(config),
+      fetchCloudflareTripwireLogs(config),
+    ]);
+    const hubEvents = readEvents(80);
+    let feed = mergeEventStreams(hubEvents, lan.events, audit.events, cfLogs).slice(0, 150);
+    const armedCount = [lan, edge, audit].filter((p) => p.enabled !== false && p.armed).length;
+    if (isDemoMode(config) && armedCount === 0) {
+      feed = mergeEventStreams(feed, demoFeed()).slice(0, 150);
+    }
+    return { lan, edge, audit, cfLogs, armedCount, feed };
+  });
+}
+
 export async function buildStatus(config) {
  return cached('status', STATUS_TTL, async () => {
- const [lan, edge, audit, cfLogs] = await Promise.all([
- fetchGhostLan(config),
- fetchEdge(config),
- fetchAudit(config),
- fetchCloudflareTripwireLogs(config),
- ]);
-
- const hubEvents = readEvents(80);
- let feed = mergeEventStreams(hubEvents, lan.events, audit.events, cfLogs).slice(0, 150);
-
- let armedCount = [lan, edge, audit].filter((p) => p.enabled !== false && p.armed).length;
+ const { lan, edge, audit, cfLogs, armedCount, feed } = await loadFeedBundle(config);
  const demo = isDemoMode(config);
 
  let planes = {
@@ -191,7 +205,6 @@ export async function buildStatus(config) {
  edge: { ok: true, armed: false, ...demoP.edge },
  audit: { ok: true, armed: false, ...demoP.audit },
  };
- feed = mergeEventStreams(feed, demoFeed()).slice(0, 150);
  }
 
  return {
@@ -343,9 +356,9 @@ export function startHub(config = loadConfig()) {
  }
 
  if (url.pathname === '/api/feed' && req.method === 'GET') {
- const limit = parseInt(url.searchParams.get('limit') || '100', 10);
- const status = await buildStatus(config);
- return json(res, 200, { ok: true, feed: status.feed.slice(0, limit) });
+ const limit = clampFeedLimit(url.searchParams.get('limit'), 100);
+ const { feed } = await loadFeedBundle(config);
+ return json(res, 200, { ok: true, feed: feed.slice(0, limit) });
  }
 
  if (url.pathname === '/api/ghost-lan' && req.method === 'GET') {
