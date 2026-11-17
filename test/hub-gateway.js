@@ -27,6 +27,9 @@ globalThis.fetch = async (url, init = {}) => {
     cookie: headers.get('Cookie'),
     lastEventId: headers.get('Last-Event-ID'),
     xff: headers.get('X-Forwarded-For'),
+    accessId: headers.get('CF-Access-Client-Id'),
+    accessSecret: headers.get('CF-Access-Client-Secret'),
+    accessJwt: headers.get('Cf-Access-Jwt-Assertion'),
   });
   if (String(url).includes('/api/events/stream')) {
     const encoder = new TextEncoder();
@@ -414,6 +417,107 @@ try {
     assert.strictEqual(new TextDecoder().decode(first.value), 'event: connected\ndata: {"ok":true}\n\n');
     await reader.cancel();
     console.log('  GET /api/events/stream forwards a bearer as an unbuffered stream');
+  }
+
+  const accessEnv = {
+    ...env,
+    CF_ACCESS_CLIENT_ID: 'gateway-access-id',
+    CF_ACCESS_CLIENT_SECRET: 'gateway-access-secret',
+  };
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: {
+          'CF-Access-Client-Id': 'gateway-access-id',
+          'CF-Access-Client-Secret': 'gateway-access-secret',
+          Cookie: `gc-hub-token=${TOKEN}`,
+        },
+      }),
+      accessEnv,
+    );
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    const body = await res.text();
+    assert.ok(!body.includes('gateway-access-secret'));
+    console.log('  an Access client pair without a bearer is 401 and is not forwarded');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          'CF-Access-Client-Id': 'caller-access-id',
+          'CF-Access-Client-Secret': 'caller-access-secret',
+          'Cf-Access-Jwt-Assertion': 'caller-jwt',
+        },
+      }),
+      accessEnv,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].authorization, `Bearer ${TOKEN}`);
+    assert.strictEqual(calls[0].accessId, 'gateway-access-id');
+    assert.strictEqual(calls[0].accessSecret, 'gateway-access-secret');
+    assert.strictEqual(calls[0].accessJwt, null);
+    const body = await res.text();
+    assert.ok(!body.includes('gateway-access-secret'));
+    console.log('  a valid bearer forwards the configured Access client, not the caller pair');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/taxii2/`, { method: 'GET' }),
+      accessEnv,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].authorization, null);
+    assert.strictEqual(calls[0].accessId, 'gateway-access-id');
+    assert.strictEqual(calls[0].accessSecret, 'gateway-access-secret');
+    console.log('  GET /taxii2/ still forwards, and includes the configured Access client');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      }),
+      { ...env, CF_ACCESS_CLIENT_ID: 'gateway-access-id' },
+    );
+    assert.strictEqual(res.status, 503);
+    assert.strictEqual(calls.length, 0);
+    const body = await res.json();
+    assert.strictEqual(body.error, 'access client not configured');
+    console.log('  a partial Access client is 503 and is not forwarded');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          'CF-Access-Client-Id': 'caller-access-id',
+          'CF-Access-Client-Secret': 'caller-access-secret',
+        },
+      }),
+      env,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].accessId, null);
+    assert.strictEqual(calls[0].accessSecret, null);
+    console.log('  caller Access headers are dropped when no client is configured');
   }
 
   console.log('hub-gateway: OK');

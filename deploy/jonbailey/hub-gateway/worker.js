@@ -8,6 +8,10 @@
  * without that bearer. Backup paths and any download path are never in that set.
  * GET /api/events/stream needs the same bearer. Its upstream body is returned
  * unread so the event stream is not buffered here.
+ *
+ * When both CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET are set, the
+ * forward adds those Access headers. Caller-supplied copies are removed.
+ * One secret without the other is refused before the hub is contacted.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
@@ -69,10 +73,25 @@ function constantTimeEqual(a, b) {
   return diff === 0;
 }
 
-function forwardHeaders(request) {
+function accessClient(env) {
+  const id = String((env && env.CF_ACCESS_CLIENT_ID) || '').trim();
+  const secret = String((env && env.CF_ACCESS_CLIENT_SECRET) || '').trim();
+  if (!id && !secret) return { ready: true, id: '', secret: '' };
+  if (!id || !secret) return { ready: false, id: '', secret: '' };
+  return { ready: true, id, secret };
+}
+
+function forwardHeaders(request, access) {
   const headers = new Headers(request.headers);
   headers.delete('Cookie');
   headers.delete('X-Forwarded-For');
+  headers.delete('CF-Access-Client-Id');
+  headers.delete('CF-Access-Client-Secret');
+  headers.delete('Cf-Access-Jwt-Assertion');
+  if (access && access.id && access.secret) {
+    headers.set('CF-Access-Client-Id', access.id);
+    headers.set('CF-Access-Client-Secret', access.secret);
+  }
   const ip = (request.headers.get('CF-Connecting-IP') || '').trim();
   if (ip) headers.set('X-Forwarded-For', ip);
   return headers;
@@ -128,8 +147,13 @@ export default {
       }
     }
 
+    const access = accessClient(env);
+    if (!access.ready) {
+      return jsonResponse(503, { ok: false, error: 'access client not configured' }, origin, env);
+    }
+
     const target = new URL(url.pathname + url.search, hubOrigin.replace(/\/$/, ''));
-    const headers = forwardHeaders(request);
+    const headers = forwardHeaders(request, access);
 
     const upstream = await fetch(target.toString(), {
       method: request.method,

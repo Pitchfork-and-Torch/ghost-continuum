@@ -13,5 +13,8 @@ compatibility_date = "2024-09-01"
 
 [vars]
 ALLOWED_ORIGIN = "https://ghost.jonbailey.xyz"
-# Set via wrangler secret: HUB_ORIGIN = https://<tunnel-id>.cfargotunnel.com
-# Set via wrangler secret: HUB_TOKEN = <same as GC_HUB_TOKEN on local hub>
+# Set via wrangler secret: HUB_ORIGIN
+# Set via wrangler secret: HUB_TOKEN
+# Set via wrangler secret when the hub is behind Access:
+# CF_ACCESS_CLIENT_ID
+# CF_ACCESS_CLIENT_SECRET
