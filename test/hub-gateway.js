@@ -25,8 +25,29 @@ globalThis.fetch = async (url, init = {}) => {
     method: init.method,
     authorization: headers.get('Authorization'),
     cookie: headers.get('Cookie'),
+    lastEventId: headers.get('Last-Event-ID'),
     xff: headers.get('X-Forwarded-For'),
   });
+  if (String(url).includes('/api/events/stream')) {
+    const encoder = new TextEncoder();
+    let pulls = 0;
+    const stream = new ReadableStream({
+      pull(controller) {
+        pulls += 1;
+        if (pulls === 1) {
+          controller.enqueue(encoder.encode('event: connected\ndata: {"ok":true}\n\n'));
+        }
+      },
+    });
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Content-Length': '128',
+        'X-Upstream': 'yes',
+      },
+    });
+  }
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'X-Upstream': 'yes' },
@@ -171,7 +192,7 @@ try {
     assert.strictEqual(res.status, 204);
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
     assert.strictEqual(res.headers.get('Access-Control-Allow-Methods'), 'GET, POST, OPTIONS');
-    assert.strictEqual(res.headers.get('Access-Control-Allow-Headers'), 'Content-Type, Authorization');
+    assert.strictEqual(res.headers.get('Access-Control-Allow-Headers'), 'Content-Type, Authorization, Last-Event-ID');
     assert.strictEqual(calls.length, 0);
     console.log('  OPTIONS keeps ALLOWED_ORIGIN CORS and is not forwarded');
   }
@@ -320,6 +341,62 @@ try {
     assert.strictEqual(res.status, 404);
     assert.strictEqual(calls.length, 0);
     console.log('  unknown paths stay 404');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/events/stream`, {
+        method: 'GET',
+        headers: { Cookie: `gc-hub-token=${TOKEN}`, Origin: ORIGIN },
+      }),
+      env,
+    );
+    assert.strictEqual(res.status, 401);
+    assert.strictEqual(calls.length, 0);
+    console.log('  GET /api/events/stream without a bearer is 401 and is not forwarded');
+  }
+
+  {
+    resetCalls();
+    const pending = worker.fetch(
+      new Request(`${ORIGIN}/api/events/stream`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          Origin: ORIGIN,
+          Cookie: `gc-hub-token=${TOKEN}`,
+          'Last-Event-ID': '42',
+        },
+      }),
+      env,
+    );
+    const res = await Promise.race([
+      pending,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('gateway buffered the stream')), 1000)),
+    ]);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].method, 'GET');
+    assert.strictEqual(calls[0].url, `${HUB}/api/events/stream`);
+    assert.strictEqual(calls[0].authorization, `Bearer ${TOKEN}`);
+    assert.strictEqual(calls[0].cookie, null);
+    assert.strictEqual(calls[0].lastEventId, '42');
+    assert.strictEqual(res.headers.get('Content-Length'), null);
+    assert.ok(String(res.headers.get('Content-Type') || '').includes('text/event-stream'));
+    assert.ok(String(res.headers.get('Cache-Control') || '').includes('no-cache'));
+    assert.ok(String(res.headers.get('Cache-Control') || '').includes('no-transform'));
+    assert.strictEqual(res.headers.get('X-Accel-Buffering'), 'no');
+    assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+    const reader = res.body.getReader();
+    const first = await Promise.race([
+      reader.read(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('stream did not yield')), 1000)),
+    ]);
+    assert.strictEqual(first.done, false);
+    assert.strictEqual(new TextDecoder().decode(first.value), 'event: connected\ndata: {"ok":true}\n\n');
+    await reader.cancel();
+    console.log('  GET /api/events/stream forwards a bearer as an unbuffered stream');
   }
 
   console.log('hub-gateway: OK');
