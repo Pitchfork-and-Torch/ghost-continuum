@@ -212,13 +212,28 @@ function loopbackPeer(addr) {
   return false;
 }
 
+function headerValue(headers, name) {
+  if (!headers) return '';
+  const direct = headers[name] ?? headers[name.toLowerCase()];
+  if (direct) return String(direct);
+  const want = name.toLowerCase();
+  for (const [key, value] of Object.entries(headers)) {
+    if (String(key).toLowerCase() === want && value) return String(value);
+  }
+  return '';
+}
+
 export function clientIp(req) {
   const peer = req.socket?.remoteAddress || '';
   const headers = req.headers || {};
-  const xff = headers['x-forwarded-for'] || headers['X-Forwarded-For'];
-  if (xff && loopbackPeer(peer)) {
-    const first = String(xff).split(',')[0].trim();
-    if (first) return first;
+  if (loopbackPeer(peer)) {
+    const cf = headerValue(headers, 'cf-connecting-ip').split(',')[0].trim();
+    if (cf) return cf;
+    const xff = headerValue(headers, 'x-forwarded-for');
+    if (xff) {
+      const first = String(xff).split(',')[0].trim();
+      if (first) return first;
+    }
   }
   return peer || 'unknown';
 }
@@ -229,18 +244,15 @@ const rlBuckets = new Map();
 const RL_MAX_BUCKETS = 10_000;
 
 function evictOldestBucket() {
-  let oldestKey = null;
-  let oldestSeen = Infinity;
-  for (const [key, bucket] of rlBuckets) {
-    const seen = Number.isFinite(bucket.seen) ? bucket.seen : bucket.start;
-    if (seen < oldestSeen) {
-      oldestSeen = seen;
-      oldestKey = key;
-    }
-  }
+  const oldestKey = rlBuckets.keys().next().value;
   if (oldestKey == null) return false;
   rlBuckets.delete(oldestKey);
   return true;
+}
+
+function rememberBucket(ip, bucket) {
+  if (rlBuckets.has(ip)) rlBuckets.delete(ip);
+  rlBuckets.set(ip, bucket);
 }
 
 export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() } = {}) {
@@ -256,11 +268,13 @@ export function rateLimit(req, { windowMs = 10_000, max = 60, now = Date.now() }
         }
       }
     }
-    rlBuckets.set(ip, { start: now, count: 1, seen: now });
+    rememberBucket(ip, { start: now, count: 1, seen: now });
     return { ok: true, remaining: max - 1, retryAfterMs: 0 };
   }
 
   bucket.count += 1;
+  bucket.seen = now;
+  rememberBucket(ip, bucket);
   if (bucket.count > max) {
     return { ok: false, remaining: 0, retryAfterMs: bucket.start + windowMs - now };
   }

@@ -58,6 +58,41 @@ assert.strictEqual(
   '203.0.113.5',
   'clientIp honours x-forwarded-for only from loopback',
 );
+assert.strictEqual(
+  clientIp({
+    headers: {
+      'cf-connecting-ip': '203.0.113.50',
+      'x-forwarded-for': '198.51.100.8',
+    },
+    socket: { remoteAddress: '127.0.0.1' },
+  }),
+  '203.0.113.50',
+  'loopback prefers cf-connecting-ip over x-forwarded-for',
+);
+assert.strictEqual(
+  clientIp({
+    headers: {
+      'CF-Connecting-IP': '203.0.113.50',
+      'x-forwarded-for': '198.51.100.8',
+    },
+    socket: { remoteAddress: '198.51.100.7' },
+  }),
+  '198.51.100.7',
+  'a non-loopback peer keeps its own address',
+);
+resetRateLimits();
+const lruNow = 8_000_000;
+assert.ok(rateLimit(req('idle'), { windowMs: 60_000, max: 2, now: lruNow }).ok);
+assert.ok(rateLimit(req('hot'), { windowMs: 60_000, max: 2, now: lruNow }).ok);
+assert.ok(rateLimit(req('hot'), { windowMs: 60_000, max: 2, now: lruNow }).ok);
+assert.ok(!rateLimit(req('hot'), { windowMs: 60_000, max: 2, now: lruNow }).ok);
+for (let i = 0; i < 9998; i++) {
+  rateLimit(req('fill-' + i), { windowMs: 60_000, max: 2, now: lruNow });
+}
+rateLimit(req('spill'), { windowMs: 60_000, max: 2, now: lruNow });
+assert.ok(!rateLimit(req('hot'), { windowMs: 60_000, max: 2, now: lruNow }).ok, 'a touched key stays at the recent end');
+assert.ok(rateLimit(req('idle'), { windowMs: 60_000, max: 2, now: lruNow }).ok, 'oldest untouched key is evicted');
+resetRateLimits();
 assert.ok(rateLimit(req('9.9.9.9'), { max: 0 }).ok, 'max<=0 disables limiting');
 console.log('  ✓ clientIp + disable path');
 
