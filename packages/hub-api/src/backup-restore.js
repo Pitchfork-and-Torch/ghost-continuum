@@ -12,6 +12,7 @@ import { HOME_PATH, loadHome, saveHome } from './home-shield.js';
 import { DEVICES_PATH, listDevices } from './device-inventory.js';
 import { PROGRESS_PATH } from './progression.js';
 import { POOL_PATH, loadPool, savePool } from '../../genome/src/pool.js';
+import { isSafeWorldId } from '../../narrative/src/echo.js';
 
 export const BACKUP_DIR = path.join(GC_DIR, 'backups');
 
@@ -108,8 +109,6 @@ function isPlainObject(value) {
 const RESTORE_SPEC = {
   demoMode: true,
   useBuiltinValidator: true,
-  blockExploitOperators: true,
-  defensiveOperators: true,
   cloudflareWorkerName: true,
   continuum: {
     morph: true,
@@ -127,7 +126,6 @@ const RESTORE_SPEC = {
       deepVeil: true,
       mirageCore: true,
       trenchCloak: true,
-      trenchAutoStart: true,
       trenchRouteTools: true,
       trenchPollMs: true,
     },
@@ -209,6 +207,7 @@ function applyRestoreSpec(spec, uploaded, current) {
     if (neverRestoreKey(key)) continue;
     if (!Object.prototype.hasOwnProperty.call(uploaded, key)) continue;
     if (child === true) {
+      if (key === 'worldId' && !isSafeWorldId(uploaded[key])) continue;
       next[key] = uploaded[key];
     } else if (isPlainObject(child) && isPlainObject(uploaded[key])) {
       next[key] = applyRestoreSpec(child, uploaded[key], next[key]);

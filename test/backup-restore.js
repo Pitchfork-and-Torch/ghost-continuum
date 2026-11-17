@@ -32,6 +32,8 @@ const current = {
   cellPort: 3333,
   marker: 'current',
   demoMode: false,
+  blockExploitOperators: true,
+  defensiveOperators: ['recon', 'scanner', 'analyst'],
   edgeStatusUrl: 'https://edge-status.example/status',
   edgeStatusKey: 'edge-key-sentinel',
   tripwireUrl: 'https://trip.example/hook',
@@ -48,7 +50,7 @@ const current = {
   continuum: {
     morph: 'research',
     plugins: ['keep-plugin.js'],
-    planes: { mirageCore: false, mirageImage: 'alpine:3.19', phantomMesh: false },
+    planes: { mirageCore: false, mirageImage: 'alpine:3.19', phantomMesh: false, trenchAutoStart: false },
     narrative: { enabled: false, worldId: 'keep-world' },
   },
   narrative: {
@@ -74,6 +76,8 @@ const uploaded = {
   listenHost: '0.0.0.0',
   marker: 'uploaded',
   demoMode: true,
+  blockExploitOperators: false,
+  defensiveOperators: ['exploit'],
   edgeStatusUrl: 'https://uploaded.example/status',
   edgeStatusKey: 'edge-key-uploaded',
   tripwireUrl: 'https://uploaded.example/trip',
@@ -95,6 +99,7 @@ const uploaded = {
       mirageCore: true,
       mirageImage: 'uploaded:latest',
       phantomMesh: true,
+      trenchAutoStart: true,
       trenchEntryHost: '10.1.2.3',
     },
     narrative: { enabled: true, worldId: 'uploaded-world', llmEndpoint: 'http://uploaded.example' },
@@ -201,6 +206,9 @@ try {
   assert.strictEqual(saved.continuum.planes.mirageCore, true);
   assert.strictEqual(saved.continuum.planes.phantomMesh, true);
   assert.strictEqual(saved.continuum.planes.trenchEntryHost, undefined);
+  assert.strictEqual(saved.blockExploitOperators, true);
+  assert.deepStrictEqual(saved.defensiveOperators, ['recon', 'scanner', 'analyst']);
+  assert.strictEqual(saved.continuum.planes.trenchAutoStart, false);
   assert.strictEqual(saved.continuum.narrative.worldId, 'uploaded-world');
   assert.strictEqual(saved.narrative.llmEndpoint, 'http://127.0.0.1:11434');
   assert.strictEqual(saved.narrative.llmModel, 'uploaded-model');
@@ -214,6 +222,27 @@ try {
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'bindHost'));
   assert.ok(!Object.prototype.hasOwnProperty.call(saved, 'listenHost'));
   console.log('  restore copies listed keys and keeps endpoints, plugins, and credentials');
+
+  writeConfig(current);
+  for (const worldId of ['../etc/passwd', '..', 'lab..alpha', 'a/b', 'has space', 'x'.repeat(65), '']) {
+    const hostile = structuredClone(uploaded);
+    hostile.continuum.narrative.worldId = worldId;
+    hostile.demoMode = true;
+    const kept = restoreBackup({ bundle: bundle(hostile) });
+    assert.strictEqual(kept.ok, true, worldId || 'empty');
+    const after = readConfig();
+    assert.strictEqual(after.continuum.narrative.worldId, 'keep-world', worldId || 'empty');
+    assert.strictEqual(after.demoMode, true, worldId || 'empty');
+    if (worldId) {
+      assert.ok(!fs.readFileSync(CONFIG_PATH, 'utf8').includes(worldId), worldId);
+    }
+  }
+  const accepted = structuredClone(uploaded);
+  accepted.continuum.narrative.worldId = 'lab.alpha_1';
+  const took = restoreBackup({ bundle: bundle(accepted) });
+  assert.strictEqual(took.ok, true);
+  assert.strictEqual(readConfig().continuum.narrative.worldId, 'lab.alpha_1');
+  console.log('  restore keeps the current world id when the upload is not a safe id');
 
   writeConfig(current);
   const made = createBackup({ includeEvents: false });
