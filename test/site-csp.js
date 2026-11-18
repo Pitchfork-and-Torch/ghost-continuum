@@ -35,6 +35,7 @@ function has(name, token) {
 assert.deepStrictEqual(directives['default-src'], ["'self'"]);
 assert.ok(has('script-src', "'self'"));
 assert.ok(has('script-src', 'https://hits.jonbailey.xyz'));
+assert.ok(has('script-src', 'https://static.cloudflareinsights.com'));
 assert.ok(!has('script-src', "'unsafe-inline'"), 'script-src must not allow unsafe-inline');
 assert.ok(!has('script-src', "'unsafe-eval'"));
 assert.deepStrictEqual(directives['script-src-attr'], ["'none'"]);
@@ -44,6 +45,7 @@ assert.deepStrictEqual(directives['font-src'], ["'self'"]);
 assert.deepStrictEqual(directives['img-src'], ["'self'", 'data:']);
 assert.ok(has('connect-src', "'self'"));
 assert.ok(has('connect-src', 'https://hits.jonbailey.xyz'));
+assert.ok(has('connect-src', 'https://cloudflareinsights.com'));
 assert.deepStrictEqual(directives['object-src'], ["'none'"]);
 assert.deepStrictEqual(directives['base-uri'], ["'self'"]);
 assert.deepStrictEqual(directives['frame-ancestors'], ["'none'"]);
@@ -60,7 +62,6 @@ const bannedHosts = [
   'ads-twitter.com',
   't.co',
   'x.com',
-  'cloudflareinsights.com',
 ];
 for (const host of bannedHosts) {
   assert.ok(!csp.includes(host), `CSP must not allow ${host}`);
