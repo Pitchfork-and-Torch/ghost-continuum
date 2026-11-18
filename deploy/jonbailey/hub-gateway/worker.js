@@ -16,6 +16,9 @@
  *
  * Proxied responses drop every Set-Cookie, every cf-access-* header, and hop-by-hop headers.
  * Responses built in this worker never set a cookie.
+ * Every response sets HSTS without preload, nosniff, DENY, a locked CSP,
+ * no-referrer, and Cache-Control no-store. The event stream adds no-transform
+ * and returns the upstream body unread.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
@@ -61,21 +64,37 @@ function applyHeaderMap(headers, map) {
   }
 }
 
+const SECURITY_HEADERS = {
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+  'Referrer-Policy': 'no-referrer',
+};
+
+function applySecurityHeaders(headers, cacheControl = 'no-store') {
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    headers.set(key, value);
+  }
+  headers.set('Cache-Control', cacheControl);
+  return headers;
+}
+
 function jsonResponse(status, body, origin, env) {
   const headers = new Headers({
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-store',
   });
   applyHeaderMap(headers, corsHeaders(origin, env));
+  applySecurityHeaders(headers);
   return new Response(JSON.stringify(body), { status, headers });
 }
 
 function staticDiscoveryResponse(request, origin, env) {
   const headers = new Headers({
     'Content-Type': 'application/taxii+json;version=2.1',
-    'Cache-Control': 'no-store',
   });
   applyHeaderMap(headers, corsHeaders(origin, env));
+  applySecurityHeaders(headers);
   if (request.method === 'HEAD') {
     return new Response(null, { status: 200, headers });
   }
@@ -172,10 +191,10 @@ function eventStreamResponse(upstream, origin, env) {
   if (!type.toLowerCase().includes('text/event-stream')) {
     headers.set('Content-Type', 'text/event-stream');
   }
-  headers.set('Cache-Control', 'no-cache, no-transform');
   headers.set('X-Accel-Buffering', 'no');
   headers.delete('Content-Length');
   headers.delete('Content-Encoding');
+  applySecurityHeaders(headers, 'no-store, no-transform');
   return new Response(upstream.body, { status: upstream.status, headers });
 }
 
@@ -187,11 +206,14 @@ export default {
     if (request.method === 'OPTIONS') {
       const headers = new Headers();
       applyHeaderMap(headers, corsHeaders(origin, env));
+      applySecurityHeaders(headers);
       return new Response(null, { status: 204, headers });
     }
 
     if (!ALLOWED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
-      return new Response('Not found', { status: 404 });
+      const headers = new Headers({ 'Content-Type': 'text/plain; charset=utf-8' });
+      applySecurityHeaders(headers);
+      return new Response('Not found', { status: 404, headers });
     }
 
     if (isStaticDiscovery(request.method, url.pathname)) {
@@ -230,7 +252,7 @@ export default {
 
     const resHeaders = filteredResponseHeaders(upstream.headers);
     applyHeaderMap(resHeaders, corsHeaders(origin, env));
-    resHeaders.set('Cache-Control', 'no-store');
+    applySecurityHeaders(resHeaders);
     return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
   },
 };

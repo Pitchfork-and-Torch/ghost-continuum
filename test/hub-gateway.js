@@ -105,6 +105,26 @@ function assertNoLeak(res, label) {
   }
 }
 
+function assertSecurityHeaders(res, label) {
+  assert.strictEqual(
+    res.headers.get('Strict-Transport-Security'),
+    'max-age=31536000; includeSubDomains',
+    label,
+  );
+  assert.ok(!/preload/i.test(res.headers.get('Strict-Transport-Security') || ''), `${label} preload`);
+  assert.strictEqual(res.headers.get('X-Content-Type-Options'), 'nosniff', label);
+  assert.strictEqual(res.headers.get('X-Frame-Options'), 'DENY', label);
+  assert.strictEqual(
+    res.headers.get('Content-Security-Policy'),
+    "default-src 'none'; frame-ancestors 'none'",
+    label,
+  );
+  assert.strictEqual(res.headers.get('Referrer-Policy'), 'no-referrer', label);
+  const cache = res.headers.get('Cache-Control') || '';
+  assert.ok(/(^|,\s*)no-store($|,)/.test(cache), `${label} cache=${cache}`);
+  assertNoLeak(res, label);
+}
+
 try {
   {
     resetCalls();
@@ -464,7 +484,7 @@ try {
     assert.strictEqual(calls[0].lastEventId, '42');
     assert.strictEqual(res.headers.get('Content-Length'), null);
     assert.ok(String(res.headers.get('Content-Type') || '').includes('text/event-stream'));
-    assert.ok(String(res.headers.get('Cache-Control') || '').includes('no-cache'));
+    assert.ok(String(res.headers.get('Cache-Control') || '').includes('no-store'));
     assert.ok(String(res.headers.get('Cache-Control') || '').includes('no-transform'));
     assert.strictEqual(res.headers.get('X-Accel-Buffering'), 'no');
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
@@ -705,6 +725,118 @@ try {
     assert.strictEqual(calls.length, 0);
     assertNoLeak(res, '404');
     console.log('  worker 404 has no Set-Cookie');
+  }
+
+  {
+    resetCalls();
+    const cases = [
+      {
+        label: 'OPTIONS',
+        request: new Request(`${ORIGIN}/api/status`, { method: 'OPTIONS', headers: { Origin: ORIGIN } }),
+        env,
+        status: 204,
+        fetches: 0,
+      },
+      {
+        label: 'OPTIONS without CORS origin',
+        request: new Request(`${ORIGIN}/api/status`, { method: 'OPTIONS' }),
+        env,
+        status: 204,
+        fetches: 0,
+      },
+      {
+        label: '404',
+        request: new Request(`${ORIGIN}/nope`),
+        env,
+        status: 404,
+        fetches: 0,
+      },
+      {
+        label: '401 missing bearer',
+        request: new Request(`${ORIGIN}/api/status`),
+        env,
+        status: 401,
+        fetches: 0,
+      },
+      {
+        label: '401 wrong bearer',
+        request: new Request(`${ORIGIN}/api/status`, { headers: { Authorization: 'Bearer wrong-token' } }),
+        env,
+        status: 401,
+        fetches: 0,
+      },
+      {
+        label: '503 missing HUB_TOKEN',
+        request: new Request(`${ORIGIN}/api/status`, { headers: { Authorization: `Bearer ${TOKEN}` } }),
+        env: { HUB_ORIGIN: HUB, ALLOWED_ORIGIN: ORIGIN },
+        status: 503,
+        fetches: 0,
+      },
+      {
+        label: '503 missing HUB_ORIGIN',
+        request: new Request(`${ORIGIN}/api/status`, { headers: { Authorization: `Bearer ${TOKEN}` } }),
+        env: { HUB_TOKEN: TOKEN, ALLOWED_ORIGIN: ORIGIN },
+        status: 503,
+        fetches: 0,
+      },
+      {
+        label: '503 partial access client',
+        request: new Request(`${ORIGIN}/api/status`, { headers: { Authorization: `Bearer ${TOKEN}` } }),
+        env: { ...env, CF_ACCESS_CLIENT_ID: 'only-id' },
+        status: 503,
+        fetches: 0,
+      },
+      {
+        label: 'static GET /taxii2/',
+        request: new Request(`${ORIGIN}/taxii2/`, { headers: { Origin: ORIGIN } }),
+        env,
+        status: 200,
+        fetches: 0,
+      },
+      {
+        label: 'static HEAD /taxii2/',
+        request: new Request(`${ORIGIN}/taxii2/`, { method: 'HEAD' }),
+        env,
+        status: 200,
+        fetches: 0,
+      },
+      {
+        label: 'authenticated JSON',
+        request: new Request(`${ORIGIN}/api/status`, {
+          headers: { Authorization: `Bearer ${TOKEN}`, Origin: ORIGIN, Cookie: 'session=abc' },
+        }),
+        env,
+        status: 200,
+        fetches: 1,
+      },
+    ];
+    for (const item of cases) {
+      resetCalls();
+      const res = await worker.fetch(item.request, item.env);
+      assert.strictEqual(res.status, item.status, item.label);
+      assert.strictEqual(calls.length, item.fetches, item.label);
+      assertSecurityHeaders(res, item.label);
+    }
+
+    resetCalls();
+    upstreamExtra = LEAK_HEADERS.map((pair) => pair.slice());
+    const streamRes = await worker.fetch(
+      new Request(`${ORIGIN}/api/events/stream`, {
+        headers: { Authorization: `Bearer ${TOKEN}`, Origin: ORIGIN, Cookie: 'session=abc' },
+      }),
+      env,
+    );
+    assert.strictEqual(streamRes.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(calls[0].cookie, null);
+    assertSecurityHeaders(streamRes, 'event stream');
+    assert.ok(String(streamRes.headers.get('Cache-Control')).includes('no-transform'));
+    assert.strictEqual(streamRes.headers.get('X-Accel-Buffering'), 'no');
+    const reader = streamRes.body.getReader();
+    const first = await reader.read();
+    assert.strictEqual(new TextDecoder().decode(first.value), 'event: connected\ndata: {"ok":true}\n\n');
+    await reader.cancel();
+    console.log('  security headers are on every gateway response type');
   }
 
   console.log('hub-gateway: OK');
