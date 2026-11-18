@@ -1,0 +1,4 @@
+Contact: mailto:info@jonbailey.xyz
+Expires: 2027-11-17T00:00:00Z
+Preferred-Languages: en
+Canonical: https://ghost.jonbailey.xyz/.well-known/security.txt

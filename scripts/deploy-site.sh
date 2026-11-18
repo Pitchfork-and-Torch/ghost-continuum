@@ -42,7 +42,12 @@ for f in llms.txt robots.txt sitemap.xml; do
   elif [ -f "$SEO/$f" ]; then cp "$SEO/$f" "$SITE/$f"; fi
 done
 
-[ -d "$L/.well-known" ] && { mkdir -p "$SITE/.well-known"; cp -r "$L/.well-known/." "$SITE/.well-known/"; }
+# IndexNow /.well-known from landing, then site-seo well-known (security.txt).
+if [ -d "$L/.well-known" ] || [ -d "$SEO/.well-known" ]; then
+  mkdir -p "$SITE/.well-known"
+fi
+[ -d "$L/.well-known" ] && cp -r "$L/.well-known/." "$SITE/.well-known/"
+[ -d "$SEO/.well-known" ] && cp -r "$SEO/.well-known/." "$SITE/.well-known/"
 [ -f "$SEO/_headers" ] && cp "$SEO/_headers" "$SITE/_headers"
 if [ -f "$L/_redirects" ]; then cp "$L/_redirects" "$SITE/_redirects";
 elif [ -f "$SEO/_redirects" ]; then cp "$SEO/_redirects" "$SITE/_redirects"; fi

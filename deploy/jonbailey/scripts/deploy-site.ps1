@@ -62,12 +62,18 @@ foreach ($seoName in @("llms.txt", "robots.txt", "sitemap.xml")) {
   }
 }
 
-# IndexNow /.well-known alternate (Bing/IndexNow)
-$wellKnown = Join-Path $LandingDir ".well-known"
-if (Test-Path $wellKnown) {
-  $wkOut = Join-Path $Site ".well-known"
+# IndexNow /.well-known from landing, then site-seo well-known (security.txt).
+$wkOut = Join-Path $Site ".well-known"
+$landingWellKnown = Join-Path $LandingDir ".well-known"
+$seoWellKnown = Join-Path $seo ".well-known"
+if ((Test-Path $landingWellKnown) -or (Test-Path $seoWellKnown)) {
   New-Item -ItemType Directory -Path $wkOut -Force | Out-Null
-  Copy-Item (Join-Path $wellKnown "*") $wkOut -Force -ErrorAction SilentlyContinue
+}
+if (Test-Path $landingWellKnown) {
+  Copy-Item (Join-Path $landingWellKnown "*") $wkOut -Force -ErrorAction SilentlyContinue
+}
+if (Test-Path $seoWellKnown) {
+  Copy-Item (Join-Path $seoWellKnown "*") $wkOut -Force
 }
 
 # Headers always from site-seo (CSP / cache)

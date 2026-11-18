@@ -68,9 +68,10 @@ for (const host of bannedHosts) {
 }
 
 assert.ok(
-  headers.includes('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload'),
-  'site HSTS preload line stays as-is',
+  headers.includes('Strict-Transport-Security: max-age=31536000; includeSubDomains'),
+  'site HSTS is one year with includeSubDomains',
 );
+assert.ok(!/\bpreload\b/.test(headers), 'site HSTS must not include preload');
 assert.ok(headers.includes('X-Frame-Options: SAMEORIGIN'));
 assert.ok(headers.includes('X-Content-Type-Options: nosniff'));
 assert.ok(headers.includes('Referrer-Policy: strict-origin-when-cross-origin'));
@@ -86,12 +87,32 @@ assert.ok(/<style[\s>]/i.test(notFound), '404 page keeps its own styles');
 assert.ok(notFound.includes('href="/"'));
 assert.ok(notFound.includes('href="/hub/"'));
 
+const securityTxt = read('deploy/jonbailey/site-seo/.well-known/security.txt').replace(/^\uFEFF/, '');
+const securityLines = securityTxt.trim().split(/\r?\n/);
+assert.deepStrictEqual(securityLines, [
+  'Contact: mailto:info@jonbailey.xyz',
+  'Expires: 2027-11-17T00:00:00Z',
+  'Preferred-Languages: en',
+  'Canonical: https://ghost.jonbailey.xyz/.well-known/security.txt',
+]);
+assert.ok(
+  /\/\.well-known\/security\.txt\r?\n(?:[ \t]+[^\n]+\r?\n)*?[ \t]+Content-Type: text\/plain; charset=utf-8/.test(headers),
+  'security.txt must be served as text/plain',
+);
+
+for (const rel of ['deploy/jonbailey/site-seo/_redirects', 'landing/_redirects']) {
+  const redirects = read(rel);
+  assert.ok(!/security\.txt/.test(redirects), `${rel} must not rewrite security.txt`);
+  assert.ok(!/^\/\*/m.test(redirects), `${rel} must not splat-rewrite unknown paths`);
+}
+
 for (const rel of [
   'deploy/jonbailey/scripts/deploy-site.ps1',
   'scripts/deploy-site.sh',
 ]) {
   const text = read(rel);
   assert.ok(text.includes('404.html'), `${rel} must copy 404.html into the Pages output`);
+  assert.ok(text.includes('site-seo well-known'), `${rel} must copy site-seo well-known into the Pages output`);
 }
 
 function walk(dir, out) {
