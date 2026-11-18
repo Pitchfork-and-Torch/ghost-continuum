@@ -48,6 +48,7 @@ const DEFAULT_FILES = [
   'test/holo-canvas.js',
   'test/air-gap-map.js',
   'test/version-lockstep.js',
+  'test/site-csp.js',
 ];
 
 const files = process.argv.slice(2);

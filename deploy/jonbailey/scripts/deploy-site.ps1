@@ -118,6 +118,12 @@ $versionFile = Join-Path $LandingDir "VERSION"
 if (Test-Path $versionFile) {
   Copy-Item $versionFile (Join-Path $Site "VERSION") -Force
 }
+# A top-level 404.html turns off Pages SPA fallback (unknown paths were index.html / 200).
+$notFound = Join-Path $LandingDir "404.html"
+if (-not (Test-Path $notFound)) {
+  throw "Missing landing/404.html. Without it, Pages serves index.html for unknown paths."
+}
+Copy-Item $notFound (Join-Path $Site "404.html") -Force
 $panel = Join-Path $LandingDir "projects-panel.js"
 if (Test-Path $panel) {
   Copy-Item $panel (Join-Path $Site "projects-panel.js") -Force

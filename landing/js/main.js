@@ -203,37 +203,6 @@
     if (dockDismiss) dockDismiss.addEventListener('click', hideAll);
   }
 
-  function initTwitterPixel() {
-    var loaded = false;
-    function load() {
-      if (loaded) return;
-      loaded = true;
-      var s = window.twq;
-      if (!s) {
-        s = window.twq = function () {
-          s.exe ? s.exe.apply(s, arguments) : s.queue.push(arguments);
-        };
-        s.version = '1.1';
-        s.queue = [];
-      }
-      var u = document.createElement('script');
-      u.async = true;
-      u.src = 'https://static.ads-twitter.com/uwt.js';
-      u.onload = function () {
-        try { window.twq('config', 'rdkqt'); } catch (e) { /* */ }
-      };
-      document.head.appendChild(u);
-    }
-    var kick = function () {
-      window.removeEventListener('pointerdown', kick);
-      window.removeEventListener('keydown', kick);
-      load();
-    };
-    window.addEventListener('pointerdown', kick, { passive: true });
-    window.addEventListener('keydown', kick);
-    window.setTimeout(load, 6000);
-  }
-
   function initAmbient() {
     var btn = document.getElementById('ambient-toggle');
     if (!btn || reduced) {
@@ -322,7 +291,6 @@
     initReveals();
     initMagneticButtons();
     initStickyCta();
-    initTwitterPixel();
     initAmbient();
     initKonami();
   }

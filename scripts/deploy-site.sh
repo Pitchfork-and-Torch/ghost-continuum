@@ -75,6 +75,13 @@ if [ -f "$L/VERSION" ]; then
   cp "$L/VERSION" "$SITE/VERSION"
 fi
 
+# A top-level 404.html turns off Pages SPA fallback (unknown paths were index.html / 200).
+if [ ! -f "$L/404.html" ]; then
+  echo "Missing landing/404.html. Without it, Pages serves index.html for unknown paths." >&2
+  exit 1
+fi
+cp "$L/404.html" "$SITE/404.html"
+
 # JPEG magic ffd8ff (HTML-as-image would fail this).
 if [ -f "$L/share-card.jpg" ]; then
   sig="$(node -e "const fs=require('fs'); const b=fs.readFileSync(process.argv[1]); process.stdout.write(b.slice(0,3).toString('hex'));" "$L/share-card.jpg")"
