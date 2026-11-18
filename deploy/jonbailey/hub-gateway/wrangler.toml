@@ -6,10 +6,15 @@ name = "jonbailey-ghost-hub-api"
 main = "worker.js"
 compatibility_date = "2024-09-01"
 
-# routes = [
-#   { pattern = "ghost.jonbailey.xyz/api/*", zone_name = "jonbailey.xyz" },
-#   { pattern = "ghost.jonbailey.xyz/taxii2/*", zone_name = "jonbailey.xyz" },
-# ]
+routes = [
+  { pattern = "ghost.jonbailey.xyz/api/*", zone_name = "jonbailey.xyz" },
+  { pattern = "ghost.jonbailey.xyz/taxii2/*", zone_name = "jonbailey.xyz" },
+]
+
+# Existing workers.dev gateway stays on. Wrangler disables it when routes
+# are set and workers_dev is omitted.
+workers_dev = true
+preview_urls = true
 
 [vars]
 ALLOWED_ORIGIN = "https://ghost.jonbailey.xyz"
