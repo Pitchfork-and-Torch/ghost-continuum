@@ -2,28 +2,47 @@
  * Ghost Continuum Hub API gateway - proxies /api and /taxii2 to the local hub via Cloudflare Tunnel.
  * The dashboard is served by that hub behind this gateway. This worker does not serve the hub UI.
  *
- * OPTIONS is answered here. Every other method needs the caller's own bearer,
- * compared to HUB_TOKEN. This worker never adds HUB_TOKEN itself.
- * GET /taxii2/ is the only read forwarded
- * without that bearer. Backup paths and any download path are never in that set.
+ * OPTIONS is answered here. GET and HEAD /taxii2/ return a static TAXII discovery
+ * document and never contact the hub. Every other path needs the caller's own bearer,
+ * compared to HUB_TOKEN, before any upstream fetch. This worker never adds HUB_TOKEN itself.
+ * Backup paths and any download path are not exempt.
  * GET /api/events/stream needs the same bearer. Its upstream body is returned
  * unread so the event stream is not buffered here.
  *
  * When both CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET are set, the
- * forward adds those Access headers. Caller-supplied copies are removed.
+ * forward adds those Access headers only after the bearer passes.
+ * Caller-supplied cf-access-* headers, Cf-Access-Jwt-Assertion, and Cookie are removed.
  * One secret without the other is refused before the hub is contacted.
+ *
+ * Proxied responses drop every Set-Cookie, every cf-access-* header, and hop-by-hop headers.
+ * Responses built in this worker never set a cookie.
  */
 
 const ALLOWED_PREFIXES = ['/api/', '/taxii2/'];
-const PUBLIC_GET_PATHS = new Set(['/taxii2/']);
 
-function isPublicGet(method, pathname) {
-  if (method !== 'GET') return false;
-  const path = String(pathname || '');
-  const folded = path.toLowerCase();
-  if (folded.includes('/download/')) return false;
-  if (folded.startsWith('/api/home/backup')) return false;
-  return PUBLIC_GET_PATHS.has(path);
+const TAXII_DISCOVERY = {
+  title: 'Ghost Continuum TAXII',
+  description: 'Public TAXII 2.1 discovery. Collection reads require authorization.',
+  contact: 'defensive-only',
+  api_roots: [],
+};
+
+const TAXII_DISCOVERY_JSON = JSON.stringify(TAXII_DISCOVERY);
+
+const HOP_BY_HOP = new Set([
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+function isStaticDiscovery(method, pathname) {
+  if (method !== 'GET' && method !== 'HEAD') return false;
+  return String(pathname || '') === '/taxii2/';
 }
 
 function corsHeaders(origin, env) {
@@ -49,6 +68,18 @@ function jsonResponse(status, body, origin, env) {
   });
   applyHeaderMap(headers, corsHeaders(origin, env));
   return new Response(JSON.stringify(body), { status, headers });
+}
+
+function staticDiscoveryResponse(request, origin, env) {
+  const headers = new Headers({
+    'Content-Type': 'application/taxii+json;version=2.1',
+    'Cache-Control': 'no-store',
+  });
+  applyHeaderMap(headers, corsHeaders(origin, env));
+  if (request.method === 'HEAD') {
+    return new Response(null, { status: 200, headers });
+  }
+  return new Response(TAXII_DISCOVERY_JSON, { status: 200, headers });
 }
 
 function presentedBearer(request) {
@@ -85,9 +116,9 @@ function forwardHeaders(request, access) {
   const headers = new Headers(request.headers);
   headers.delete('Cookie');
   headers.delete('X-Forwarded-For');
-  headers.delete('CF-Access-Client-Id');
-  headers.delete('CF-Access-Client-Secret');
-  headers.delete('Cf-Access-Jwt-Assertion');
+  for (const key of [...headers.keys()]) {
+    if (String(key).toLowerCase().startsWith('cf-access-')) headers.delete(key);
+  }
   if (access && access.id && access.secret) {
     headers.set('CF-Access-Client-Id', access.id);
     headers.set('CF-Access-Client-Secret', access.secret);
@@ -97,12 +128,45 @@ function forwardHeaders(request, access) {
   return headers;
 }
 
+function connectionHeaderNames(headers) {
+  const names = new Set();
+  const raw = headers.get('connection');
+  if (!raw) return names;
+  for (const part of String(raw).split(',')) {
+    const name = part.trim().toLowerCase();
+    if (name) names.add(name);
+  }
+  return names;
+}
+
+function isBlockedResponseHeader(name, extraHop) {
+  const lower = String(name || '').toLowerCase();
+  if (!lower) return true;
+  if (lower === 'set-cookie' || lower === 'set-cookie2') return true;
+  if (lower.startsWith('cf-access-')) return true;
+  if (HOP_BY_HOP.has(lower)) return true;
+  if (extraHop && extraHop.has(lower)) return true;
+  return false;
+}
+
+function filteredResponseHeaders(source) {
+  const extraHop = connectionHeaderNames(source);
+  const out = new Headers();
+  for (const [key, value] of source.entries()) {
+    if (isBlockedResponseHeader(key, extraHop)) continue;
+    out.append(key, value);
+  }
+  out.delete('set-cookie');
+  out.delete('set-cookie2');
+  return out;
+}
+
 function isEventStream(pathname) {
   return pathname === '/api/events/stream';
 }
 
 function eventStreamResponse(upstream, origin, env) {
-  const headers = new Headers(upstream.headers);
+  const headers = filteredResponseHeaders(upstream.headers);
   applyHeaderMap(headers, corsHeaders(origin, env));
   const type = headers.get('Content-Type') || '';
   if (!type.toLowerCase().includes('text/event-stream')) {
@@ -130,21 +194,20 @@ export default {
       return new Response('Not found', { status: 404 });
     }
 
-    const hubOrigin = env.HUB_ORIGIN;
-    if (!hubOrigin) {
-      return new Response(JSON.stringify({ ok: false, error: 'HUB_ORIGIN not configured' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (isStaticDiscovery(request.method, url.pathname)) {
+      return staticDiscoveryResponse(request, origin, env);
     }
 
-    if (!isPublicGet(request.method, url.pathname)) {
-      if (!env.HUB_TOKEN) {
-        return jsonResponse(503, { ok: false, error: 'HUB_TOKEN not configured' }, origin, env);
-      }
-      if (!constantTimeEqual(presentedBearer(request), env.HUB_TOKEN)) {
-        return jsonResponse(401, { ok: false, error: 'unauthorized' }, origin, env);
-      }
+    if (!env.HUB_TOKEN) {
+      return jsonResponse(503, { ok: false, error: 'HUB_TOKEN not configured' }, origin, env);
+    }
+    if (!constantTimeEqual(presentedBearer(request), env.HUB_TOKEN)) {
+      return jsonResponse(401, { ok: false, error: 'unauthorized' }, origin, env);
+    }
+
+    const hubOrigin = env.HUB_ORIGIN;
+    if (!hubOrigin) {
+      return jsonResponse(503, { ok: false, error: 'HUB_ORIGIN not configured' }, origin, env);
     }
 
     const access = accessClient(env);
@@ -165,7 +228,7 @@ export default {
       return eventStreamResponse(upstream, origin, env);
     }
 
-    const resHeaders = new Headers(upstream.headers);
+    const resHeaders = filteredResponseHeaders(upstream.headers);
     applyHeaderMap(resHeaders, corsHeaders(origin, env));
     resHeaders.set('Cache-Control', 'no-store');
     return new Response(upstream.body, { status: upstream.status, headers: resHeaders });

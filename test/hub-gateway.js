@@ -30,7 +30,10 @@ globalThis.fetch = async (url, init = {}) => {
     accessId: headers.get('CF-Access-Client-Id'),
     accessSecret: headers.get('CF-Access-Client-Secret'),
     accessJwt: headers.get('Cf-Access-Jwt-Assertion'),
+    cfAccess: [...headers.keys()].filter((key) => key.toLowerCase().startsWith('cf-access-')).sort(),
   });
+  const extra = upstreamExtra;
+  upstreamExtra = [];
   if (String(url).includes('/api/events/stream')) {
     const encoder = new TextEncoder();
     let pulls = 0;
@@ -42,23 +45,64 @@ globalThis.fetch = async (url, init = {}) => {
         }
       },
     });
-    return new Response(stream, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Content-Length': '128',
-        'X-Upstream': 'yes',
-      },
+    const responseHeaders = new Headers({
+      'Content-Type': 'text/event-stream',
+      'Content-Length': '128',
+      'X-Upstream': 'yes',
     });
+    for (const [key, value] of extra) responseHeaders.append(key, value);
+    return new Response(stream, { status: 200, headers: responseHeaders });
   }
+  const responseHeaders = new Headers({
+    'Content-Type': 'application/json',
+    'X-Upstream': 'yes',
+  });
+  for (const [key, value] of extra) responseHeaders.append(key, value);
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json', 'X-Upstream': 'yes' },
+    headers: responseHeaders,
   });
 };
 
+let upstreamExtra = [];
+
+const LEAK_HEADERS = [
+  ['Set-Cookie', 'CF_Authorization=leak-one; Path=/; HttpOnly; Secure'],
+  ['Set-Cookie', 'session=leak-two; Path=/; HttpOnly'],
+  ['Set-Cookie2', 'legacy=leak-three'],
+  ['CF-Access-Jwt-Assertion', 'leak-jwt'],
+  ['Cf-Access-Authenticated-User-Email', 'leak@example.test'],
+  ['Connection', 'close, X-Hop'],
+  ['Keep-Alive', 'timeout=5'],
+  ['X-Hop', 'secret-hop'],
+  ['Transfer-Encoding', 'chunked'],
+  ['Upgrade', 'websocket'],
+  ['Proxy-Authenticate', 'Basic realm="upstream"'],
+  ['Proxy-Authorization', 'Basic abc'],
+  ['Te', 'trailers'],
+  ['Trailer', 'X-Hop'],
+];
+
 function resetCalls() {
   calls.length = 0;
+  upstreamExtra = [];
+}
+
+function assertNoLeak(res, label) {
+  const names = [...res.headers.keys()].map((name) => name.toLowerCase());
+  assert.ok(!names.includes('set-cookie'), `${label} Set-Cookie names=${names.join(',')}`);
+  assert.ok(!names.includes('set-cookie2'), `${label} Set-Cookie2`);
+  assert.ok(!names.some((name) => name.startsWith('cf-access-')), `${label} cf-access-* names=${names.join(',')}`);
+  if (typeof res.headers.getSetCookie === 'function') {
+    assert.deepStrictEqual(res.headers.getSetCookie(), [], label);
+  }
+  for (const [key, value] of res.headers.entries()) {
+    const text = String(value);
+    assert.ok(!text.includes('leak-one'), `${label} ${key}`);
+    assert.ok(!text.includes('leak-two'), `${label} ${key}`);
+    assert.ok(!text.includes('leak-jwt'), `${label} ${key}`);
+    assert.ok(!text.toLowerCase().includes('cf-access-'), `${label} ${key}`);
+  }
 }
 
 try {
@@ -84,6 +128,7 @@ try {
     assert.strictEqual(calls.length, 0, 'unauthenticated POST is not forwarded');
     assert.ok(!calls.some((c) => String(c.authorization || '').includes(TOKEN)));
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
+    assertNoLeak(res, 'unauthenticated POST');
     console.log('  unauthenticated POST is 401 and is not forwarded');
   }
 
@@ -99,6 +144,7 @@ try {
     );
     assert.strictEqual(res.status, 401);
     assert.strictEqual(calls.length, 0);
+    assertNoLeak(res, 'mismatched bearer');
     console.log('  mismatched bearer is 401 and is not forwarded');
   }
 
@@ -149,15 +195,23 @@ try {
       env,
     );
     assert.strictEqual(res.status, 200);
-    assert.strictEqual(calls.length, 1);
-    assert.strictEqual(calls[0].authorization, null);
-    assert.strictEqual(calls[0].cookie, null);
-    assert.strictEqual(calls[0].xff, '203.0.113.10');
-    assert.strictEqual(calls[0].url, `${HUB}/taxii2/`);
+    assert.strictEqual(calls.length, 0, 'public discovery must not fetch');
+    assert.strictEqual(res.headers.get('Content-Type'), 'application/taxii+json;version=2.1');
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), ORIGIN);
     assert.strictEqual(res.headers.get('Cache-Control'), 'no-store');
-    assert.strictEqual(res.headers.get('X-Upstream'), 'yes');
-    console.log('  GET /taxii2/ forwards without a token, strips Cookie, sets X-Forwarded-For');
+    assertNoLeak(res, 'public discovery');
+    const body = await res.json();
+    assert.deepStrictEqual(body, {
+      title: 'Ghost Continuum TAXII',
+      description: 'Public TAXII 2.1 discovery. Collection reads require authorization.',
+      contact: 'defensive-only',
+      api_roots: [],
+    });
+    const raw = JSON.stringify(body);
+    assert.ok(!raw.includes('hub.internal'));
+    assert.ok(!raw.includes('127.0.0.1'));
+    assert.ok(!raw.includes(TOKEN));
+    console.log('  GET /taxii2/ is static discovery and does not fetch');
   }
 
   {
@@ -170,8 +224,9 @@ try {
       env,
     );
     assert.strictEqual(res.status, 200);
-    assert.strictEqual(calls[0].authorization, 'Bearer caller-supplied');
-    console.log('  GET keeps the caller Authorization and does not replace it');
+    assert.strictEqual(calls.length, 0);
+    assertNoLeak(res, 'public discovery with caller authorization');
+    console.log('  GET /taxii2/ ignores a caller Authorization and does not fetch');
   }
 
   {
@@ -228,6 +283,8 @@ try {
     );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get('Access-Control-Allow-Origin'), null);
+    assert.strictEqual(calls.length, 0);
+    assertNoLeak(res, 'discovery from other origin');
     console.log('  a non-allowed Origin does not receive CORS headers');
   }
 
@@ -282,9 +339,12 @@ try {
     resetCalls();
     const res = await worker.fetch(new Request(`${ORIGIN}/taxii2/`, { method: 'GET' }), env);
     assert.strictEqual(res.status, 200);
-    assert.strictEqual(calls.length, 1);
-    assert.strictEqual(calls[0].url, `${HUB}/taxii2/`);
-    console.log('  GET /taxii2/ is forwarded without a bearer');
+    assert.strictEqual(calls.length, 0);
+    const body = await res.json();
+    assert.strictEqual(body.title, 'Ghost Continuum TAXII');
+    assert.deepStrictEqual(body.api_roots, []);
+    assertNoLeak(res, 'public discovery again');
+    console.log('  GET /taxii2/ returns static JSON and does not contact the hub');
   }
 
   {
@@ -477,11 +537,11 @@ try {
       accessEnv,
     );
     assert.strictEqual(res.status, 200);
-    assert.strictEqual(calls.length, 1);
-    assert.strictEqual(calls[0].authorization, null);
-    assert.strictEqual(calls[0].accessId, 'gateway-access-id');
-    assert.strictEqual(calls[0].accessSecret, 'gateway-access-secret');
-    console.log('  GET /taxii2/ still forwards, and includes the configured Access client');
+    assert.strictEqual(calls.length, 0);
+    assertNoLeak(res, 'discovery with access env');
+    const discovery = await res.json();
+    assert.ok(!JSON.stringify(discovery).includes('gateway-access'));
+    console.log('  GET /taxii2/ does not fetch and does not attach the Access client');
   }
 
   {
@@ -509,6 +569,8 @@ try {
           Authorization: `Bearer ${TOKEN}`,
           'CF-Access-Client-Id': 'caller-access-id',
           'CF-Access-Client-Secret': 'caller-access-secret',
+          'Cf-Access-Jwt-Assertion': 'caller-jwt',
+          'CF-Access-Extra': 'caller-extra',
         },
       }),
       env,
@@ -517,7 +579,132 @@ try {
     assert.strictEqual(calls.length, 1);
     assert.strictEqual(calls[0].accessId, null);
     assert.strictEqual(calls[0].accessSecret, null);
+    assert.strictEqual(calls[0].accessJwt, null);
+    assert.deepStrictEqual(calls[0].cfAccess, []);
     console.log('  caller Access headers are dropped when no client is configured');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          'CF-Access-Client-Id': 'caller-access-id',
+          'CF-Access-Client-Secret': 'caller-access-secret',
+          'Cf-Access-Jwt-Assertion': 'caller-jwt',
+          Cookie: 'session=abc',
+        },
+      }),
+      accessEnv,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.deepStrictEqual(calls[0].cfAccess, ['cf-access-client-id', 'cf-access-client-secret']);
+    assert.strictEqual(calls[0].cookie, null);
+    assert.strictEqual(calls[0].accessJwt, null);
+    console.log('  Access client headers are attached only after the bearer passes');
+  }
+
+  {
+    resetCalls();
+    const head = await worker.fetch(new Request(`${ORIGIN}/taxii2/`, { method: 'HEAD' }), env);
+    assert.strictEqual(head.status, 200);
+    assert.strictEqual(calls.length, 0);
+    assert.strictEqual(head.headers.get('Content-Type'), 'application/taxii+json;version=2.1');
+    assert.strictEqual(await head.text(), '');
+    assertNoLeak(head, 'HEAD discovery');
+    console.log('  HEAD /taxii2/ is static and does not fetch');
+  }
+
+  {
+    resetCalls();
+    upstreamExtra = LEAK_HEADERS.map((pair) => pair.slice());
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/api/status`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}`, Origin: ORIGIN },
+      }),
+      env,
+    );
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.strictEqual(res.headers.get('Content-Type'), 'application/json');
+    assert.strictEqual(res.headers.get('X-Upstream'), 'yes');
+    assert.strictEqual(res.headers.get('X-Hop'), null);
+    for (const name of [
+      'connection',
+      'keep-alive',
+      'proxy-authenticate',
+      'proxy-authorization',
+      'te',
+      'trailer',
+      'transfer-encoding',
+      'upgrade',
+    ]) {
+      assert.strictEqual(res.headers.get(name), null, name);
+    }
+    assertNoLeak(res, 'authenticated JSON');
+    const body = await res.json();
+    assert.strictEqual(body.ok, true);
+    console.log('  authenticated JSON strips Set-Cookie, cf-access-*, and hop-by-hop headers');
+  }
+
+  {
+    resetCalls();
+    upstreamExtra = LEAK_HEADERS.map((pair) => pair.slice());
+    const pending = worker.fetch(
+      new Request(`${ORIGIN}/api/events/stream`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${TOKEN}`, Origin: ORIGIN },
+      }),
+      env,
+    );
+    const res = await Promise.race([
+      pending,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('gateway buffered the stream')), 1000)),
+    ]);
+    assert.strictEqual(res.status, 200);
+    assert.strictEqual(calls.length, 1);
+    assert.ok(String(res.headers.get('Content-Type') || '').includes('text/event-stream'));
+    assertNoLeak(res, 'authenticated stream');
+    assert.strictEqual(res.headers.get('X-Hop'), null);
+    assert.strictEqual(res.headers.get('Connection'), null);
+    const reader = res.body.getReader();
+    const first = await Promise.race([
+      reader.read(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('stream did not yield')), 1000)),
+    ]);
+    assert.strictEqual(first.done, false);
+    assert.strictEqual(new TextDecoder().decode(first.value), 'event: connected\ndata: {"ok":true}\n\n');
+    await reader.cancel();
+    console.log('  authenticated stream strips leak headers and passes the body through');
+  }
+
+  {
+    resetCalls();
+    for (const authorization of [undefined, 'Bearer wrong-token']) {
+      const headers = authorization ? { Authorization: authorization } : {};
+      const res = await worker.fetch(
+        new Request(`${ORIGIN}/api/status`, { method: 'GET', headers }),
+        env,
+      );
+      assert.strictEqual(res.status, 401);
+      assert.strictEqual(calls.length, 0);
+      assertNoLeak(res, 'missing or wrong bearer');
+      const body = await res.json();
+      assert.strictEqual(body.ok, false);
+    }
+    console.log('  missing or wrong bearer is 401 and makes no upstream call');
+  }
+
+  {
+    resetCalls();
+    const res = await worker.fetch(new Request(`${ORIGIN}/nope`), env);
+    assert.strictEqual(res.status, 404);
+    assert.strictEqual(calls.length, 0);
+    assertNoLeak(res, '404');
+    console.log('  worker 404 has no Set-Cookie');
   }
 
   console.log('hub-gateway: OK');
